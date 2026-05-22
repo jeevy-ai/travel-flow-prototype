@@ -4,6 +4,16 @@ import { IMAGE_MANIFEST, GRADIENT_FALLBACKS } from '../data/imageManifest'
 
 export type EntryState = 'ghost' | 'proposed' | 'confirmed' | 'calendar-synced' | 'day-of-active' | 'self-managed' | 'custom-pending'
 
+export interface AlternativeOption {
+  id: string
+  name: string
+  tagline: string
+  imageThumb: string | null
+  imageHero: string | null
+  gradientFallback: string
+  details?: Record<string, unknown>
+}
+
 export type EntryType =
   | 'flight_outbound'
   | 'flight_return'
@@ -28,6 +38,8 @@ export type TimelineEntry = {
   ghostSubtext: string
   data: Record<string, unknown>
   customOverrideText?: string
+  alternatives?: AlternativeOption[]
+  enrichedWith?: AlternativeOption
 }
 
 function makeEntries(): TimelineEntry[] {
@@ -98,6 +110,35 @@ function makeEntries(): TimelineEntry[] {
       tagline: 'Marriott Lisbon · Nov 10–12 · Avenida dos Combatentes',
       ghostHeadline: 'Your Lisbon hotel',
       ghostSubtext: 'Marriott Bonvoy, close to the venue',
+      alternatives: [
+        {
+          id: 'bairro-alto-hotel',
+          name: 'Bairro Alto Hotel',
+          tagline: '5-star design hotel · Chiado neighbourhood',
+          imageThumb: '/fixture-images/hotel-bairro-alto.webp',
+          imageHero: '/fixture-images/hotel-bairro-alto.webp',
+          gradientFallback: 'linear-gradient(135deg, #E8D5B7, #C4956A)',
+          details: { chain: 'Independent', memberTier: 'N/A', pricePerNight: '€420', rating: '4.9 ★', distanceToVenue: '9 km · 20 min' },
+        },
+        {
+          id: 'memmo-alfama',
+          name: 'Memmo Alfama',
+          tagline: 'Boutique hotel · Castle & Tagus views',
+          imageThumb: '/fixture-images/hotel-marriott-lisbon-exterior.webp',
+          imageHero: '/fixture-images/hotel-marriott-lisbon-exterior.webp',
+          gradientFallback: 'linear-gradient(135deg, #744210, #D69E2E)',
+          details: { chain: 'Design Hotels', memberTier: 'N/A', pricePerNight: '€380', rating: '4.8 ★', distanceToVenue: '10 km · 22 min' },
+        },
+        {
+          id: 'palacio-belmonte',
+          name: 'Palácio Belmonte',
+          tagline: 'Historic 15th-century palace · Alfama hilltop',
+          imageThumb: '/fixture-images/hotel-marriott-lisbon-room.webp',
+          imageHero: '/fixture-images/hotel-marriott-lisbon-room.webp',
+          gradientFallback: 'linear-gradient(135deg, #4A1942, #805AD5)',
+          details: { chain: 'Independent', memberTier: 'N/A', pricePerNight: '€650', rating: '4.9 ★', distanceToVenue: '11 km · 25 min' },
+        },
+      ],
       data: {
         venue: fix.hotel.result.payload.venue,
         slot: fix.hotel.result.payload.slot,
@@ -221,6 +262,35 @@ function makeEntries(): TimelineEntry[] {
       imageHero: null,
       gradientFallback: GRADIENT_FALLBACKS['restaurant'],
       tagline: 'Solar dos Presuntos · Traditional Portuguese · Rua das Portas de Santo Antão',
+      alternatives: [
+        {
+          id: 'belcanto',
+          name: 'Belcanto',
+          tagline: '2 Michelin stars · José Avillez · Chiado',
+          imageThumb: '/fixture-images/restaurant-belcanto-lisbon.webp',
+          imageHero: '/fixture-images/restaurant-belcanto-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #744210, #C05621)',
+          details: { cuisine: 'Modern Portuguese', priceRange: '€€€€', rating: '4.8 ★', address: 'Largo de São Carlos 10, Lisbon' },
+        },
+        {
+          id: 'taberna',
+          name: 'Taberna da Rua das Flores',
+          tagline: 'Natural wines · Portuguese tapas · Chiado',
+          imageThumb: '/fixture-images/restaurant-taberna-lisbon.webp',
+          imageHero: '/fixture-images/restaurant-taberna-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #7B341E, #9C4221)',
+          details: { cuisine: 'Wine bar & tapas', priceRange: '€€', rating: '4.6 ★', address: 'Rua das Flores 103, Lisbon' },
+        },
+        {
+          id: 'eleven',
+          name: 'Eleven Restaurant',
+          tagline: 'Rooftop terrace · Parque Eduardo VII views',
+          imageThumb: '/fixture-images/restaurant-dinner-lisbon.webp',
+          imageHero: '/fixture-images/restaurant-dinner-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #B7791F, #F6AD55)',
+          details: { cuisine: 'Mediterranean fine dining', priceRange: '€€€€', rating: '4.5 ★', address: 'Rua Marquês de Fronteira, Lisbon' },
+        },
+      ],
       ghostHeadline: 'Dinner — Nov 10',
       ghostSubtext: 'Jeevy is picking the best table for tonight',
       data: {
@@ -244,6 +314,35 @@ function makeEntries(): TimelineEntry[] {
       imageHero: null,
       gradientFallback: GRADIENT_FALLBACKS['restaurant'],
       tagline: 'Cervejaria Ramiro · Premium Seafood · Av. Almirante Reis',
+      alternatives: [
+        {
+          id: 'tasca-chico',
+          name: 'Tasca do Chico',
+          tagline: 'Intimate wine bar · Fado nights · Bairro Alto',
+          imageThumb: '/fixture-images/activity-fado-lisbon.webp',
+          imageHero: '/fixture-images/activity-fado-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #553C9A, #B794F4)',
+          details: { cuisine: 'Portuguese tapas & wine', priceRange: '€€', rating: '4.7 ★', address: 'Rua do Diário de Notícias 39, Lisbon' },
+        },
+        {
+          id: 'can-the-can',
+          name: 'Can the Can',
+          tagline: 'Creative Portuguese · Iconic canned-fish concept',
+          imageThumb: '/fixture-images/restaurant-dinner-lisbon.webp',
+          imageHero: '/fixture-images/restaurant-dinner-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #C05621, #F6AD55)',
+          details: { cuisine: 'Creative Portuguese', priceRange: '€€€', rating: '4.4 ★', address: 'Praça do Comércio 23, Lisbon' },
+        },
+        {
+          id: 'ze-mouraria',
+          name: 'Zé da Mouraria',
+          tagline: 'Local favourite · Traditional Mouraria neighbourhood',
+          imageThumb: '/fixture-images/restaurant-belcanto-lisbon.webp',
+          imageHero: '/fixture-images/restaurant-belcanto-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #9C4221, #DD6B20)',
+          details: { cuisine: 'Traditional Portuguese', priceRange: '€€', rating: '4.5 ★', address: 'Rua João do Outeiro 24, Lisbon' },
+        },
+      ],
       ghostHeadline: 'Dinner — Nov 11',
       ghostSubtext: 'Jeevy is picking the best table for tonight',
       data: {
@@ -268,6 +367,35 @@ function makeEntries(): TimelineEntry[] {
       imageHero: null,
       gradientFallback: GRADIENT_FALLBACKS['activity'],
       tagline: 'Clube de Fado · Fado show · São Miguel, Alfama',
+      alternatives: [
+        {
+          id: 'parreirinha',
+          name: 'Parreirinha de Alfama',
+          tagline: 'Historic fado house · Intimate · Alfama',
+          imageThumb: '/fixture-images/activity-fado-lisbon.webp',
+          imageHero: '/fixture-images/activity-fado-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #44337A, #B794F4)',
+          details: { type: 'Fado show', cost: '€20 cover', duration: '~2.5 hrs', address: 'Beco do Espírito Santo 1, Alfama' },
+        },
+        {
+          id: 'topo-chiado-nov10',
+          name: 'Topo Chiado',
+          tagline: 'Rooftop terrace · Panoramic city views · Chiado',
+          imageThumb: '/fixture-images/activity-rooftop-lisbon.webp',
+          imageHero: '/fixture-images/activity-rooftop-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #2D3748, #6c7aff)',
+          details: { type: 'Rooftop bar', cost: '€12–18 cocktails', duration: 'Open until 01:00', address: 'R. do Carmo 2, Chiado' },
+        },
+        {
+          id: 'lx-factory',
+          name: 'LX Factory Night Market',
+          tagline: 'Creative hub · Shops & bars · Alcântara',
+          imageThumb: '/fixture-images/city-lisbon.webp',
+          imageHero: '/fixture-images/city-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #2D3748, #4A5568)',
+          details: { type: 'Night market', cost: 'Free entry', duration: 'Until midnight', address: 'Rua Rodrigues de Faria 103' },
+        },
+      ],
       ghostHeadline: 'Evening — Fado in Alfama',
       ghostSubtext: 'Optional — skip or swap for early rest',
       data: {
@@ -290,6 +418,35 @@ function makeEntries(): TimelineEntry[] {
       imageHero: null,
       gradientFallback: GRADIENT_FALLBACKS['activity'],
       tagline: 'PARK Bar · Rooftop drinks · Calçada do Combro',
+      alternatives: [
+        {
+          id: 'topo-chiado',
+          name: 'Topo Chiado',
+          tagline: 'Rooftop terrace bar · Panoramic · Chiado',
+          imageThumb: '/fixture-images/activity-rooftop-lisbon.webp',
+          imageHero: '/fixture-images/activity-rooftop-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #1A365D, #4299E1)',
+          details: { type: 'Rooftop bar', cost: '€12–20 cocktails', address: 'R. do Carmo 2, Chiado' },
+        },
+        {
+          id: 'pensao-amor',
+          name: 'Pensão Amor',
+          tagline: 'Eclectic boudoir bar · Cais do Sodré',
+          imageThumb: '/fixture-images/restaurant-taberna-lisbon.webp',
+          imageHero: '/fixture-images/restaurant-taberna-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #702459, #B83280)',
+          details: { type: 'Bar & entertainment', cost: '€10–15 drinks', address: 'Rua do Alecrim 19, Lisbon' },
+        },
+        {
+          id: 'rio-maravilha',
+          name: 'Rio Maravilha',
+          tagline: 'Rooftop with pool · River views · Belém',
+          imageThumb: '/fixture-images/activity-rooftop-lisbon.webp',
+          imageHero: '/fixture-images/activity-rooftop-lisbon.webp',
+          gradientFallback: 'linear-gradient(135deg, #1C4532, #38A169)',
+          details: { type: 'Rooftop bar & pool', cost: '€15–22 cocktails', address: 'Rua Rodrigues de Faria 103, LX Factory' },
+        },
+      ],
       ghostHeadline: 'Evening — Rooftop bar',
       ghostSubtext: 'Optional — panoramic views of Lisbon at night',
       data: {
@@ -366,7 +523,13 @@ export function useFlowEngine() {
 
   const restoreEntry = useCallback((id: string) => {
     setEntries(prev => prev.map(e =>
-      e.id === id ? { ...e, state: 'proposed' as EntryState, customOverrideText: undefined } : e
+      e.id === id ? { ...e, state: 'proposed' as EntryState, customOverrideText: undefined, enrichedWith: undefined } : e
+    ))
+  }, [])
+
+  const enrichEntry = useCallback((id: string, alt: AlternativeOption) => {
+    setEntries(prev => prev.map(e =>
+      e.id === id ? { ...e, state: 'confirmed' as EntryState, enrichedWith: alt, customOverrideText: undefined } : e
     ))
   }, [])
 
@@ -448,6 +611,7 @@ export function useFlowEngine() {
     allConfirmed,
     dismissEntry,
     restoreEntry,
+    enrichEntry,
     data: soloTravelFixture,
   }
 }

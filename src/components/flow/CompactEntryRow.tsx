@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { TimelineEntry, FlowEngine } from '../../hooks/useFlowEngine'
+import type { TimelineEntry, FlowEngine, AlternativeOption } from '../../hooks/useFlowEngine'
 import { ImageSlot } from '../timeline/ImageSlot'
 import { TimelineEntryExpanded } from '../timeline/TimelineEntryExpanded'
 
@@ -62,6 +62,13 @@ function StatusChip({ entry }: { entry: TimelineEntry }) {
         </span>
       )
     case 'confirmed':
+      if (entry.enrichedWith) {
+        return (
+          <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full whitespace-nowrap">
+            ✦ Enriched by Jeevy
+          </span>
+        )
+      }
       return (
         <span className="text-[10px] font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full whitespace-nowrap">
           ✓ Confirmed
@@ -94,15 +101,22 @@ function StatusChip({ entry }: { entry: TimelineEntry }) {
 interface DismissSheetProps {
   onSelf: () => void
   onCustom: (text: string) => void
+  onEnrich: (alt: AlternativeOption) => void
   onClose: () => void
+  alternatives?: AlternativeOption[]
 }
 
-function DismissSheet({ onSelf, onCustom, onClose }: DismissSheetProps) {
-  const [mode, setMode] = useState<'menu' | 'custom'>('menu')
+function DismissSheet({ onSelf, onCustom, onEnrich, onClose, alternatives }: DismissSheetProps) {
+  const [mode, setMode] = useState<'menu' | 'alternatives' | 'custom'>('menu')
   const [text, setText] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const handleCustomMode = () => {
+  const handleDifferentOption = () => {
+    if (alternatives && alternatives.length > 0) setMode('alternatives')
+    else goCustom()
+  }
+
+  const goCustom = () => {
     setMode('custom')
     setTimeout(() => inputRef.current?.focus(), 50)
   }
@@ -119,7 +133,7 @@ function DismissSheet({ onSelf, onCustom, onClose }: DismissSheetProps) {
       exit={{ height: 0, opacity: 0 }}
       transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
     >
-      {mode === 'menu' ? (
+      {mode === 'menu' && (
         <div className="space-y-1.5">
           <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide mb-2">Override this entry</p>
           <button
@@ -133,13 +147,13 @@ function DismissSheet({ onSelf, onCustom, onClose }: DismissSheetProps) {
             </div>
           </button>
           <button
-            onClick={handleCustomMode}
+            onClick={handleDifferentOption}
             className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-surface-3 hover:bg-surface-3/80 border border-border text-left transition-colors"
           >
-            <span className="text-base">✎</span>
+            <span className="text-base">✦</span>
             <div>
               <p className="text-on-surface text-[12px] font-semibold">Different option…</p>
-              <p className="text-on-dim text-[11px]">Describe what you want — Jeevy will enrich it</p>
+              <p className="text-on-dim text-[11px]">Pick an alternative or describe what you want</p>
             </div>
           </button>
           <button
@@ -149,7 +163,49 @@ function DismissSheet({ onSelf, onCustom, onClose }: DismissSheetProps) {
             ✕ Cancel
           </button>
         </div>
-      ) : (
+      )}
+
+      {mode === 'alternatives' && alternatives && (
+        <div className="space-y-1.5">
+          <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide mb-2">Jeevy's alternatives</p>
+          {alternatives.map(alt => (
+            <button
+              key={alt.id}
+              onClick={() => onEnrich(alt)}
+              className="w-full flex items-center gap-3 px-2 py-2 rounded-xl bg-surface-3 hover:bg-surface-3/80 border border-border text-left transition-colors group"
+            >
+              <div
+                className="w-12 h-12 rounded-lg shrink-0 overflow-hidden"
+                style={{ background: alt.gradientFallback }}
+              >
+                {alt.imageThumb && (
+                  <img src={alt.imageThumb} alt={alt.name} className="w-full h-full object-cover" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-on-surface text-[12px] font-semibold leading-tight">{alt.name}</p>
+                <p className="text-on-dim text-[10px] mt-0.5 line-clamp-1">{alt.tagline}</p>
+              </div>
+              <span className="text-on-dim/40 text-[16px] group-hover:text-accent transition-colors shrink-0">›</span>
+            </button>
+          ))}
+          <button
+            onClick={goCustom}
+            className="w-full text-left text-on-dim text-[11px] hover:text-accent transition-colors px-2 py-1.5 flex items-center gap-1.5"
+          >
+            <span>✎</span>
+            <span>Type your own option…</span>
+          </button>
+          <button
+            onClick={() => setMode('menu')}
+            className="text-on-dim text-[11px] hover:text-on-surface transition-colors px-1"
+          >
+            ← Back
+          </button>
+        </div>
+      )}
+
+      {mode === 'custom' && (
         <div className="space-y-2">
           <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide">Describe your preference</p>
           <input
@@ -170,7 +226,7 @@ function DismissSheet({ onSelf, onCustom, onClose }: DismissSheetProps) {
               Enrich →
             </button>
             <button
-              onClick={() => setMode('menu')}
+              onClick={() => alternatives ? setMode('alternatives') : setMode('menu')}
               className="px-3 text-on-dim text-[12px] hover:text-on-surface transition-colors"
             >
               Back
@@ -211,6 +267,15 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
     setDismissOpen(false)
   }
 
+  const handleEnrich = (alt: AlternativeOption) => {
+    flow.enrichEntry(entry.id, alt)
+    setDismissOpen(false)
+  }
+
+  const displayThumb = entry.enrichedWith?.imageThumb ?? entry.imageThumb
+  const displayHero = entry.enrichedWith?.imageHero ?? entry.enrichedWith?.imageThumb ?? entry.imageHero ?? entry.imageThumb
+  const displayTagline = entry.enrichedWith?.tagline ?? entry.tagline
+
   return (
     <motion.div
       data-entry-id={entry.id}
@@ -247,9 +312,9 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
           {/* Thumbnail */}
           <div className={`w-[72px] h-[72px] shrink-0 rounded-lg overflow-hidden ${isDismissed ? 'grayscale' : ''}`}>
             <ImageSlot
-              src={entry.imageThumb}
+              src={displayThumb}
               alt={entryTitle(entry)}
-              gradient={entry.gradientFallback}
+              gradient={entry.enrichedWith?.gradientFallback ?? entry.gradientFallback}
               className="w-full h-full object-cover"
             />
           </div>
@@ -258,13 +323,13 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
               <p className={`font-semibold text-[13px] leading-tight line-clamp-2 ${isDismissed ? 'text-on-dim line-through' : 'text-on-surface'}`}>
-                {entryTitle(entry)}
+                {entry.enrichedWith?.name ?? entryTitle(entry)}
               </p>
               {hasConflict && (
                 <span className="text-warning text-[10px] font-bold shrink-0">⚠ Conflict</span>
               )}
             </div>
-            <p className="text-on-dim text-[11px] mt-0.5 truncate">{entry.tagline}</p>
+            <p className="text-on-dim text-[11px] mt-0.5 truncate">{displayTagline}</p>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <StatusChip entry={entry} />
               {isProposed && swapScreen && !flow.confirmingAll && !flow.allConfirmed && (
@@ -292,11 +357,11 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
                   ···
                 </button>
               )}
-              {isDismissed && (
+              {(isDismissed || entry.enrichedWith) && (
                 <button
                   onClick={e => { e.stopPropagation(); flow.restoreEntry(entry.id) }}
                   className="text-[10px] font-medium text-on-dim/40 hover:text-on-dim px-1.5 py-0.5 rounded-full transition-colors"
-                  title="Undo override"
+                  title="Undo"
                 >
                   ↩ Undo
                 </button>
@@ -321,7 +386,9 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
             <DismissSheet
               onSelf={handleSelf}
               onCustom={handleCustom}
+              onEnrich={handleEnrich}
               onClose={() => setDismissOpen(false)}
+              alternatives={entry.alternatives}
             />
           )}
         </AnimatePresence>
@@ -339,9 +406,9 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
               >
                 <div className="relative" style={{ aspectRatio: '16/9' }}>
                   <ImageSlot
-                    src={entry.imageHero ?? entry.imageThumb}
-                    alt={entryTitle(entry)}
-                    gradient={entry.gradientFallback}
+                    src={displayHero}
+                    alt={entry.enrichedWith?.name ?? entryTitle(entry)}
+                    gradient={entry.enrichedWith?.gradientFallback ?? entry.gradientFallback}
                     className="w-full h-full"
                   />
                   {hasConflict && !flow.conflictResolved && (
