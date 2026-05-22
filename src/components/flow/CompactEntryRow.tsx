@@ -62,57 +62,58 @@ function ProviderBadge({ entry }: { entry: TimelineEntry }) {
   )
 }
 
-// ── Info strip (static facts: time · duration · price) ────────────────────────
+// ── Left data column (time · duration · price stacked) ────────────────────────
 
-function InfoStrip({ entry }: { entry: TimelineEntry }) {
+function LeftData({ entry, isDismissed }: { entry: TimelineEntry; isDismissed: boolean }) {
   const d = entry.data
   const time = formatTime(entry.scheduledAt)
-  const items: string[] = []
+  const lines: string[] = []
 
   switch (entry.type) {
-    case 'ride':
-      items.push(`🕗 ${time}`)
-      if (d['duration']) items.push(String(d['duration']))
-      if (d['cost']) items.push(String(d['cost']))
-      break
     case 'restaurant':
-      items.push(`🕗 ${time}`)
-      if (d['priceRange']) items.push(String(d['priceRange']).split(' · ')[0])
-      if (d['distanceFromHotel']) items.push(String(d['distanceFromHotel']).split(' · ')[0])
+      lines.push(time)
+      if (d['priceRange']) lines.push(String(d['priceRange']).split(' · ')[0])
+      if (d['distanceFromHotel']) lines.push(String(d['distanceFromHotel']).split(' · ')[0])
       break
     case 'activity':
-      items.push(`🕗 ${time}`)
-      if (d['duration']) items.push(String(d['duration']))
-      if (d['cost']) items.push(String(d['cost']).split('+')[0].trim())
+      lines.push(time)
+      if (d['duration']) lines.push(String(d['duration']))
+      if (d['cost']) lines.push(String(d['cost']).split('+')[0].trim())
       break
     case 'hotel':
-      items.push('Nov 10–12 · 2 nights')
-      if (d['pricePerNight']) items.push(`$${d['pricePerNight']}/night`)
-      if (d['distanceToVenue']) items.push(String(d['distanceToVenue']))
+      lines.push('Nov 10–12')
+      if (d['pricePerNight']) lines.push(`$${d['pricePerNight']}/nt`)
+      if (d['distanceToVenue']) lines.push(String(d['distanceToVenue']).split('·')[0].trim())
       break
     case 'flight_outbound':
     case 'flight_return':
-      items.push(`🕗 ${time}`)
-      if (d['duration']) items.push(String(d['duration']))
-      if (d['fare']) items.push(String(d['fare']))
+      lines.push(time)
+      if (d['duration']) lines.push(String(d['duration']))
+      if (d['fare']) lines.push(String(d['fare']))
       break
     case 'conference_session':
-      items.push(`🕗 ${time}`)
-      if (d['room']) items.push(String(d['room']))
+      lines.push(time)
+      if (d['room']) lines.push(String(d['room']))
       break
     default:
-      items.push(`🕗 ${time}`)
+      lines.push(time)
   }
 
   return (
-    <div className="flex items-center gap-1 flex-wrap">
-      {items.filter(Boolean).map((item, i) => (
-        <span key={i} className="text-on-dim text-[11px] flex items-center">
-          {i > 0 && <span className="text-on-dim/30 mx-1">·</span>}
-          {item}
+    <>
+      {lines.map((line, i) => (
+        <span
+          key={i}
+          className={`leading-tight ${isDismissed ? 'opacity-40' : ''} ${
+            i === 0
+              ? 'text-on-surface text-[12px] font-semibold'
+              : 'text-on-dim text-[10px]'
+          }`}
+        >
+          {line}
         </span>
       ))}
-    </div>
+    </>
   )
 }
 
@@ -365,9 +366,14 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
           hasConflict ? 'border-warning/50' : 'border-border'
         }`}
       >
-        {/* Main row — info left, image right */}
+        {/* Main row — data left | title+actions center | image right */}
         <div className="flex cursor-pointer min-h-[80px]" onClick={handleRowClick}>
-          {/* Left: provider badge + title + info strip + actions */}
+          {/* Left: time / duration / price data column */}
+          <div className="w-[72px] shrink-0 px-2.5 py-2.5 flex flex-col gap-1 justify-start border-r border-border/20">
+            <LeftData entry={entry} isDismissed={isDismissed} />
+          </div>
+
+          {/* Center: provider badge + title + status + actions */}
           <div className="flex-1 min-w-0 px-3 py-2.5 flex flex-col justify-between gap-1">
             {/* Title row */}
             <div className="flex items-start gap-2">
@@ -385,9 +391,6 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
                 >›</span>
               )}
             </div>
-
-            {/* Info strip */}
-            <InfoStrip entry={entry} />
 
             {/* Status + action buttons */}
             <div className="flex items-center gap-2 flex-wrap">
@@ -430,7 +433,7 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
           </div>
 
           {/* Right: image panel */}
-          <div className={`w-[88px] shrink-0 self-stretch ${isDismissed ? 'grayscale opacity-50' : ''}`}>
+          <div className={`w-[80px] shrink-0 self-stretch ${isDismissed ? 'grayscale opacity-50' : ''}`}>
             <ImageSlot
               src={displayThumb}
               alt={entry.enrichedWith?.name ?? entryTitle(entry)}
