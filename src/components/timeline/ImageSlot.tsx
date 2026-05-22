@@ -10,6 +10,7 @@ interface Props {
 
 export function ImageSlot({ src, alt, gradient, className = '', overlay = false }: Props) {
   const [failed, setFailed] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   if (!src || failed) {
     return (
@@ -22,13 +23,20 @@ export function ImageSlot({ src, alt, gradient, className = '', overlay = false 
   }
 
   return (
-    <div className={`${className} relative overflow-hidden`}>
+    <div className={`${className} relative overflow-hidden`} style={{ background: gradient }}>
       <img
         src={src}
         alt={alt}
         loading="lazy"
         onError={() => setFailed(true)}
-        className="w-full h-full object-cover"
+        onLoad={() => setLoaded(true)}
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          opacity: loaded ? 1 : 0,
+          transition: 'opacity 0.2s ease',
+        }}
       />
       {overlay && (
         <div className="absolute inset-0" style={{ background: 'rgba(255,255,255,0.72)' }} />

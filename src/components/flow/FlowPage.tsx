@@ -6,7 +6,8 @@ import { AppHeader } from '../layout/AppHeader'
 import { DateSidebar } from '../layout/DateSidebar'
 import { TripMap } from '../map/TripMap'
 import type { TripMapHandle } from '../map/TripMap'
-import { CompactEntryRow } from './CompactEntryRow'
+import { TimelineCard } from './TimelineCard'
+import { CardDetailSheet } from './CardDetailSheet'
 import { TransportConnector } from './TransportConnector'
 import { Screen2FlightSelection } from '../screens/Screen2FlightSelection'
 import { Screen3HotelSelection } from '../screens/Screen3HotelSelection'
@@ -102,7 +103,7 @@ export function FlowPage() {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showMap, setShowMap] = useState(false)
   const [activeDateKey, setActiveDateKey] = useState<string>('2026-11-09')
-  const [activeEntryId, setActiveEntryId] = useState<string | null>(null)
+  const [openSheetEntryId, setOpenSheetEntryId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const tripMapRef = useRef<TripMapHandle>(null)
@@ -137,18 +138,14 @@ export function FlowPage() {
     setActiveDateKey(dateKey)
   }, [])
 
-  const activateEntry = useCallback((id: string) => {
-    setActiveEntryId(id)
+  const openSheet = useCallback((id: string) => {
+    setOpenSheetEntryId(id)
     tripMapRef.current?.flyToEntry(id)
     tripMapRef.current?.highlightEntry(id)
-    setTimeout(() => {
-      const el = scrollRef.current?.querySelector(`[data-entry-id="${id}"]`)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    }, 50)
   }, [])
 
-  const deactivateEntry = useCallback(() => {
-    setActiveEntryId(null)
+  const closeSheet = useCallback(() => {
+    setOpenSheetEntryId(null)
     tripMapRef.current?.highlightEntry(null)
   }, [])
 
@@ -315,14 +312,12 @@ export function FlowPage() {
                             flow={flow}
                           />
                         ) : (
-                          <CompactEntryRow
+                          <TimelineCard
                             key={entry.id}
                             entry={entry}
                             flow={flow}
                             staggerIndex={baseIndex + i}
-                            isActive={activeEntryId === entry.id}
-                            onActivate={activateEntry}
-                            onDeactivate={deactivateEntry}
+                            onOpen={openSheet}
                           />
                         )
                       ))}
@@ -359,7 +354,7 @@ export function FlowPage() {
 
         {/* Right map panel — large desktop only (lg+) */}
         <div className="hidden lg:block w-[360px] xl:w-[420px] shrink-0 border-l border-border relative" style={{ isolation: 'isolate', zIndex: 0 }}>
-          <TripMap ref={tripMapRef} className="w-full h-full" onPinClick={activateEntry} />
+          <TripMap ref={tripMapRef} className="w-full h-full" onPinClick={openSheet} />
           {/* Map label */}
           <div className="absolute top-3 left-3 bg-surface-0/80 backdrop-blur-sm border border-border rounded-lg px-2 py-1 pointer-events-none">
             <p className="text-on-surface text-[11px] font-semibold">Lisbon · Nov 2026</p>
@@ -403,12 +398,8 @@ export function FlowPage() {
               <TripMap
                 className="w-full h-full"
                 onPinClick={(entryId) => {
-                  setActiveEntryId(entryId)
                   setShowMap(false)
-                  setTimeout(() => {
-                    const el = scrollRef.current?.querySelector(`[data-entry-id="${entryId}"]`)
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-                  }, 350)
+                  setTimeout(() => openSheet(entryId), 350)
                 }}
               />
             </motion.div>
@@ -537,6 +528,13 @@ export function FlowPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Card detail bottom-sheet */}
+      <CardDetailSheet
+        entry={flow.entries.find(e => e.id === openSheetEntryId) ?? null}
+        flow={flow}
+        onClose={closeSheet}
+      />
 
       {/* Sticky confirm footer */}
       {!flow.allConfirmed && !flow.confirmingAll && (
