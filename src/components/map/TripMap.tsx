@@ -133,5 +133,5 @@ export function TripMap({ className = '' }: Props) {
     }
   }, [])
 
-  return <div ref={containerRef} className={className} />
+  return <div ref={containerRef} className={className} style={{ position: 'relative', zIndex: 0 }} />
 }

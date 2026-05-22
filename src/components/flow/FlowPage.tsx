@@ -328,7 +328,7 @@ export function FlowPage() {
         </main>
 
         {/* Right map panel — large desktop only (lg+) */}
-        <div className="hidden lg:block w-[360px] xl:w-[420px] shrink-0 border-l border-border relative">
+        <div className="hidden lg:block w-[360px] xl:w-[420px] shrink-0 border-l border-border relative" style={{ isolation: 'isolate', zIndex: 0 }}>
           <TripMap className="w-full h-full" />
           {/* Map label */}
           <div className="absolute top-3 left-3 bg-surface-0/80 backdrop-blur-sm border border-border rounded-lg px-2 py-1 pointer-events-none">
@@ -360,6 +360,7 @@ export function FlowPage() {
           >
             <motion.div
               className="absolute bottom-0 left-0 right-0 h-[60vh] rounded-t-3xl overflow-hidden border-t border-border"
+              style={{ isolation: 'isolate' }}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
