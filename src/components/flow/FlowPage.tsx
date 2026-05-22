@@ -1,161 +1,296 @@
-import { useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFlowEngine } from '../../hooks/useFlowEngine'
 import { AppHeader } from '../layout/AppHeader'
-import { StepProgress } from './StepProgress'
 import { ConfirmedEntryCard } from './ConfirmedEntryCard'
-import { GhostCard } from '../timeline/GhostCard'
-import { Screen1TripDetection } from '../screens/Screen1TripDetection'
 import { Screen2FlightSelection } from '../screens/Screen2FlightSelection'
 import { Screen3HotelSelection } from '../screens/Screen3HotelSelection'
 import { Screen4Sessions } from '../screens/Screen4Sessions'
 import { Screen5Restaurants } from '../screens/Screen5Restaurants'
 import { Screen6PackingList } from '../screens/Screen6PackingList'
-import { Screen7Itinerary } from '../screens/Screen7Itinerary'
 
-// Maps entry ID → which chatScreen owns it
-const SCREEN_FOR_ENTRY: Record<string, number> = {
-  flt_outbound: 2,
-  flt_return: 2,
-  hotel_main: 3,
-  'WS2026-K01': 4,
-  'WS2026-K02': 4,
-  'WS2026-K08': 4,
-  'WS2026-W07': 4,
-  reminders: 6,
-}
-
-function ActiveScreen({ flow, screenNumber }: { flow: ReturnType<typeof useFlowEngine>; screenNumber: number }) {
+function SwapScreen({ flow, screenNumber }: { flow: ReturnType<typeof useFlowEngine>; screenNumber: number }) {
   switch (screenNumber) {
-    case 1: return <Screen1TripDetection flow={flow} />
     case 2: return <Screen2FlightSelection flow={flow} />
     case 3: return <Screen3HotelSelection flow={flow} />
     case 4: return <Screen4Sessions flow={flow} />
     case 5: return <Screen5Restaurants flow={flow} />
     case 6: return <Screen6PackingList flow={flow} />
-    case 7: return <Screen7Itinerary flow={flow} />
     default: return null
   }
 }
 
+function ConfirmProgressItem({ label, done, active }: { label: string; done: boolean; active: boolean }) {
+  return (
+    <motion.div
+      className="flex items-center gap-3"
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <span className={`text-[16px] w-5 shrink-0 ${done ? 'text-success' : active ? 'text-accent' : 'text-on-dim'}`}>
+        {done ? '✓' : active ? '⟳' : '○'}
+      </span>
+      <span className={`text-[13px] ${done ? 'text-success font-medium' : active ? 'text-on-surface' : 'text-on-dim'}`}>
+        {label}
+      </span>
+    </motion.div>
+  )
+}
+
+const CONFIRM_STEPS = [
+  { ids: ['flt_outbound'], label: 'Outbound flight · UA88 SFO → LIS' },
+  { ids: ['flt_return'], label: 'Return flight · UA89 LIS → SFO' },
+  { ids: ['hotel_main'], label: 'Marriott Lisbon · 2 nights' },
+  { ids: ['WS2026-K01', 'WS2026-K02', 'WS2026-W07', 'WS2026-K08'], label: 'Conference sessions · 4 selected' },
+  { ids: ['reminders'], label: 'Packing & departure reminders' },
+]
+
 export function FlowPage() {
   const flow = useFlowEngine()
-  const activeScreenRef = useRef<HTMLDivElement>(null)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
 
-  const confirmedEntries = flow.entries.filter(
-    e => e.state === 'confirmed' || e.state === 'calendar-synced'
-  )
-  const ghostEntries = flow.entries.filter(
-    e => e.state === 'ghost' && (SCREEN_FOR_ENTRY[e.id] ?? 99) > flow.chatScreen
-  )
+  const hasConflict = flow.entries.some(
+    e => e.id === 'WS2026-K08' && Boolean(e.data['conflictDetected'])
+  ) && !flow.conflictResolved
 
-  const displayScreen = flow.editingScreen ?? flow.chatScreen
-  const isEditing = flow.editingScreen !== null
-  const allDone = flow.chatScreen === 7 && confirmedEntries.length === flow.entries.length
+  const allEntryIds = CONFIRM_STEPS.flatMap(s => s.ids)
 
-  // Scroll active booking panel into view when screen advances
-  useEffect(() => {
-    if (flow.chatScreen > 1 && activeScreenRef.current) {
-      setTimeout(() => {
-        activeScreenRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 120)
-    }
-  }, [flow.chatScreen])
+  const handleConfirmTrip = () => {
+    setShowConfirmModal(false)
+    flow.confirmAll(allEntryIds)
+  }
 
   return (
     <div className="flex flex-col h-screen bg-surface-0 overflow-hidden">
       <AppHeader confirmedCount={flow.confirmedCount} totalCount={flow.totalCount} />
 
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto pb-20">
+        <div className="max-w-2xl mx-auto pb-40">
 
-          {/* Step progress */}
-          {flow.chatScreen > 1 && (
-            <StepProgress
-              chatScreen={flow.chatScreen}
-              confirmedCount={flow.confirmedCount}
-              totalCount={flow.totalCount}
-            />
-          )}
-
-          {/* Screen 1 — trip detection (full width, no confirmed entries yet) */}
-          {flow.chatScreen === 1 && (
-            <div className="px-4 pt-6">
-              <Screen1TripDetection flow={flow} />
+          {/* Jeevy intro */}
+          <motion.div
+            className="px-4 pt-6 pb-2"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="bg-surface-1 rounded-2xl border border-border p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-accent text-[14px] font-bold">J</span>
+                </div>
+                <div>
+                  <p className="text-on-surface font-semibold text-[14px] mb-0.5">Jeevy arranged your Web Summit trip</p>
+                  <p className="text-on-dim text-[12px] leading-relaxed">
+                    Here's your full plan — flights, hotel, and sessions picked using your Platinum status and the conference schedule. Swap anything, then hit <strong className="text-on-surface">Confirm trip</strong> to book everything at once.
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
+          </motion.div>
 
-          {/* Confirmed entry cards */}
-          {flow.chatScreen > 1 && (
-            <div className="px-4 space-y-3 mt-3">
-              {confirmedEntries.map((entry, i) => (
-                <ConfirmedEntryCard
-                  key={entry.id}
-                  entry={entry}
-                  flow={flow}
-                  staggerIndex={i}
-                />
-              ))}
-            </div>
-          )}
-
-          {/* Active booking step — current screen or edit screen */}
-          {flow.chatScreen > 1 && flow.chatScreen < 8 && (
-            <div ref={activeScreenRef} className="px-4 mt-4">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`screen-${displayScreen}-${isEditing ? 'edit' : 'main'}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  {isEditing && (
-                    <div className="flex items-center justify-between mb-3 px-1">
-                      <span className="text-on-dim text-[12px] font-medium">Editing…</span>
-                      <button
-                        onClick={() => flow.stopEditScreen()}
-                        className="text-on-dim text-[12px] hover:text-on-surface transition-colors flex items-center gap-1"
-                      >
-                        ✕ Cancel
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="bg-surface-1 rounded-2xl border border-border overflow-hidden">
-                    {!allDone && <ActiveScreen flow={flow} screenNumber={displayScreen} />}
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          )}
-
-          {/* Day-of plan link when all done */}
-          {allDone && (
-            <div className="px-4 mt-6">
-              <a
-                href="#/itinerary/ws2026/day-of"
-                className="block w-full text-center bg-accent text-white font-semibold text-[14px] py-3.5 rounded-xl hover:bg-accent/90 transition-colors"
+          {/* Conflict banner */}
+          <AnimatePresence>
+            {hasConflict && (
+              <motion.div
+                className="px-4 py-2"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 28 }}
               >
-                View day-of plan →
-              </a>
-            </div>
-          )}
+                <div className="bg-warning/10 border border-warning/30 rounded-xl px-4 py-3 flex items-start gap-2">
+                  <span className="text-warning text-sm">⚠</span>
+                  <p className="text-warning text-[12px] leading-relaxed">
+                    <span className="font-semibold">1 schedule overlap</span> — K08 Closing Keynote conflicts with your All-Hands call.{' '}
+                    <button
+                      onClick={() => flow.startEditScreen(5)}
+                      className="underline font-semibold hover:no-underline"
+                    >
+                      Resolve →
+                    </button>
+                  </p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {/* Ghost entries for future steps */}
-          {ghostEntries.length > 0 && (
-            <div className="px-4 mt-4 space-y-3">
-              {ghostEntries.map(entry => (
-                <GhostCard
-                  key={entry.id}
-                  entry={entry}
-                  onLetJeevyArrange={() => flow.proposeEntry(entry.id)}
-                />
-              ))}
-            </div>
-          )}
+          {/* All pre-planned entries */}
+          <div className="px-4 pt-2 space-y-3">
+            {flow.entries.map((entry, i) => (
+              <ConfirmedEntryCard
+                key={entry.id}
+                entry={entry}
+                flow={flow}
+                staggerIndex={i}
+              />
+            ))}
+          </div>
+
+          {/* Post-confirm success */}
+          <AnimatePresence>
+            {flow.allConfirmed && (
+              <motion.div
+                className="px-4 mt-6"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 24 }}
+              >
+                <div className="bg-success/10 border border-success/30 rounded-2xl p-4 text-center mb-4">
+                  <p className="text-success font-bold text-[17px]">Trip confirmed ✓</p>
+                  <p className="text-on-dim text-[12px] mt-0.5">All bookings placed · Calendar invites sent</p>
+                </div>
+                <a
+                  href="#/itinerary/ws2026/day-of"
+                  className="block w-full text-center bg-accent text-white font-semibold text-[14px] py-3.5 rounded-xl hover:bg-accent/90 transition-colors"
+                >
+                  View day-of plan →
+                </a>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </main>
+
+      {/* Confirm-in-progress overlay */}
+      <AnimatePresence>
+        {flow.confirmingAll && (
+          <motion.div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-end justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="w-full max-w-2xl bg-surface-0 rounded-t-3xl border-t border-border px-5 pt-5 pb-10"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            >
+              <p className="text-on-surface font-bold text-[17px] mb-1">Confirming your trip…</p>
+              <p className="text-on-dim text-[12px] mb-5">Booking each item in sequence.</p>
+              <div className="space-y-3">
+                {CONFIRM_STEPS.map((step, i) => (
+                  <ConfirmProgressItem
+                    key={step.label}
+                    label={step.label}
+                    done={flow.confirmStep > i}
+                    active={flow.confirmStep === i}
+                  />
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Pre-confirm summary modal */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowConfirmModal(false)}
+          >
+            <motion.div
+              className="w-full max-w-md bg-surface-0 rounded-3xl border border-border p-5"
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <p className="text-on-surface font-bold text-[17px] mb-1">Confirm everything?</p>
+              <p className="text-on-dim text-[12px] mb-4">Jeevy will book all items below in one go.</p>
+              <div className="space-y-2 mb-5">
+                {CONFIRM_STEPS.map(step => (
+                  <div key={step.label} className="flex items-center gap-2">
+                    <span className="text-accent text-[12px]">✦</span>
+                    <span className="text-on-surface text-[13px]">{step.label}</span>
+                  </div>
+                ))}
+              </div>
+              {hasConflict && (
+                <div className="bg-warning/10 border border-warning/30 rounded-xl px-3 py-2 mb-4">
+                  <p className="text-warning text-[12px]">⚠ 1 schedule conflict unresolved. You can confirm anyway and resolve later.</p>
+                </div>
+              )}
+              <button
+                onClick={handleConfirmTrip}
+                className="w-full bg-accent text-white font-bold text-[15px] py-3.5 rounded-xl hover:bg-accent/90 transition-colors mb-2"
+              >
+                Confirm trip
+              </button>
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="w-full text-on-dim text-[14px] py-2 rounded-xl hover:text-on-surface transition-colors"
+              >
+                Go back and review
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Swap panel slide-up */}
+      <AnimatePresence>
+        {flow.editingScreen !== null && (
+          <motion.div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 flex items-end justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => flow.stopEditScreen()}
+          >
+            <motion.div
+              className="w-full max-w-2xl bg-surface-0 rounded-t-3xl border-t border-border overflow-hidden"
+              style={{ maxHeight: '85vh' }}
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-center px-5 pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full bg-border" />
+              </div>
+              <div className="flex items-center justify-between px-5 pb-2">
+                <p className="text-on-dim text-[12px] font-medium">Swap option</p>
+                <button
+                  onClick={() => flow.stopEditScreen()}
+                  className="text-on-dim text-[12px] hover:text-on-surface transition-colors"
+                >
+                  ✕ Close
+                </button>
+              </div>
+              <div className="overflow-y-auto" style={{ maxHeight: 'calc(85vh - 72px)' }}>
+                <SwapScreen flow={flow} screenNumber={flow.editingScreen} />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Sticky confirm footer */}
+      {!flow.allConfirmed && !flow.confirmingAll && (
+        <div className="fixed bottom-0 left-0 right-0 z-20 bg-surface-0/95 backdrop-blur-sm border-t border-border px-4 py-4">
+          <div className="max-w-2xl mx-auto">
+            <button
+              onClick={() => setShowConfirmModal(true)}
+              className="w-full bg-accent text-white font-bold text-[15px] py-4 rounded-xl hover:bg-accent/90 active:scale-[0.98] transition-all shadow-lg"
+            >
+              Confirm trip →
+            </button>
+            <p className="text-center text-on-dim text-[11px] mt-1.5">
+              Books flights, hotel &amp; syncs your calendar in one go
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

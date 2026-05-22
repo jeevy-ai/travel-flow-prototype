@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { soloTravelFixture } from '../data/fixture'
 import { IMAGE_MANIFEST, GRADIENT_FALLBACKS } from '../data/imageManifest'
 
@@ -31,7 +31,7 @@ function makeEntries(): TimelineEntry[] {
     {
       id: 'flt_outbound',
       type: 'flight_outbound',
-      state: 'ghost',
+      state: 'proposed',
       imageThumb: IMAGE_MANIFEST['flight_outbound']?.thumb ?? null,
       imageHero: IMAGE_MANIFEST['flight_outbound']?.hero ?? null,
       gradientFallback: GRADIENT_FALLBACKS['flight_outbound'],
@@ -57,7 +57,7 @@ function makeEntries(): TimelineEntry[] {
     {
       id: 'flt_return',
       type: 'flight_return',
-      state: 'ghost',
+      state: 'proposed',
       imageThumb: IMAGE_MANIFEST['flight_return']?.thumb ?? null,
       imageHero: IMAGE_MANIFEST['flight_return']?.hero ?? null,
       gradientFallback: GRADIENT_FALLBACKS['flight_return'],
@@ -83,7 +83,7 @@ function makeEntries(): TimelineEntry[] {
     {
       id: 'hotel_main',
       type: 'hotel',
-      state: 'ghost',
+      state: 'proposed',
       imageThumb: IMAGE_MANIFEST['hotel']?.thumb ?? null,
       imageHero: IMAGE_MANIFEST['hotel']?.hero ?? null,
       gradientFallback: GRADIENT_FALLBACKS['hotel'],
@@ -112,7 +112,7 @@ function makeEntries(): TimelineEntry[] {
     ...fix.sessions.map(s => ({
       id: s.sessionId,
       type: 'conference_session' as EntryType,
-      state: 'ghost' as EntryState,
+      state: 'proposed' as EntryState,
       imageThumb: IMAGE_MANIFEST[s.sessionId]?.thumb ?? null,
       imageHero: IMAGE_MANIFEST[s.sessionId]?.hero ?? null,
       gradientFallback: GRADIENT_FALLBACKS['conference_session'],
@@ -141,7 +141,7 @@ function makeEntries(): TimelineEntry[] {
     {
       id: 'reminders',
       type: 'reminders',
-      state: 'ghost',
+      state: 'proposed',
       imageThumb: null,
       imageHero: null,
       gradientFallback: GRADIENT_FALLBACKS['reminders'],
@@ -163,30 +163,21 @@ function makeEntries(): TimelineEntry[] {
 export type FlowEngine = ReturnType<typeof useFlowEngine>
 
 export function useFlowEngine() {
-  const [chatScreen, setChatScreen] = useState(1)
-  const [enrichment, setEnrichment] = useState<number>(0)
   const [entries, setEntries] = useState<TimelineEntry[]>(() => makeEntries())
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
-  const [timelineSheetOpen, setTimelineSheetOpen] = useState(false)
   const [conflictResolved, setConflictResolved] = useState(false)
   const [editingScreen, setEditingScreen] = useState<number | null>(null)
-  const editingScreenRef = useRef<number | null>(null)
-  editingScreenRef.current = editingScreen
+  const [confirmingAll, setConfirmingAll] = useState(false)
+  const [confirmStep, setConfirmStep] = useState(-1)
+  const [allConfirmed, setAllConfirmed] = useState(false)
 
-  const advanceChat = useCallback((nextScreen: number, enrichBit?: number) => {
-    if (editingScreenRef.current !== null) {
-      setEditingScreen(null)
-      return
-    }
-    if (enrichBit !== undefined) setEnrichment(e => e | (1 << enrichBit))
-    setChatScreen(nextScreen)
+  // In pre-planned model, "advancing chat" just closes any open swap panel
+  const advanceChat = useCallback((_nextScreen: number, _enrichBit?: number) => {
+    setEditingScreen(null)
   }, [])
 
-  const hasEnrichment = useCallback((bit: number) => Boolean(enrichment & (1 << bit)), [enrichment])
-
-  const confirmEntry = useCallback((id: string) => {
-    setEntries(prev => prev.map(e => e.id === id ? { ...e, state: 'confirmed' as EntryState } : e))
-  }, [])
+  // noop in swap panels — actual confirmation happens via confirmAll()
+  const confirmEntry = useCallback((_id: string) => {}, [])
 
   const calendarSyncEntry = useCallback((id: string) => {
     setEntries(prev => prev.map(e => e.id === id ? { ...e, state: 'calendar-synced' as EntryState } : e))
@@ -210,6 +201,25 @@ export function useFlowEngine() {
     setEditingScreen(null)
   }, [])
 
+  // Global confirm: sequentially confirms each entry ~700ms apart
+  const confirmAll = useCallback((entryIds: string[]) => {
+    if (confirmingAll || allConfirmed) return
+    setConfirmingAll(true)
+    setConfirmStep(0)
+    entryIds.forEach((id, i) => {
+      setTimeout(() => {
+        setEntries(prev => prev.map(e => e.id === id ? { ...e, state: 'confirmed' as EntryState } : e))
+        setConfirmStep(i + 1)
+        if (i === entryIds.length - 1) {
+          setTimeout(() => {
+            setConfirmingAll(false)
+            setAllConfirmed(true)
+          }, 600)
+        }
+      }, i * 700)
+    })
+  }, [confirmingAll, allConfirmed])
+
   const confirmedCount = useMemo(
     () => entries.filter(e => e.state === 'confirmed' || e.state === 'calendar-synced').length,
     [entries]
@@ -229,9 +239,9 @@ export function useFlowEngine() {
   }, [entries])
 
   return {
-    chatScreen,
+    chatScreen: 1,
     advanceChat,
-    hasEnrichment,
+    hasEnrichment: (_bit: number) => false,
     entries,
     expandedEntryId,
     setExpandedEntryId,
@@ -240,14 +250,18 @@ export function useFlowEngine() {
     proposeEntry,
     resolveConflict,
     conflictResolved,
-    timelineSheetOpen,
-    setTimelineSheetOpen,
+    timelineSheetOpen: false,
+    setTimelineSheetOpen: (_v: boolean) => {},
     confirmedCount,
     totalCount: entries.length,
     dayOfActiveId,
     editingScreen,
     startEditScreen,
     stopEditScreen,
+    confirmAll,
+    confirmingAll,
+    confirmStep,
+    allConfirmed,
     data: soloTravelFixture,
   }
 }

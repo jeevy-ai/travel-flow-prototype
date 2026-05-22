@@ -45,16 +45,20 @@ interface Props {
 
 export function ConfirmedEntryCard({ entry, flow, staggerIndex }: Props) {
   const [expanded, setExpanded] = useState(false)
-  const hasConflict = entry.id === 'WS2026-K08' && Boolean(entry.data['conflictDetected'])
-  const editScreen = SCREEN_FOR_ENTRY[entry.id]
+  const isProposed = entry.state === 'proposed'
+  const isConfirmed = entry.state === 'confirmed' || entry.state === 'calendar-synced'
+  const hasConflict = entry.id === 'WS2026-K08' && Boolean(entry.data['conflictDetected']) && !flow.conflictResolved
+  const swapScreen = SCREEN_FOR_ENTRY[entry.id]
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1], delay: staggerIndex * 0.04 }}
+      transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1], delay: staggerIndex * 0.05 }}
     >
-      <div className="rounded-2xl overflow-hidden border border-border bg-surface-1">
+      <div className={`rounded-2xl overflow-hidden border bg-surface-1 transition-colors duration-300 ${
+        isConfirmed ? 'border-success/40' : hasConflict ? 'border-warning/50' : 'border-border'
+      }`}>
         {/* Image with status + conflict overlays */}
         <div className="relative" style={{ aspectRatio: '16/9' }}>
           <ImageSlot
@@ -68,15 +72,26 @@ export function ConfirmedEntryCard({ entry, flow, staggerIndex }: Props) {
           </div>
           {hasConflict && (
             <div className="absolute top-2 left-2">
-              <span className="bg-success/90 text-black text-[10px] font-bold px-2 py-0.5 rounded-md">
-                ✓ Conflict resolved
+              <span className="bg-warning/90 text-black text-[10px] font-bold px-2 py-0.5 rounded-md">
+                ⚠ Schedule conflict
               </span>
             </div>
           )}
-          {/* Edit button */}
-          {editScreen && (
+          {/* Swap button (only when proposed and not during confirm flow) */}
+          {isProposed && swapScreen && !flow.confirmingAll && !flow.allConfirmed && (
             <button
-              onClick={() => flow.startEditScreen(editScreen)}
+              onClick={() => flow.startEditScreen(swapScreen)}
+              className="absolute top-2 right-2 flex items-center gap-1 bg-black/50 hover:bg-black/70 text-white text-[11px] font-medium px-2 py-1 rounded-lg transition-colors backdrop-blur-sm"
+              aria-label={`Swap ${entryTitle(entry)}`}
+            >
+              <span>⇄</span>
+              <span>Swap</span>
+            </button>
+          )}
+          {/* Edit button (post-confirm) */}
+          {isConfirmed && swapScreen && (
+            <button
+              onClick={() => flow.startEditScreen(swapScreen)}
               className="absolute top-2 right-2 flex items-center gap-1 bg-black/50 hover:bg-black/70 text-white text-[11px] font-medium px-2 py-1 rounded-lg transition-colors backdrop-blur-sm"
               aria-label={`Edit ${entryTitle(entry)}`}
             >
@@ -98,6 +113,9 @@ export function ConfirmedEntryCard({ entry, flow, staggerIndex }: Props) {
             </p>
             <p className="text-on-dim text-[12px] truncate">{entry.tagline}</p>
           </div>
+          {hasConflict && (
+            <span className="text-warning text-[11px] font-medium shrink-0">conflict</span>
+          )}
           <span
             className="text-on-dim text-lg shrink-0 transition-transform duration-200"
             style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
