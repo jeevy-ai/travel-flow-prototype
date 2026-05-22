@@ -486,6 +486,7 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
               <TimelineEntryExpanded
                 entry={entry}
                 onCollapse={() => onDeactivate?.()}
+                onPartyChange={size => flow.setPartySize(entry.id, size)}
               />
             </>
           )}

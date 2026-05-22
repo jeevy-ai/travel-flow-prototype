@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import type { TimelineEntry } from '../../hooks/useFlowEngine'
 
-interface Props { entry: TimelineEntry; onCollapse: () => void }
+interface Props { entry: TimelineEntry; onCollapse: () => void; onPartyChange?: (size: number) => void }
 
 function DetailRow({ label, value }: { label: string; value: unknown }) {
   if (value == null || value === false || value === '') return null
@@ -132,7 +132,29 @@ function MealSelector({ flightId }: { flightId: string }) {
   )
 }
 
-export function TimelineEntryExpanded({ entry, onCollapse }: Props) {
+function PartySizeStepper({ size, onChange }: { size: number; onChange: (n: number) => void }) {
+  return (
+    <div className="flex items-center gap-3">
+      <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide">Party size</p>
+      <div className="flex items-center gap-1.5 bg-surface-3 rounded-xl px-2 py-1 border border-border">
+        <button
+          onClick={() => onChange(Math.max(1, size - 1))}
+          disabled={size <= 1}
+          className="w-6 h-6 flex items-center justify-center text-on-dim hover:text-on-surface text-[18px] leading-none transition-colors disabled:opacity-30"
+        >−</button>
+        <span className="text-on-surface text-[13px] font-bold w-4 text-center">{size}</span>
+        <button
+          onClick={() => onChange(Math.min(8, size + 1))}
+          disabled={size >= 8}
+          className="w-6 h-6 flex items-center justify-center text-on-dim hover:text-on-surface text-[18px] leading-none transition-colors disabled:opacity-30"
+        >+</button>
+      </div>
+      <span className="text-on-dim text-[11px]">{size === 1 ? 'solo' : `${size} guests`}</span>
+    </div>
+  )
+}
+
+export function TimelineEntryExpanded({ entry, onCollapse, onPartyChange }: Props) {
   const d = entry.data
 
   return (
@@ -268,6 +290,32 @@ export function TimelineEntryExpanded({ entry, onCollapse }: Props) {
               </div>
             </div>
           )}
+          {/* Party size stepper */}
+          <PartySizeStepper
+            size={entry.partySize ?? 1}
+            onChange={size => onPartyChange?.(size)}
+          />
+
+          {/* Menu */}
+          {Array.isArray(entry.menuItems) && entry.menuItems.length > 0 && (
+            <div>
+              <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide mb-2">Popular choices</p>
+              <div className="space-y-0">
+                {(entry.menuItems as { name: string; price: string; popular?: boolean }[]).map((item, i) => (
+                  <div key={i} className="flex items-center justify-between gap-2 py-1.5 border-b border-border last:border-0">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      {item.popular && <span className="text-[10px] text-accent shrink-0">⭐</span>}
+                      <span className={`text-[12px] truncate ${item.popular ? 'text-on-surface font-medium' : 'text-on-dim'}`}>
+                        {item.name}
+                      </span>
+                    </div>
+                    <span className="text-on-surface text-[12px] font-semibold shrink-0">{item.price}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {Boolean(d['rationale']) && <RationaleBlock text={String(d['rationale'])} />}
         </div>
       )}

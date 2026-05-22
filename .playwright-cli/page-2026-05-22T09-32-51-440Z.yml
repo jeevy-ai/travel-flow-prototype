@@ -1,0 +1,140 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]: jeevy
+    - generic [ref=e6]: 0/8 confirmed
+  - main [ref=e7]:
+    - generic [ref=e8]:
+      - generic [ref=e11]:
+        - generic [ref=e13]: J
+        - generic [ref=e14]:
+          - paragraph [ref=e15]: Jeevy arranged your Web Summit trip
+          - paragraph [ref=e16]:
+            - text: Here's your full plan — flights, hotel, and sessions picked using your Platinum status and the conference schedule. Swap anything, then hit
+            - strong [ref=e17]: Confirm trip
+            - text: to book everything at once.
+      - generic [ref=e19]:
+        - generic [ref=e20]: ⚠
+        - paragraph [ref=e21]:
+          - text: 1 schedule overlap — K08 Closing Keynote conflicts with your All-Hands call.
+          - button "Resolve →" [ref=e22]
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - generic [ref=e26]:
+            - generic [ref=e27]: Sun, Nov 9
+            - generic [ref=e28]: Day 0 — Departure from SFO
+          - generic [ref=e30]:
+            - generic [ref=e33] [cursor=pointer]:
+              - generic [ref=e34]:
+                - generic [ref=e35]: 22:10
+                - text: ✈
+              - img "SFO → LIS · Outbound" [ref=e38]
+              - generic [ref=e39]:
+                - paragraph [ref=e41]: SFO → LIS · Outbound
+                - paragraph [ref=e42]: SFO → LIS · Nov 9 · Business Class · Direct
+                - generic [ref=e43]:
+                  - generic [ref=e44]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e45]
+              - generic [ref=e46]: ›
+            - generic [ref=e49] [cursor=pointer]:
+              - generic [ref=e50]:
+                - generic [ref=e51]: 20:00
+                - text: 🔔
+              - generic "Reminders & packing" [ref=e53]
+              - generic [ref=e54]:
+                - paragraph [ref=e56]: Reminders & packing
+                - paragraph [ref=e57]: Packing reminder · Nov 9 · Departure reminder · Nov 10
+                - generic [ref=e58]:
+                  - generic [ref=e59]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e60]
+              - generic [ref=e61]: ›
+        - generic [ref=e62]:
+          - generic [ref=e64]:
+            - generic [ref=e65]: Mon, Nov 10
+            - generic [ref=e66]: Day 1 — Web Summit opens
+          - generic [ref=e68]:
+            - generic [ref=e71] [cursor=pointer]:
+              - generic [ref=e72]:
+                - generic [ref=e73]: 15:00
+                - text: 🏨
+              - img "Marriott Lisbon" [ref=e76]
+              - generic [ref=e77]:
+                - paragraph [ref=e79]: Marriott Lisbon
+                - paragraph [ref=e80]: Marriott Lisbon · Nov 10–12 · Avenida dos Combatentes
+                - generic [ref=e81]:
+                  - generic [ref=e82]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e83]
+              - generic [ref=e84]: ›
+            - generic [ref=e87] [cursor=pointer]:
+              - generic [ref=e88]:
+                - generic [ref=e89]: 09:30
+                - text: 📋
+              - img "The Age of Ambient AI" [ref=e92]
+              - generic [ref=e93]:
+                - paragraph [ref=e95]: The Age of Ambient AI
+                - paragraph [ref=e96]: Reid Hoffman · 10 Nov · Stage 1
+                - generic [ref=e97]:
+                  - generic [ref=e98]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e99]
+              - generic [ref=e100]: ›
+            - generic [ref=e103] [cursor=pointer]:
+              - generic [ref=e104]:
+                - generic [ref=e105]: 14:00
+                - text: 📋
+              - img "Future of Work keynote" [ref=e108]
+              - generic [ref=e109]:
+                - paragraph [ref=e111]: Future of Work keynote
+                - paragraph [ref=e112]: Panel · 10 Nov · Centre Stage
+                - generic [ref=e113]:
+                  - generic [ref=e114]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e115]
+              - generic [ref=e116]: ›
+        - generic [ref=e117]:
+          - generic [ref=e119]:
+            - generic [ref=e120]: Tue, Nov 11
+            - generic [ref=e121]: Day 2 — Web Summit
+          - generic [ref=e123]:
+            - generic [ref=e126] [cursor=pointer]:
+              - generic [ref=e127]:
+                - generic [ref=e128]: 10:00
+                - text: 📋
+              - img "Product Strategy in the AI Era" [ref=e131]
+              - generic [ref=e132]:
+                - paragraph [ref=e134]: Product Strategy in the AI Era
+                - paragraph [ref=e135]: Lenny Rachitsky · 11 Nov · Workshop Hall C
+                - generic [ref=e136]:
+                  - generic [ref=e137]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e138]
+              - generic [ref=e139]: ›
+            - generic [ref=e142] [cursor=pointer]:
+              - generic [ref=e143]:
+                - generic [ref=e144]: 15:30
+                - text: 📋
+              - img "Closing Keynote" [ref=e147]
+              - generic [ref=e148]:
+                - generic [ref=e149]:
+                  - paragraph [ref=e150]: Closing Keynote
+                  - generic [ref=e151]: ⚠ Conflict
+                - paragraph [ref=e152]: Padmasree Warrior · 11 Nov · Centre Stage
+                - generic [ref=e153]:
+                  - generic [ref=e154]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e155]
+              - generic [ref=e156]: ›
+        - generic [ref=e157]:
+          - generic [ref=e159]:
+            - generic [ref=e160]: Wed, Nov 12
+            - generic [ref=e161]: Return to SFO
+          - generic [ref=e166] [cursor=pointer]:
+            - generic [ref=e167]:
+              - generic [ref=e168]: 09:30
+              - text: ✈
+            - img "LIS → SFO · Return" [ref=e171]
+            - generic [ref=e172]:
+              - paragraph [ref=e174]: LIS → SFO · Return
+              - paragraph [ref=e175]: LIS → SFO · Nov 12 · Business Class · Direct
+              - generic [ref=e176]:
+                - generic [ref=e177]: Jeevy's pick ❆
+                - button "⇄ Swap" [ref=e178]
+            - generic [ref=e179]: ›
+  - generic [ref=e181]:
+    - button "Confirm trip →" [ref=e182]
+    - paragraph [ref=e183]: Books flights, hotel & syncs your calendar in one go

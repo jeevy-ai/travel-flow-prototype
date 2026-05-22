@@ -41,6 +41,9 @@ export type TimelineEntry = {
   alternatives?: AlternativeOption[]
   enrichedWith?: AlternativeOption
   dishImages?: string[]
+  transportMode?: 'taxi' | 'transit' | 'walk'
+  partySize?: number
+  menuItems?: { name: string; price: string; popular?: boolean }[]
 }
 
 function makeEntries(): TimelineEntry[] {
@@ -198,6 +201,7 @@ function makeEntries(): TimelineEntry[] {
       imageThumb: '/fixture-images/ride-executive-sedan.webp',
       imageHero: '/fixture-images/ride-executive-sedan.webp',
       gradientFallback: GRADIENT_FALLBACKS['ride'],
+      transportMode: 'taxi',
       tagline: 'LIS Airport → Marriott · ~25 min · est. €35',
       ghostHeadline: 'Airport transfer',
       ghostSubtext: 'Jeevy will arrange your arrival ride',
@@ -219,6 +223,7 @@ function makeEntries(): TimelineEntry[] {
       imageThumb: '/fixture-images/ride-executive-sedan.webp',
       imageHero: '/fixture-images/ride-executive-sedan.webp',
       gradientFallback: GRADIENT_FALLBACKS['ride'],
+      transportMode: 'taxi',
       tagline: 'Marriott → Altice Arena · ~15 min · est. €18',
       ghostHeadline: 'Morning transfer to venue',
       ghostSubtext: 'Day 2 — arrives before 09:30 session',
@@ -240,6 +245,7 @@ function makeEntries(): TimelineEntry[] {
       imageThumb: '/fixture-images/ride-executive-sedan.webp',
       imageHero: '/fixture-images/ride-executive-sedan.webp',
       gradientFallback: GRADIENT_FALLBACKS['ride'],
+      transportMode: 'taxi',
       tagline: 'Marriott → LIS Airport · ~25 min · est. €35',
       ghostHeadline: 'Departure transfer',
       ghostSubtext: 'Departs 07:00 for 09:30 flight',
@@ -297,6 +303,13 @@ function makeEntries(): TimelineEntry[] {
           details: { cuisine: 'Mediterranean fine dining', priceRange: '€€€€', rating: '4.5 ★', address: 'Rua Marquês de Fronteira, Lisbon' },
         },
       ],
+      partySize: 1,
+      menuItems: [
+        { name: 'Presunto croquettes', price: '€12', popular: true },
+        { name: 'Bacalhau à Brás', price: '€24', popular: true },
+        { name: 'Arroz de tamboril', price: '€28' },
+        { name: 'Pastéis de nata', price: '€3', popular: true },
+      ],
       ghostHeadline: 'Dinner — Nov 10',
       ghostSubtext: 'Jeevy is picking the best table for tonight',
       data: {
@@ -353,6 +366,13 @@ function makeEntries(): TimelineEntry[] {
           gradientFallback: 'linear-gradient(135deg, #9C4221, #DD6B20)',
           details: { cuisine: 'Traditional Portuguese', priceRange: '€€', rating: '4.5 ★', address: 'Rua João do Outeiro 24, Lisbon' },
         },
+      ],
+      partySize: 1,
+      menuItems: [
+        { name: 'Gambas al ajillo', price: '€28', popular: true },
+        { name: 'Percebes', price: '€48', popular: true },
+        { name: 'Sapateira recheada', price: '€38' },
+        { name: 'Prego no pão', price: '€14', popular: true },
       ],
       ghostHeadline: 'Dinner — Nov 11',
       ghostSubtext: 'Jeevy is picking the best table for tonight',
@@ -544,6 +564,14 @@ export function useFlowEngine() {
     ))
   }, [])
 
+  const setRideMode = useCallback((id: string, mode: 'taxi' | 'transit' | 'walk') => {
+    setEntries(prev => prev.map(e => e.id === id ? { ...e, transportMode: mode } : e))
+  }, [])
+
+  const setPartySize = useCallback((id: string, size: number) => {
+    setEntries(prev => prev.map(e => e.id === id ? { ...e, partySize: size } : e))
+  }, [])
+
   const resolveConflict = useCallback(() => {
     setConflictResolved(true)
   }, [])
@@ -623,6 +651,8 @@ export function useFlowEngine() {
     dismissEntry,
     restoreEntry,
     enrichEntry,
+    setRideMode,
+    setPartySize,
     data: soloTravelFixture,
   }
 }

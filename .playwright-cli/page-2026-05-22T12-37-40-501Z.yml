@@ -1,0 +1,283 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: jeevy
+      - generic [ref=e7]: ·
+      - generic [ref=e8]: Web Summit 2026
+    - generic [ref=e10]: 0/15
+  - generic [ref=e12]:
+    - button "SUN 9 2 items" [ref=e13]:
+      - generic [ref=e14]: SUN
+      - generic [ref=e15]: "9"
+      - generic [ref=e16]: 2 items
+    - button "MON 10 6 items" [ref=e17]:
+      - generic [ref=e18]: MON
+      - generic [ref=e19]: "10"
+      - generic [ref=e20]: 6 items
+    - button "TUE 11 5 items" [ref=e21]:
+      - generic [ref=e22]: TUE
+      - generic [ref=e23]: "11"
+      - generic [ref=e24]: 5 items
+    - button "WED 12 2 items" [ref=e25]:
+      - generic [ref=e26]: WED
+      - generic [ref=e27]: "12"
+      - generic [ref=e28]: 2 items
+  - main [ref=e30]:
+    - generic [ref=e31]:
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e35]: Jeevy arranged
+          - heading "Web Summit 2026" [level=1] [ref=e36]
+          - paragraph [ref=e37]: Lisbon, Portugal · Nov 9–12
+        - generic [ref=e38]:
+          - generic [ref=e39]:
+            - generic [ref=e40]:
+              - generic [ref=e41]: ✈
+              - generic [ref=e42]: SFO → LIS
+            - paragraph [ref=e43]: Non-stop · Business
+          - generic [ref=e44]:
+            - generic [ref=e45]:
+              - generic [ref=e46]: 🏨
+              - generic [ref=e47]: 2 nights
+            - paragraph [ref=e48]: Marriott Bonvoy
+          - generic [ref=e49]:
+            - generic [ref=e50]:
+              - generic [ref=e51]: 🎙
+              - generic [ref=e52]: 4 sessions
+            - paragraph [ref=e53]: Web Summit
+          - generic [ref=e54]:
+            - generic [ref=e55]:
+              - generic [ref=e56]: 💰
+              - generic [ref=e57]: $7,058
+            - paragraph [ref=e58]: est. total
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - generic [ref=e61]: ⭐
+              - generic [ref=e62]: Platinum
+            - paragraph [ref=e63]: Status applied
+        - generic [ref=e64]:
+          - generic [ref=e66]: J
+          - paragraph [ref=e67]:
+            - text: Picked using your Delta Platinum + Marriott Bonvoy status. Swap anything, then hit
+            - strong [ref=e68]: Confirm trip
+            - text: to book in one go.
+      - generic [ref=e70]:
+        - generic [ref=e71]: ⚠
+        - paragraph [ref=e72]:
+          - text: 1 schedule overlap — K08 Closing Keynote conflicts with your All-Hands call.
+          - button "Resolve →" [ref=e73]
+      - generic [ref=e74]:
+        - generic [ref=e75]:
+          - generic [ref=e77]:
+            - generic [ref=e78]: Sun, Nov 9
+            - generic [ref=e79]: Day 0 — Departure from SFO
+          - generic [ref=e81]:
+            - generic [ref=e84] [cursor=pointer]:
+              - generic [ref=e85]:
+                - generic [ref=e86]: 20:00
+                - text: 🔔
+              - generic "Reminders & packing" [ref=e88]
+              - generic [ref=e89]:
+                - paragraph [ref=e91]: Reminders & packing
+                - paragraph [ref=e92]: Packing reminder · Nov 9 · Departure reminder · Nov 10
+                - generic [ref=e93]:
+                  - generic [ref=e94]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e95]
+                  - button "···" [ref=e96]
+              - generic [ref=e97]: ›
+            - generic [ref=e100] [cursor=pointer]:
+              - generic [ref=e101]:
+                - generic [ref=e102]: 22:10
+                - text: ✈
+              - img "SFO → LIS · Outbound" [ref=e105]
+              - generic [ref=e106]:
+                - paragraph [ref=e108]: SFO → LIS · Outbound
+                - paragraph [ref=e109]: SFO → LIS · Nov 9 · Business Class · Direct
+                - generic [ref=e110]:
+                  - generic [ref=e111]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e112]
+                  - button "···" [ref=e113]
+              - generic [ref=e114]: ›
+        - generic [ref=e115]:
+          - generic [ref=e117]:
+            - generic [ref=e118]: Mon, Nov 10
+            - generic [ref=e119]: Day 1 — Web Summit opens · Dinner · Fado
+          - generic [ref=e121]:
+            - generic [ref=e124] [cursor=pointer]:
+              - generic [ref=e125]:
+                - generic [ref=e126]: 09:30
+                - text: 📋
+              - img "The Age of Ambient AI" [ref=e129]
+              - generic [ref=e130]:
+                - paragraph [ref=e132]: The Age of Ambient AI
+                - paragraph [ref=e133]: Reid Hoffman · 10 Nov · Stage 1
+                - generic [ref=e134]:
+                  - generic [ref=e135]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e136]
+                  - button "···" [ref=e137]
+              - generic [ref=e138]: ›
+            - generic [ref=e141] [cursor=pointer]:
+              - generic [ref=e142]:
+                - generic [ref=e143]: 14:00
+                - text: 📋
+              - img "Future of Work keynote" [ref=e146]
+              - generic [ref=e147]:
+                - paragraph [ref=e149]: Future of Work keynote
+                - paragraph [ref=e150]: Panel · 10 Nov · Centre Stage
+                - generic [ref=e151]:
+                  - generic [ref=e152]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e153]
+                  - button "···" [ref=e154]
+              - generic [ref=e155]: ›
+            - generic [ref=e158] [cursor=pointer]:
+              - generic [ref=e159]:
+                - generic [ref=e160]: 15:00
+                - text: 🏨
+              - img "Marriott Lisbon" [ref=e163]
+              - generic [ref=e164]:
+                - paragraph [ref=e166]: Marriott Lisbon
+                - paragraph [ref=e167]: Marriott Lisbon · Nov 10–12 · Avenida dos Combatentes
+                - generic [ref=e168]:
+                  - generic [ref=e169]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e170]
+                  - button "···" [ref=e171]
+              - generic [ref=e172]: ›
+            - generic [ref=e175] [cursor=pointer]:
+              - generic [ref=e176]:
+                - generic [ref=e177]: 17:30
+                - text: 🚗
+              - generic "Lisbon Humberto Delgado Airport → Marriott Lisbon" [ref=e179]
+              - generic [ref=e180]:
+                - paragraph [ref=e182]: Lisbon Humberto Delgado Airport → Marriott Lisbon
+                - paragraph [ref=e183]: LIS Airport → Marriott · ~25 min · est. €35
+                - generic [ref=e184]:
+                  - generic [ref=e185]: Jeevy's pick ❆
+                  - button "···" [ref=e186]
+              - generic [ref=e187]: ›
+            - generic [ref=e190] [cursor=pointer]:
+              - generic [ref=e191]:
+                - generic [ref=e192]: 20:00
+                - text: 🍽
+              - generic "Solar dos Presuntos" [ref=e194]
+              - generic [ref=e195]:
+                - paragraph [ref=e197]: Solar dos Presuntos
+                - paragraph [ref=e198]: Solar dos Presuntos · Traditional Portuguese · Rua das Portas de Santo Antão
+                - generic [ref=e199]:
+                  - generic [ref=e200]: Jeevy's pick ❆
+                  - button "···" [ref=e201]
+              - generic [ref=e202]: ›
+            - generic [ref=e205] [cursor=pointer]:
+              - generic [ref=e206]:
+                - generic [ref=e207]: 22:00
+                - text: 🌟
+              - generic "Clube de Fado" [ref=e209]
+              - generic [ref=e210]:
+                - paragraph [ref=e212]: Clube de Fado
+                - paragraph [ref=e213]: Clube de Fado · Fado show · São Miguel, Alfama
+                - generic [ref=e214]:
+                  - generic [ref=e215]: Jeevy's pick ❆
+                  - button "···" [ref=e216]
+              - generic [ref=e217]: ›
+        - generic [ref=e218]:
+          - generic [ref=e220]:
+            - generic [ref=e221]: Tue, Nov 11
+            - generic [ref=e222]: Day 2 — Web Summit · Dinner · Rooftop
+          - generic [ref=e224]:
+            - generic [ref=e227] [cursor=pointer]:
+              - generic [ref=e228]:
+                - generic [ref=e229]: 08:15
+                - text: 🚗
+              - generic "Marriott Lisbon → Altice Arena" [ref=e231]
+              - generic [ref=e232]:
+                - paragraph [ref=e234]: Marriott Lisbon → Altice Arena
+                - paragraph [ref=e235]: Marriott → Altice Arena · ~15 min · est. €18
+                - generic [ref=e236]:
+                  - generic [ref=e237]: Jeevy's pick ❆
+                  - button "···" [ref=e238]
+              - generic [ref=e239]: ›
+            - generic [ref=e242] [cursor=pointer]:
+              - generic [ref=e243]:
+                - generic [ref=e244]: 10:00
+                - text: 📋
+              - img "Product Strategy in the AI Era" [ref=e247]
+              - generic [ref=e248]:
+                - paragraph [ref=e250]: Product Strategy in the AI Era
+                - paragraph [ref=e251]: Lenny Rachitsky · 11 Nov · Workshop Hall C
+                - generic [ref=e252]:
+                  - generic [ref=e253]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e254]
+                  - button "···" [ref=e255]
+              - generic [ref=e256]: ›
+            - generic [ref=e259] [cursor=pointer]:
+              - generic [ref=e260]:
+                - generic [ref=e261]: 15:30
+                - text: 📋
+              - img "Closing Keynote" [ref=e264]
+              - generic [ref=e265]:
+                - generic [ref=e266]:
+                  - paragraph [ref=e267]: Closing Keynote
+                  - generic [ref=e268]: ⚠ Conflict
+                - paragraph [ref=e269]: Padmasree Warrior · 11 Nov · Centre Stage
+                - generic [ref=e270]:
+                  - generic [ref=e271]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e272]
+                  - button "···" [ref=e273]
+              - generic [ref=e274]: ›
+            - generic [ref=e277] [cursor=pointer]:
+              - generic [ref=e278]:
+                - generic [ref=e279]: 20:30
+                - text: 🍽
+              - generic "Cervejaria Ramiro" [ref=e281]
+              - generic [ref=e282]:
+                - paragraph [ref=e284]: Cervejaria Ramiro
+                - paragraph [ref=e285]: Cervejaria Ramiro · Premium Seafood · Av. Almirante Reis
+                - generic [ref=e286]:
+                  - generic [ref=e287]: Jeevy's pick ❆
+                  - button "···" [ref=e288]
+              - generic [ref=e289]: ›
+            - generic [ref=e292] [cursor=pointer]:
+              - generic [ref=e293]:
+                - generic [ref=e294]: 22:30
+                - text: 🌟
+              - generic "PARK Bar" [ref=e296]
+              - generic [ref=e297]:
+                - paragraph [ref=e299]: PARK Bar
+                - paragraph [ref=e300]: PARK Bar · Rooftop drinks · Calçada do Combro
+                - generic [ref=e301]:
+                  - generic [ref=e302]: Jeevy's pick ❆
+                  - button "···" [ref=e303]
+              - generic [ref=e304]: ›
+        - generic [ref=e305]:
+          - generic [ref=e307]:
+            - generic [ref=e308]: Wed, Nov 12
+            - generic [ref=e309]: Return to SFO
+          - generic [ref=e311]:
+            - generic [ref=e314] [cursor=pointer]:
+              - generic [ref=e315]:
+                - generic [ref=e316]: 07:00
+                - text: 🚗
+              - generic "Marriott Lisbon → Lisbon Humberto Delgado Airport" [ref=e318]
+              - generic [ref=e319]:
+                - paragraph [ref=e321]: Marriott Lisbon → Lisbon Humberto Delgado Airport
+                - paragraph [ref=e322]: Marriott → LIS Airport · ~25 min · est. €35
+                - generic [ref=e323]:
+                  - generic [ref=e324]: Jeevy's pick ❆
+                  - button "···" [ref=e325]
+              - generic [ref=e326]: ›
+            - generic [ref=e329] [cursor=pointer]:
+              - generic [ref=e330]:
+                - generic [ref=e331]: 09:30
+                - text: ✈
+              - img "LIS → SFO · Return" [ref=e334]
+              - generic [ref=e335]:
+                - paragraph [ref=e337]: LIS → SFO · Return
+                - paragraph [ref=e338]: LIS → SFO · Nov 12 · Business Class · Direct
+                - generic [ref=e339]:
+                  - generic [ref=e340]: Jeevy's pick ❆
+                  - button "⇄ Swap" [ref=e341]
+                  - button "···" [ref=e342]
+              - generic [ref=e343]: ›
+  - button "🗺 Map" [ref=e345]
+  - generic [ref=e347]:
+    - button "Confirm trip →" [ref=e348]
+    - paragraph [ref=e349]: Books flights, hotel & syncs your calendar in one go

@@ -7,6 +7,7 @@ import { DateSidebar } from '../layout/DateSidebar'
 import { TripMap } from '../map/TripMap'
 import type { TripMapHandle } from '../map/TripMap'
 import { CompactEntryRow } from './CompactEntryRow'
+import { TransportConnector } from './TransportConnector'
 import { Screen2FlightSelection } from '../screens/Screen2FlightSelection'
 import { Screen3HotelSelection } from '../screens/Screen3HotelSelection'
 import { Screen4Sessions } from '../screens/Screen4Sessions'
@@ -307,15 +308,23 @@ export function FlowPage() {
                     {/* Compact rows for this day */}
                     <div className="space-y-2 mt-2">
                       {group.entries.map((entry, i) => (
-                        <CompactEntryRow
-                          key={entry.id}
-                          entry={entry}
-                          flow={flow}
-                          staggerIndex={baseIndex + i}
-                          isActive={activeEntryId === entry.id}
-                          onActivate={activateEntry}
-                          onDeactivate={deactivateEntry}
-                        />
+                        entry.type === 'ride' ? (
+                          <TransportConnector
+                            key={entry.id}
+                            entry={entry}
+                            flow={flow}
+                          />
+                        ) : (
+                          <CompactEntryRow
+                            key={entry.id}
+                            entry={entry}
+                            flow={flow}
+                            staggerIndex={baseIndex + i}
+                            isActive={activeEntryId === entry.id}
+                            onActivate={activateEntry}
+                            onDeactivate={deactivateEntry}
+                          />
+                        )
                       ))}
                     </div>
                   </div>
