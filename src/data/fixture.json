@@ -1,0 +1,182 @@
+{
+  "trip": {
+    "id": "trip_saastr_2026_06",
+    "title": "SaaStr Annual",
+    "destination": "San Francisco, CA",
+    "startDate": "2026-06-03",
+    "endDate": "2026-06-05",
+    "status": "confirmed",
+    "completenessPercent": 100
+  },
+  "flights": [
+    {
+      "id": "flt_outbound",
+      "direction": "outbound",
+      "airline": "United Airlines",
+      "flightNumber": "UA 857",
+      "origin": "CPH",
+      "destination": "SFO",
+      "departureAt": "2026-06-03T09:15:00+02:00",
+      "arrivalAt": "2026-06-03T11:45:00-07:00",
+      "seat": "24C",
+      "seatType": "aisle",
+      "cabin": "economy",
+      "baggage": "carry-on only",
+      "price": 847,
+      "currency": "USD",
+      "terminal": "CPH T2",
+      "pnr": "XQRT24",
+      "allianceMatchesPref": true
+    },
+    {
+      "id": "flt_return",
+      "direction": "return",
+      "airline": "United Airlines",
+      "flightNumber": "UA 858",
+      "origin": "SFO",
+      "destination": "CPH",
+      "departureAt": "2026-06-05T18:30:00-07:00",
+      "arrivalAt": "2026-06-06T14:45:00+02:00",
+      "seat": "22C",
+      "seatType": "aisle",
+      "cabin": "economy",
+      "baggage": "carry-on only",
+      "price": 831,
+      "currency": "USD",
+      "terminal": "SFO T3",
+      "pnr": "XQRT25",
+      "allianceMatchesPref": true
+    }
+  ],
+  "hotel": {
+    "id": "hotel_marriott_marquis_sf",
+    "name": "Marriott Marquis San Francisco",
+    "chain": "Marriott",
+    "address": "55 4th St, San Francisco, CA 94103",
+    "distanceToVenueMiles": 0.3,
+    "checkinDate": "2026-06-03",
+    "checkoutDate": "2026-06-05",
+    "roomType": "King City View",
+    "pricePerNight": 289,
+    "totalPrice": 867,
+    "currency": "USD",
+    "loyaltyPoints": 3000,
+    "loyaltyProgram": "Marriott Bonvoy",
+    "amenities": ["Fitness Center", "Free WiFi", "Concierge", "Restaurant", "Bar"],
+    "cancellationPolicy": "Free cancellation until Jun 1, 2026",
+    "confirmationNumber": "H-9284755"
+  },
+  "sessions": [
+    {
+      "id": "sess_growth_retention",
+      "title": "Growth vs. Retention: Where to Double Down",
+      "startAt": "2026-06-03T14:00:00-07:00",
+      "endAt": "2026-06-03T14:45:00-07:00",
+      "room": "Room B",
+      "speaker": "Maya Patel, Chief Growth Officer, Lattice",
+      "description": "A data-driven look at where SaaS companies lose growth leverage — and the surprising answer about when retention is greater than acquisition.",
+      "jeevyRecommended": false,
+      "conflictDetected": false
+    },
+    {
+      "id": "sess_ai_native",
+      "title": "AI-Native Products: 3 Years In",
+      "startAt": "2026-06-04T10:00:00-07:00",
+      "endAt": "2026-06-04T10:50:00-07:00",
+      "room": "Main Stage",
+      "speaker": "Jason Lemkin, SaaStr Founder",
+      "description": "What product leaders wish they had known before building AI-native. Real data from 2023-2025.",
+      "jeevyRecommended": true,
+      "conflictDetected": false
+    },
+    {
+      "id": "sess_sales_team",
+      "title": "Building a Sales Team That Scales",
+      "startAt": "2026-06-04T14:30:00-07:00",
+      "endAt": "2026-06-04T15:15:00-07:00",
+      "room": "Room A",
+      "speaker": "David Sacks, Craft Ventures",
+      "description": "Hiring, comp structure, and ramping velocity - practical playbook for Series A to Series C.",
+      "jeevyRecommended": false,
+      "conflictDetected": false
+    }
+  ],
+  "restaurants": [
+    {
+      "id": "rest_omakase",
+      "name": "Omakase",
+      "cuisine": "Japanese",
+      "address": "1 Dollar Row, San Francisco, CA 94105",
+      "distanceFromHotelMiles": 0.4,
+      "reservationAt": "2026-06-03T19:30:00-07:00",
+      "partySize": 1,
+      "pricePerPersonUSD": 85,
+      "dietaryMatch": { "noShellfish": true },
+      "confirmationNumber": "OMA-201466",
+      "notes": "Omakase tasting menu, approx 2 hours. No modifications accepted - allergen-safe per kitchen confirmation."
+    },
+    {
+      "id": "rest_rich_table",
+      "name": "Rich Table",
+      "cuisine": "Modern American",
+      "address": "199 Gough St, San Francisco, CA 94102",
+      "distanceFromHotelMiles": 0.6,
+      "reservationAt": "2026-06-04T19:00:00-07:00",
+      "partySize": 1,
+      "pricePerPersonUSD": 75,
+      "dietaryMatch": { "noShellfish": true },
+      "confirmationNumber": "RT-88312",
+      "notes": "A la carte. Chef's seasonal menu. Shellfish-free options clearly marked."
+    }
+  ],
+  "packingList": {
+    "core": [
+      { "id": "pl_laptop",      "label": "Laptop + charger",              "packed": false },
+      { "id": "pl_phone",       "label": "Phone charger (USB-C)",          "packed": false },
+      { "id": "pl_shirts",      "label": "2 x dress shirts",               "packed": false },
+      { "id": "pl_jacket",      "label": "1 x suit jacket",                "packed": false },
+      { "id": "pl_chinos",      "label": "2 x chinos",                     "packed": false },
+      { "id": "pl_toiletries",  "label": "Toiletries — carry-on safe",     "packed": false },
+      { "id": "pl_lightjacket", "label": "Light jacket (SF fog)",          "packed": false },
+      { "id": "pl_badge",       "label": "Conference badge holder",        "packed": false }
+    ],
+    "extended": [
+      { "id": "pl_jeans",       "label": "1 x casual jeans",               "packed": false },
+      { "id": "pl_headphones",  "label": "Noise-canceling headphones",     "packed": false },
+      { "id": "pl_bizcard",     "label": "Business cards (20+)",           "packed": false },
+      { "id": "pl_powerbank",   "label": "Portable charger (10,000mAh+)", "packed": false },
+      { "id": "pl_umbrella",    "label": "Umbrella (compact)",             "packed": false },
+      { "id": "pl_sleepmask",   "label": "Sleep mask (return flight)",     "packed": false }
+    ]
+  },
+  "reminders": [
+    {
+      "id": "rem_airport",
+      "label": "Leave for CPH Airport",
+      "fireAt": "2026-06-03T06:30:00+02:00",
+      "type": "departure",
+      "notificationChannels": ["push", "calendar"]
+    },
+    {
+      "id": "rem_packing",
+      "label": "Pack your bag for SF",
+      "fireAt": "2026-06-02T21:00:00+02:00",
+      "type": "packing",
+      "notificationChannels": ["push"]
+    }
+  ],
+  "userPrefs": {
+    "flightSeat": "aisle",
+    "flightBaggage": "carry-on",
+    "flightAlliance": "Star Alliance",
+    "hotelChains": ["Marriott", "Hilton"],
+    "hotelRoomType": "king",
+    "hotelRequiresGym": true,
+    "diningExclusions": ["shellfish"],
+    "diningPreferences": ["Japanese", "Modern American"],
+    "diningBudgetSoloUSD": 80,
+    "calendarBufferPostFlightMin": 30,
+    "noEarlyMeetingsBefore": "07:00",
+    "timezone": "Europe/Copenhagen"
+  }
+}
