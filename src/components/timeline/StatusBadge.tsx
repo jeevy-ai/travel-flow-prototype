@@ -10,6 +10,8 @@ export function StatusBadge({ state }: Props) {
     confirmed: { label: '✓ Confirmed', className: 'bg-success/20 text-success' },
     'calendar-synced': { label: '✓ Synced 📅', className: 'bg-success/20 text-success' },
     'day-of-active': { label: '▶ Active', className: 'bg-accent/20 text-accent' },
+    'self-managed': { label: '✋ Self-managed', className: 'bg-surface-3 text-on-dim' },
+    'custom-pending': { label: '✎ Custom', className: 'bg-[#c084fc]/10 text-[#c084fc]' },
   }
 
   const cfg = configs[state]

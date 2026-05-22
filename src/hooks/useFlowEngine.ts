@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react'
 import { soloTravelFixture } from '../data/fixture'
 import { IMAGE_MANIFEST, GRADIENT_FALLBACKS } from '../data/imageManifest'
 
-export type EntryState = 'ghost' | 'proposed' | 'confirmed' | 'calendar-synced' | 'day-of-active'
+export type EntryState = 'ghost' | 'proposed' | 'confirmed' | 'calendar-synced' | 'day-of-active' | 'self-managed' | 'custom-pending'
 
 export type EntryType =
   | 'flight_outbound'
@@ -27,6 +27,7 @@ export type TimelineEntry = {
   ghostHeadline: string
   ghostSubtext: string
   data: Record<string, unknown>
+  customOverrideText?: string
 }
 
 function makeEntries(): TimelineEntry[] {
@@ -355,6 +356,20 @@ export function useFlowEngine() {
     ))
   }, [])
 
+  const dismissEntry = useCallback((id: string, mode: 'self' | 'custom', customText?: string) => {
+    setEntries(prev => prev.map(e => {
+      if (e.id !== id) return e
+      if (mode === 'self') return { ...e, state: 'self-managed' as EntryState, customOverrideText: undefined }
+      return { ...e, state: 'custom-pending' as EntryState, customOverrideText: customText ?? '' }
+    }))
+  }, [])
+
+  const restoreEntry = useCallback((id: string) => {
+    setEntries(prev => prev.map(e =>
+      e.id === id ? { ...e, state: 'proposed' as EntryState, customOverrideText: undefined } : e
+    ))
+  }, [])
+
   const resolveConflict = useCallback(() => {
     setConflictResolved(true)
   }, [])
@@ -387,7 +402,10 @@ export function useFlowEngine() {
   }, [confirmingAll, allConfirmed])
 
   const confirmedCount = useMemo(
-    () => entries.filter(e => e.state === 'confirmed' || e.state === 'calendar-synced').length,
+    () => entries.filter(e =>
+      e.state === 'confirmed' || e.state === 'calendar-synced' ||
+      e.state === 'self-managed' || e.state === 'custom-pending'
+    ).length,
     [entries]
   )
 
@@ -428,6 +446,8 @@ export function useFlowEngine() {
     confirmingAll,
     confirmStep,
     allConfirmed,
+    dismissEntry,
+    restoreEntry,
     data: soloTravelFixture,
   }
 }
