@@ -28,7 +28,7 @@ export function Screen3HotelSelection({ flow }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-surface-0">
+    <div className="flex flex-col bg-surface-0">
       <div className="px-5 pt-10 pb-4 flex items-center justify-between">
         <div>
           <VerbTag verb="book_reservation" />
@@ -37,7 +37,7 @@ export function Screen3HotelSelection({ flow }: Props) {
         <p className="text-on-dim text-[12px]">3 of 7</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-4 flex flex-col gap-3">
+      <div className="px-5 pb-4 flex flex-col gap-3">
         <motion.div
           className={`bg-surface-1 rounded-2xl border overflow-hidden transition-colors duration-400 ${
             flash ? 'border-success' : 'border-border'

@@ -18,7 +18,7 @@ export function Screen5Restaurants({ flow }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-surface-0">
+    <div className="flex flex-col bg-surface-0">
       <div className="px-5 pt-10 pb-4 flex items-center justify-between">
         <div>
           <VerbTag verb="schedule_event" />
@@ -27,7 +27,7 @@ export function Screen5Restaurants({ flow }: Props) {
         <p className="text-on-dim text-[12px]">5 of 7</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-4 flex flex-col gap-4">
+      <div className="px-5 pb-4 flex flex-col gap-4">
         <motion.div
           className="bg-warning/10 border border-warning/30 rounded-2xl p-4"
           initial={{ opacity: 0, y: 12 }}
@@ -87,7 +87,7 @@ export function Screen5Restaurants({ flow }: Props) {
         </AnimatePresence>
       </div>
 
-      <div className="px-5 pb-8 pt-4 border-t border-border bg-surface-0 shrink-0">
+      <div className="px-5 pb-8 pt-4 border-t border-border bg-surface-0">
         {!resolved ? (
           <button
             onClick={handleResolve}

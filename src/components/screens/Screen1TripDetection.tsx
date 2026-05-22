@@ -10,7 +10,7 @@ export function Screen1TripDetection({ flow }: Props) {
 
   if (dismissed) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
+      <div className="flex flex-col items-center justify-center py-20 gap-3 px-6 text-center">
         <p className="text-on-dim text-sm">Trip card dismissed.</p>
         <button onClick={() => setDismissed(false)} className="text-accent text-sm underline">
           Re-show card
@@ -20,8 +20,8 @@ export function Screen1TripDetection({ flow }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-surface-0">
-      <div className="flex-1 flex flex-col items-center justify-center px-5 pb-6">
+    <div className="flex flex-col bg-surface-0">
+      <div className="flex flex-col items-center justify-center px-5 py-16 pb-6">
         <div className="mb-10">
           <span className="text-accent text-xl font-bold tracking-tight">jeevy</span>
         </div>

@@ -113,7 +113,7 @@ export function Screen2FlightSelection({ flow }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-surface-0">
+    <div className="flex flex-col bg-surface-0">
       <div className="px-5 pt-10 pb-4 flex items-center justify-between">
         <div>
           <VerbTag verb="book_reservation" />
@@ -122,7 +122,7 @@ export function Screen2FlightSelection({ flow }: Props) {
         <p className="text-on-dim text-[12px]">2 of 7</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-4 flex flex-col gap-3">
+      <div className="px-5 pb-4 flex flex-col gap-3">
         <FlightCard
           label="Outbound"
           route="SFO → LIS"
@@ -182,7 +182,7 @@ export function Screen2FlightSelection({ flow }: Props) {
         </AnimatePresence>
       </div>
 
-      <div className="px-5 pb-8 pt-4 border-t border-border bg-surface-0 shrink-0">
+      <div className="px-5 pb-8 pt-4 border-t border-border bg-surface-0">
         <div className="flex items-center justify-between mb-3">
           <span className="text-on-dim text-[13px]">Total</span>
           <span className="text-on-surface font-mono font-bold text-[16px]">${total.toLocaleString()} · 2 tickets</span>

@@ -49,7 +49,7 @@ export function Screen4Sessions({ flow }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-surface-0">
+    <div className="flex flex-col bg-surface-0">
       <div className="px-5 pt-10 pb-4 flex items-center justify-between">
         <div>
           <VerbTag verb="schedule_event" />
@@ -75,7 +75,7 @@ export function Screen4Sessions({ flow }: Props) {
         )}
       </AnimatePresence>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-4 flex flex-col gap-2">
+      <div className="px-5 pb-4 flex flex-col gap-2">
         {sessions.map((session, i) => {
           const isSelected = selected.has(session.sessionId)
           const isConflicted = session.conflictDetected && isSelected
@@ -134,7 +134,7 @@ export function Screen4Sessions({ flow }: Props) {
         })}
       </div>
 
-      <div className="px-5 pb-8 pt-4 border-t border-border bg-surface-0 shrink-0">
+      <div className="px-5 pb-8 pt-4 border-t border-border bg-surface-0">
         <div className="flex items-center justify-between mb-3">
           <span className="text-on-dim text-[13px]">{selected.size} selected</span>
           {hasConflict && (

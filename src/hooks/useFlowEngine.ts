@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import { soloTravelFixture } from '../data/fixture'
 import { IMAGE_MANIFEST, GRADIENT_FALLBACKS } from '../data/imageManifest'
 
@@ -169,8 +169,15 @@ export function useFlowEngine() {
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
   const [timelineSheetOpen, setTimelineSheetOpen] = useState(false)
   const [conflictResolved, setConflictResolved] = useState(false)
+  const [editingScreen, setEditingScreen] = useState<number | null>(null)
+  const editingScreenRef = useRef<number | null>(null)
+  editingScreenRef.current = editingScreen
 
   const advanceChat = useCallback((nextScreen: number, enrichBit?: number) => {
+    if (editingScreenRef.current !== null) {
+      setEditingScreen(null)
+      return
+    }
     if (enrichBit !== undefined) setEnrichment(e => e | (1 << enrichBit))
     setChatScreen(nextScreen)
   }, [])
@@ -193,6 +200,14 @@ export function useFlowEngine() {
 
   const resolveConflict = useCallback(() => {
     setConflictResolved(true)
+  }, [])
+
+  const startEditScreen = useCallback((screenNumber: number) => {
+    setEditingScreen(screenNumber)
+  }, [])
+
+  const stopEditScreen = useCallback(() => {
+    setEditingScreen(null)
   }, [])
 
   const confirmedCount = useMemo(
@@ -230,6 +245,9 @@ export function useFlowEngine() {
     confirmedCount,
     totalCount: entries.length,
     dayOfActiveId,
+    editingScreen,
+    startEditScreen,
+    stopEditScreen,
     data: soloTravelFixture,
   }
 }
