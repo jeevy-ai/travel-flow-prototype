@@ -186,10 +186,12 @@ interface Props {
   entry: TimelineEntry
   flow: FlowEngine
   staggerIndex: number
+  isActive?: boolean
+  onActivate?: (id: string) => void
+  onDeactivate?: () => void
 }
 
-export function CompactEntryRow({ entry, flow, staggerIndex }: Props) {
-  const [expanded, setExpanded] = useState(false)
+export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, onActivate, onDeactivate }: Props) {
   const [dismissOpen, setDismissOpen] = useState(false)
   const isProposed = entry.state === 'proposed'
   const isConfirmed = entry.state === 'confirmed' || entry.state === 'calendar-synced'
@@ -211,6 +213,7 @@ export function CompactEntryRow({ entry, flow, staggerIndex }: Props) {
 
   return (
     <motion.div
+      data-entry-id={entry.id}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: staggerIndex * 0.04 }}
@@ -218,6 +221,7 @@ export function CompactEntryRow({ entry, flow, staggerIndex }: Props) {
       <div
         className={`rounded-xl overflow-hidden border bg-surface-1 transition-colors duration-300 ${
           isDismissed ? 'border-border opacity-60' :
+          isActive ? 'border-accent/60 ring-1 ring-accent/20' :
           isConfirmed ? 'border-success/30' :
           hasConflict ? 'border-warning/50' : 'border-border'
         }`}
@@ -225,7 +229,14 @@ export function CompactEntryRow({ entry, flow, staggerIndex }: Props) {
         {/* Compact row — ~80px tall */}
         <div
           className="flex items-center gap-3 px-3 py-2.5 cursor-pointer"
-          onClick={() => { if (!dismissOpen) setExpanded(e => !e) }}
+          onClick={() => {
+            if (dismissOpen) return
+            if (isActive) {
+              onDeactivate?.()
+            } else {
+              onActivate?.(entry.id)
+            }
+          }}
         >
           {/* Time gutter */}
           <div className="w-11 shrink-0 text-right">
@@ -274,7 +285,7 @@ export function CompactEntryRow({ entry, flow, staggerIndex }: Props) {
               )}
               {canDismiss && (
                 <button
-                  onClick={e => { e.stopPropagation(); setDismissOpen(v => !v); setExpanded(false) }}
+                  onClick={e => { e.stopPropagation(); setDismissOpen(v => !v); onDeactivate?.() }}
                   className="text-[10px] font-medium text-on-dim/60 hover:text-on-dim px-1.5 py-0.5 rounded-full transition-colors"
                   title="Override this entry"
                 >
@@ -297,7 +308,7 @@ export function CompactEntryRow({ entry, flow, staggerIndex }: Props) {
           {!isDismissed && (
             <span
               className="text-on-dim text-[18px] shrink-0 transition-transform duration-200"
-              style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+              style={{ transform: isActive ? 'rotate(90deg)' : 'rotate(0deg)' }}
             >
               ›
             </span>
@@ -317,7 +328,7 @@ export function CompactEntryRow({ entry, flow, staggerIndex }: Props) {
 
         {/* Expanded detail — full hero + accordion */}
         <AnimatePresence>
-          {expanded && !isDismissed && (
+          {isActive && !isDismissed && (
             <>
               <motion.div
                 className="overflow-hidden"
@@ -347,7 +358,7 @@ export function CompactEntryRow({ entry, flow, staggerIndex }: Props) {
               </motion.div>
               <TimelineEntryExpanded
                 entry={entry}
-                onCollapse={() => setExpanded(false)}
+                onCollapse={() => onDeactivate?.()}
               />
             </>
           )}
