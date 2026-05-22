@@ -11,6 +11,9 @@ const ENTRY_ICONS: Record<string, string> = {
   conference_venue: '🎙',
   conference_session: '📋',
   reminders: '🔔',
+  restaurant: '🍽',
+  activity: '🌟',
+  ride: '🚗',
 }
 
 function entryTitle(entry: TimelineEntry): string {
@@ -21,6 +24,13 @@ function entryTitle(entry: TimelineEntry): string {
     case 'conference_venue': return 'Altice Arena'
     case 'conference_session': return String(entry.data['title'] ?? entry.ghostHeadline)
     case 'reminders': return 'Reminders & packing'
+    case 'restaurant': return String(entry.data['name'] ?? entry.ghostHeadline)
+    case 'activity': return String(entry.data['name'] ?? entry.ghostHeadline)
+    case 'ride': {
+      const from = String(entry.data['from'] ?? '').split('(')[0].split(',')[0].trim()
+      const to = String(entry.data['to'] ?? '').split('(')[0].split(',')[0].trim()
+      return `${from} → ${to}`
+    }
     default: return entry.ghostHeadline
   }
 }

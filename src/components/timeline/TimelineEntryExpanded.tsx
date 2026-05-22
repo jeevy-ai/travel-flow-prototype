@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import type { TimelineEntry } from '../../hooks/useFlowEngine'
 
@@ -30,6 +31,107 @@ function ExternalLink({ href, label }: { href: string; label: string }) {
   )
 }
 
+// ── Seat map for 767-400ER 2-2-2 business class layout ────────────────
+function SeatMap({ seat }: { seat: string }) {
+  // Parse "Seat 4A — Business Class, Aisle" → row=4, col=A
+  const match = seat.match(/Seat\s+(\d+)([A-F])/i)
+  const targetRow = match ? parseInt(match[1]) : -1
+  const targetCol = match ? match[2].toUpperCase() : ''
+
+  const rows = [1, 2, 3, 4, 5, 6]
+  // 2-2-2 layout: cols A,B | C,D | E,F
+  const sections = [['A', 'B'], ['C', 'D'], ['E', 'F']] as const
+
+  return (
+    <div className="mt-3">
+      <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide mb-2">Seat plan — Business class (rows 1–6)</p>
+      <div className="inline-block">
+        {/* Column headers */}
+        <div className="flex gap-1 mb-1 pl-7">
+          {sections.map((sec, si) => (
+            <div key={si} className="flex gap-1">
+              {sec.map(col => (
+                <div key={col} className="w-7 text-center text-[9px] text-on-dim font-mono">{col}</div>
+              ))}
+              {si < 2 && <div className="w-3" />}
+            </div>
+          ))}
+        </div>
+        {/* Seat rows */}
+        {rows.map(row => (
+          <div key={row} className="flex items-center gap-1 mb-1">
+            <span className="text-[10px] text-on-dim font-mono w-6 text-right">{row}</span>
+            {sections.map((sec, si) => (
+              <div key={si} className="flex gap-1">
+                {sec.map(col => {
+                  const isTarget = row === targetRow && col === targetCol
+                  return (
+                    <div
+                      key={col}
+                      className={`w-7 h-5 rounded-sm flex items-center justify-center text-[9px] font-bold transition-colors ${
+                        isTarget
+                          ? 'bg-accent text-white shadow-[0_0_6px_rgba(108,122,255,0.6)]'
+                          : 'bg-surface-3 text-on-dim/40'
+                      }`}
+                      title={`${row}${col}`}
+                    >
+                      {isTarget ? '★' : ''}
+                    </div>
+                  )
+                })}
+                {si < 2 && <div className="w-3 flex items-center">
+                  <div className="w-px h-3 bg-border mx-auto" />
+                </div>}
+              </div>
+            ))}
+          </div>
+        ))}
+        <p className="text-[10px] text-accent/80 mt-1.5 text-center">★ {seat.split('—')[0].trim()}</p>
+      </div>
+    </div>
+  )
+}
+
+// ── In-flight meal selection ───────────────────────────────────────────
+const MEAL_OPTIONS = [
+  { id: 'standard', label: 'Standard', desc: 'Pan-seared chicken with seasonal veg + cheese plate' },
+  { id: 'vegetarian', label: 'Vegetarian', desc: 'Roasted vegetable risotto + fruit plate' },
+  { id: 'vegan', label: 'Vegan', desc: 'Quinoa bowl + coconut dessert' },
+  { id: 'halal', label: 'Halal', desc: 'Halal-certified lamb tagine + baklava' },
+]
+
+function MealSelector({ flightId }: { flightId: string }) {
+  const [selected, setSelected] = useState('standard')
+  return (
+    <div className="mt-3">
+      <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide mb-2">In-flight meal · {flightId === 'flt_outbound' ? 'UA88' : 'UA89'}</p>
+      <div className="space-y-1.5">
+        {MEAL_OPTIONS.map(opt => (
+          <button
+            key={opt.id}
+            onClick={() => setSelected(opt.id)}
+            className={`w-full flex items-start gap-2.5 px-3 py-2 rounded-lg border text-left transition-all ${
+              selected === opt.id
+                ? 'border-accent bg-accent/10'
+                : 'border-border bg-surface-3 hover:bg-surface-3/80'
+            }`}
+          >
+            <span className={`mt-0.5 w-3.5 h-3.5 rounded-full border-2 shrink-0 flex items-center justify-center ${
+              selected === opt.id ? 'border-accent' : 'border-on-dim/40'
+            }`}>
+              {selected === opt.id && <span className="w-1.5 h-1.5 rounded-full bg-accent block" />}
+            </span>
+            <div>
+              <p className={`text-[12px] font-semibold ${selected === opt.id ? 'text-accent' : 'text-on-surface'}`}>{opt.label}</p>
+              <p className="text-on-dim text-[11px]">{opt.desc}</p>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export function TimelineEntryExpanded({ entry, onCollapse }: Props) {
   const d = entry.data
 
@@ -58,6 +160,10 @@ export function TimelineEntryExpanded({ entry, onCollapse }: Props) {
               </>
             )}
           </div>
+          {/* Seat map */}
+          {Boolean(d['slot']) && <SeatMap seat={String(d['slot'])} />}
+          {/* Meal selection */}
+          <MealSelector flightId={entry.id} />
           {Boolean(d['rationale']) && <RationaleBlock text={String(d['rationale'])} />}
           <div className="flex flex-wrap gap-3">
             {Boolean(d['calendarAddLink']) && <ExternalLink href={String(d['calendarAddLink'])} label="Open in Calendar" />}
@@ -88,11 +194,6 @@ export function TimelineEntryExpanded({ entry, onCollapse }: Props) {
               {(d['amenities'] as string[]).map(a => (
                 <span key={a} className="text-[11px] bg-surface-3 text-on-dim px-2 py-0.5 rounded-md">{a}</span>
               ))}
-            </div>
-          )}
-          {Boolean(d['distanceToVenue']) && (
-            <div className="flex items-center gap-1.5 text-warning text-[12px]">
-              <span>⚠</span><span>{String(d['distanceToVenue'])}</span>
             </div>
           )}
           {Boolean(d['rationale']) && <RationaleBlock text={String(d['rationale'])} />}
@@ -131,6 +232,68 @@ export function TimelineEntryExpanded({ entry, onCollapse }: Props) {
             {Boolean(d['sourceLink']) && <ExternalLink href={String(d['sourceLink'])} label="View on Web Summit" />}
             {Boolean(d['calendarAddLink']) && <ExternalLink href={String(d['calendarAddLink'])} label="Open in Calendar" />}
           </div>
+        </div>
+      )}
+
+      {entry.type === 'restaurant' && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-y-2">
+            <DetailRow label="Cuisine" value={d['cuisine']} />
+            <DetailRow label="Address" value={d['address']} />
+            <DetailRow label="Distance" value={d['distanceFromHotel']} />
+            <DetailRow label="Price" value={d['priceRange']} />
+            <DetailRow label="Rating" value={d['rating']} />
+            <DetailRow label="Reservation" value={d['reservation']} />
+          </div>
+          {Array.isArray(d['specialties']) && (
+            <div>
+              <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide mb-1.5">Must order</p>
+              <div className="flex flex-wrap gap-1.5">
+                {(d['specialties'] as string[]).map(s => (
+                  <span key={s} className="text-[11px] bg-surface-3 text-on-surface px-2 py-0.5 rounded-md">{s}</span>
+                ))}
+              </div>
+            </div>
+          )}
+          {Boolean(d['rationale']) && <RationaleBlock text={String(d['rationale'])} />}
+        </div>
+      )}
+
+      {entry.type === 'activity' && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-y-2">
+            <DetailRow label="Type" value={d['type']} />
+            <DetailRow label="Address" value={d['address']} />
+            <DetailRow label="Duration" value={d['duration']} />
+            <DetailRow label="Cost" value={d['cost']} />
+            <DetailRow label="From restaurant" value={d['distanceFromRestaurant']} />
+          </div>
+          {Boolean(d['notes']) && (
+            <p className="text-on-dim text-[12px] leading-relaxed">{String(d['notes'])}</p>
+          )}
+          {Boolean(d['optional']) && (
+            <div className="flex items-center gap-2 bg-surface-3 rounded-lg px-3 py-2">
+              <span className="text-on-dim text-[12px]">Optional — skip anytime without affecting the rest of the plan.</span>
+            </div>
+          )}
+        </div>
+      )}
+
+      {entry.type === 'ride' && (
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-y-2">
+            <DetailRow label="From" value={d['from']} />
+            <DetailRow label="To" value={d['to']} />
+            <DetailRow label="Duration" value={d['duration']} />
+            <DetailRow label="Vehicle" value={d['vehicle']} />
+            <DetailRow label="Provider" value={d['provider']} />
+            <DetailRow label="Cost" value={d['cost']} />
+          </div>
+          {Boolean(d['notes']) && (
+            <div className="border-l-2 border-accent/30 pl-3 py-1">
+              <p className="text-on-dim text-[12px]">{String(d['notes'])}</p>
+            </div>
+          )}
         </div>
       )}
 

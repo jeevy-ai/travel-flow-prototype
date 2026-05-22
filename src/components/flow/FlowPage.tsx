@@ -32,8 +32,8 @@ function localDateKey(iso: string): string {
 
 const DAY_LABELS: Record<string, { day: string; summary: string }> = {
   '2026-11-09': { day: 'Sun, Nov 9', summary: 'Day 0 — Departure from SFO' },
-  '2026-11-10': { day: 'Mon, Nov 10', summary: 'Day 1 — Web Summit opens' },
-  '2026-11-11': { day: 'Tue, Nov 11', summary: 'Day 2 — Web Summit' },
+  '2026-11-10': { day: 'Mon, Nov 10', summary: 'Day 1 — Web Summit opens · Dinner · Fado' },
+  '2026-11-11': { day: 'Tue, Nov 11', summary: 'Day 2 — Web Summit · Dinner · Rooftop' },
   '2026-11-12': { day: 'Wed, Nov 12', summary: 'Return to SFO' },
   'before-trip': { day: 'Before your trip', summary: 'Reminders' },
 }
@@ -100,6 +100,9 @@ const CONFIRM_STEPS = [
   { ids: ['flt_return'], label: 'Return flight · UA89 LIS → SFO' },
   { ids: ['hotel_main'], label: 'Marriott Lisbon · 2 nights' },
   { ids: ['WS2026-K01', 'WS2026-K02', 'WS2026-W07', 'WS2026-K08'], label: 'Conference sessions · 4 selected' },
+  { ids: ['ride_arrival', 'ride_day2_venue', 'ride_departure'], label: 'Rides · 3 transfers' },
+  { ids: ['restaurant_nov10', 'restaurant_nov11'], label: 'Restaurants · 2 dinners' },
+  { ids: ['activity_nov10', 'activity_nov11'], label: 'Evening activities · 2 nights' },
   { ids: ['reminders'], label: 'Packing & departure reminders' },
 ]
 

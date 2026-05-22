@@ -44,5 +44,8 @@ export const GRADIENT_FALLBACKS: Record<string, string> = {
   conference_venue: 'linear-gradient(135deg, #667EEA, #2D3748)',
   conference_session: 'linear-gradient(135deg, #38B2AC, #434FC0)',
   reminders: 'linear-gradient(135deg, #9AE6B4, #68D391)',
+  restaurant: 'linear-gradient(135deg, #F6AD55, #C05621)',
+  activity: 'linear-gradient(135deg, #B794F4, #553C9A)',
+  ride: 'linear-gradient(135deg, #4FD1C5, #2C7A7B)',
   default: 'linear-gradient(135deg, #6c7aff, #2D3748)',
 }
