@@ -1,39 +1,34 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
-import type { FlowState } from '../../hooks/useFlowState'
+import type { FlowEngine } from '../../hooks/useFlowEngine'
 import { VerbTag } from '../shared/VerbTag'
 import { PrefBadge } from '../shared/PrefBadge'
-import { MiniStrip } from '../ministrip/MiniStrip'
 import { dur, ease } from '../../tokens/motion'
-import fixture from '../../data/fixture.json'
 
-interface Props { flow: FlowState }
+interface Props { flow: FlowEngine }
 
 const alts = [
-  { name: 'Hyatt Centric Fisherman\'s Wharf', dist: '1.2 mi from venue', price: 349, note: 'No loyalty match' },
-  { name: 'W San Francisco', dist: '0.4 mi from venue', price: 489, note: 'Preferred brand ✓' },
+  { name: 'Bairro Alto Hotel', dist: '3.2km from venue', price: 420, note: 'Boutique — no loyalty match' },
+  { name: 'Tivoli Avenida Liberdade', dist: '5.1km from venue', price: 310, note: 'Marriott partner ✓' },
 ]
 
 export function Screen3HotelSelection({ flow }: Props) {
   const [booked, setBooked] = useState(false)
   const [flash, setFlash] = useState(false)
   const [showAlts, setShowAlts] = useState(false)
-  const hotel = fixture.hotel
-
-  const nights = Math.round(
-    (new Date(hotel.checkoutDate).getTime() - new Date(hotel.checkinDate).getTime()) / 86400000
-  )
+  const hotel = flow.data.hotel.result.payload
 
   const handleBook = () => {
     setFlash(true)
     setTimeout(() => {
       setFlash(false)
       setBooked(true)
+      flow.confirmEntry('hotel_main')
     }, 400)
   }
 
   return (
-    <div className="flex flex-col h-screen bg-surface-0">
+    <div className="flex flex-col h-full bg-surface-0">
       <div className="px-5 pt-10 pb-4 flex items-center justify-between">
         <div>
           <VerbTag verb="book_reservation" />
@@ -62,10 +57,10 @@ export function Screen3HotelSelection({ flow }: Props) {
             </div>
             <div className="absolute bottom-2 left-3 right-3 flex items-end justify-between">
               <span className="text-on-surface text-[11px] font-medium bg-surface-0/80 px-2 py-0.5 rounded-full">
-                {hotel.distanceToVenueMiles} mi from venue
+                {hotel.distanceToVenue}
               </span>
               <span className="text-on-surface text-[11px] bg-surface-0/80 px-2 py-0.5 rounded-full">
-                {hotel.loyaltyProgram} ✓
+                {hotel.chain} ✓
               </span>
             </div>
           </motion.div>
@@ -73,8 +68,8 @@ export function Screen3HotelSelection({ flow }: Props) {
           <div className="p-4">
             <div className="flex items-start justify-between mb-2">
               <div>
-                <h2 className="text-on-surface font-bold text-[16px]">{hotel.name}</h2>
-                <p className="text-on-dim text-[12px]">{hotel.address}</p>
+                <h2 className="text-on-surface font-bold text-[16px]">Marriott Lisbon</h2>
+                <p className="text-on-dim text-[12px]">Avenida dos Combatentes 45, Lisbon</p>
               </div>
               <div className="text-right">
                 <p className="text-on-surface font-mono font-bold text-[15px]">${hotel.pricePerNight}</p>
@@ -83,7 +78,7 @@ export function Screen3HotelSelection({ flow }: Props) {
             </div>
 
             <div className="flex flex-wrap gap-1.5 mb-4">
-              {['Marriott Bonvoy ✓', 'King bed ✓', 'Free Wi-Fi ✓'].map((label, i) => (
+              {['Bonvoy Platinum ✓', 'King room ✓', 'Free Wi-Fi ✓'].map((label, i) => (
                 <motion.div
                   key={label}
                   initial={{ scale: 0.8, opacity: 0 }}
@@ -97,13 +92,15 @@ export function Screen3HotelSelection({ flow }: Props) {
 
             <div className="grid grid-cols-2 gap-y-1.5 text-[12px] mb-4">
               <span className="text-on-dim">Check-in</span>
-              <span className="text-on-surface">{hotel.checkinDate}</span>
+              <span className="text-on-surface">Nov 10, 2026</span>
               <span className="text-on-dim">Check-out</span>
-              <span className="text-on-surface">{hotel.checkoutDate}</span>
+              <span className="text-on-surface">Nov 12, 2026</span>
               <span className="text-on-dim">Nights</span>
-              <span className="text-on-surface">{nights} nights</span>
+              <span className="text-on-surface">2 nights</span>
               <span className="text-on-dim">Total</span>
               <span className="text-on-surface font-mono font-medium">${hotel.totalPrice}</span>
+              <span className="text-on-dim">Cancel</span>
+              <span className="text-on-surface">{hotel.cancellationPolicy}</span>
             </div>
 
             {!booked ? (
@@ -118,7 +115,7 @@ export function Screen3HotelSelection({ flow }: Props) {
                 initial={{ scale: 0.95 }}
                 animate={{ scale: 1 }}
                 className="w-full bg-success/20 text-success text-[14px] font-semibold py-3 rounded-xl border border-success/30"
-                onClick={() => flow.advance(4, 1)}
+                onClick={() => flow.advanceChat(4, 1)}
               >
                 Booked ✓ — Continue
               </motion.button>
@@ -164,8 +161,6 @@ export function Screen3HotelSelection({ flow }: Props) {
           )}
         </AnimatePresence>
       </div>
-
-      <MiniStrip flow={flow} />
     </div>
   )
 }

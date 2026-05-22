@@ -1,11 +1,10 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import type { FlowState } from '../../hooks/useFlowState'
+import { useState } from 'react'
+import type { FlowEngine } from '../../hooks/useFlowEngine'
 import { VerbTag } from '../shared/VerbTag'
-import { MiniStrip } from '../ministrip/MiniStrip'
 import { stagger, dur, ease } from '../../tokens/motion'
-import fixture from '../../data/fixture.json'
 
-interface Props { flow: FlowState }
+interface Props { flow: FlowEngine }
 
 function Checkmark() {
   return (
@@ -25,33 +24,32 @@ function Checkmark() {
 }
 
 function fmtTime(iso: string) {
-  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Los_Angeles' })
+  return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Europe/Lisbon' })
 }
 
 export function Screen4Sessions({ flow }: Props) {
-  const sessions = fixture.sessions
-  const selected = flow.selectedSessions
+  const sessions = flow.data.sessions
+  const [selected, setSelected] = useState<Set<string>>(new Set(sessions.map(s => s.sessionId)))
 
-  const conflictedIds = new Set<string>()
-  sessions.forEach(s => {
-    if (!selected.has(s.id) || !s.conflictDetected) return
-    sessions.forEach(other => {
-      if (other.id === s.id || !selected.has(other.id)) return
-      const sStart = new Date(s.startAt).getTime()
-      const sEnd = new Date(s.endAt).getTime()
-      const oStart = new Date(other.startAt).getTime()
-      const oEnd = new Date(other.endAt).getTime()
-      if (sStart < oEnd && oStart < sEnd) {
-        conflictedIds.add(s.id)
-        conflictedIds.add(other.id)
-      }
+  const toggle = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
     })
-  })
+  }
 
-  const hasConflict = conflictedIds.size > 0
+  const hasConflict = selected.has('WS2026-K08')
+
+  const handleConfirm = () => {
+    sessions.forEach(s => {
+      if (selected.has(s.sessionId)) flow.confirmEntry(s.sessionId)
+    })
+    flow.advanceChat(5, 2)
+  }
 
   return (
-    <div className="flex flex-col h-screen bg-surface-0">
+    <div className="flex flex-col h-full bg-surface-0">
       <div className="px-5 pt-10 pb-4 flex items-center justify-between">
         <div>
           <VerbTag verb="schedule_event" />
@@ -71,7 +69,7 @@ export function Screen4Sessions({ flow }: Props) {
           >
             <span className="text-warning text-sm">⚠</span>
             <p className="text-warning text-[12px] leading-relaxed">
-              <span className="font-semibold">Conflict:</span> Two selected sessions overlap. Pick one.
+              <span className="font-semibold">Conflict:</span> K08 Closing Keynote overlaps with your All-Hands call. We'll resolve this next.
             </p>
           </motion.div>
         )}
@@ -79,13 +77,13 @@ export function Screen4Sessions({ flow }: Props) {
 
       <div className="flex-1 overflow-y-auto px-5 pb-4 flex flex-col gap-2">
         {sessions.map((session, i) => {
-          const isSelected = selected.has(session.id)
-          const isConflicted = hasConflict && conflictedIds.has(session.id)
+          const isSelected = selected.has(session.sessionId)
+          const isConflicted = session.conflictDetected && isSelected
 
           return (
             <motion.button
-              key={session.id}
-              onClick={() => flow.toggleSession(session.id)}
+              key={session.sessionId}
+              onClick={() => toggle(session.sessionId)}
               className={`w-full text-left bg-surface-1 rounded-2xl border p-4 transition-colors ${
                 isConflicted
                   ? 'border-warning/50'
@@ -101,7 +99,7 @@ export function Screen4Sessions({ flow }: Props) {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-0.5">
                     <p className="text-on-surface font-semibold text-[14px]">{session.title}</p>
-                    {session.jeevyRecommended && (
+                    {session.sessionId === 'WS2026-K01' && (
                       <motion.span
                         className="text-[11px]"
                         animate={{ scale: [1, 1.15, 1] }}
@@ -111,13 +109,13 @@ export function Screen4Sessions({ flow }: Props) {
                   </div>
                   <p className="text-on-dim text-[12px]">{session.speaker}</p>
                   <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-on-dim text-[11px]">{fmtTime(session.startAt)}</span>
+                    <span className="text-on-dim text-[11px]">{fmtTime(session.startIso)} WET</span>
                     <span className="text-border">·</span>
                     <span className="text-on-dim text-[11px]">{session.room}</span>
                     {isConflicted && (
                       <>
                         <span className="text-border">·</span>
-                        <span className="text-warning text-[11px]">overlap</span>
+                        <span className="text-warning text-[11px]">conflict</span>
                       </>
                     )}
                   </div>
@@ -136,23 +134,24 @@ export function Screen4Sessions({ flow }: Props) {
         })}
       </div>
 
-      <div className="px-5 pb-8 pt-4 border-t border-border bg-surface-0">
+      <div className="px-5 pb-8 pt-4 border-t border-border bg-surface-0 shrink-0">
         <div className="flex items-center justify-between mb-3">
           <span className="text-on-dim text-[13px]">{selected.size} selected</span>
-          {selected.size > 0 && !hasConflict && (
+          {hasConflict && (
+            <span className="text-warning text-[12px]">1 conflict to resolve</span>
+          )}
+          {!hasConflict && selected.size > 0 && (
             <span className="text-success text-[12px]">No conflicts ✓</span>
           )}
         </div>
         <button
-          onClick={() => flow.advance(5, 2)}
-          disabled={selected.size === 0 || hasConflict}
+          onClick={handleConfirm}
+          disabled={selected.size === 0}
           className="w-full bg-accent text-white text-[14px] font-semibold py-3.5 rounded-xl hover:bg-accent/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Confirm sessions
+          {hasConflict ? 'Confirm + resolve conflict →' : 'Confirm sessions'}
         </button>
       </div>
-
-      <MiniStrip flow={flow} />
     </div>
   )
 }

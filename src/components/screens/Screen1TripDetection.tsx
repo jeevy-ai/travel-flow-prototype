@@ -1,16 +1,16 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import type { FlowState } from '../../hooks/useFlowState'
+import type { FlowEngine } from '../../hooks/useFlowEngine'
 import { VerbTag } from '../shared/VerbTag'
 
-interface Props { flow: FlowState }
+interface Props { flow: FlowEngine }
 
 export function Screen1TripDetection({ flow }: Props) {
   const [dismissed, setDismissed] = useState(false)
 
   if (dismissed) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen gap-3 px-6 text-center">
+      <div className="flex flex-col items-center justify-center h-full gap-3 px-6 text-center">
         <p className="text-on-dim text-sm">Trip card dismissed.</p>
         <button onClick={() => setDismissed(false)} className="text-accent text-sm underline">
           Re-show card
@@ -20,7 +20,7 @@ export function Screen1TripDetection({ flow }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-surface-0">
+    <div className="flex flex-col h-full bg-surface-0">
       <div className="flex-1 flex flex-col items-center justify-center px-5 pb-6">
         <div className="mb-10">
           <span className="text-accent text-xl font-bold tracking-tight">jeevy</span>
@@ -48,21 +48,21 @@ export function Screen1TripDetection({ flow }: Props) {
             </div>
 
             <h1 className="text-on-surface text-[20px] font-bold tracking-tight leading-tight mb-1">
-              SaaStr Annual
+              Web Summit 2026
             </h1>
-            <p className="text-accent font-semibold text-sm mb-1">San Francisco</p>
+            <p className="text-accent font-semibold text-sm mb-1">Lisbon, Portugal</p>
 
             <div className="flex items-center gap-3 mb-5 flex-wrap">
-              <span className="text-on-dim text-[13px]">Jun 3–5</span>
+              <span className="text-on-dim text-[13px]">Nov 10–11</span>
               <span className="text-border">·</span>
-              <span className="text-on-dim text-[13px]">12 days out</span>
+              <span className="text-on-dim text-[13px]">172 days out</span>
               <span className="text-border">·</span>
               <span className="text-warning text-[13px] font-medium">Flight not booked</span>
             </div>
 
             <div className="flex gap-3">
               <button
-                onClick={() => flow.advance(2)}
+                onClick={() => flow.advanceChat(2)}
                 className="flex-1 bg-accent text-white text-[14px] font-semibold py-3 rounded-xl hover:bg-accent/90 transition-colors"
               >
                 Let's plan it
