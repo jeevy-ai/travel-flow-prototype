@@ -14,7 +14,7 @@ export function Screen6PackingList({ flow }: Props) {
   }
 
   return (
-    <div className="flex flex-col h-full bg-surface-0">
+    <div className="flex flex-col bg-surface-0">
       <div className="px-5 pt-10 pb-4 flex items-center justify-between">
         <div>
           <VerbTag verb="errand" />
@@ -23,7 +23,7 @@ export function Screen6PackingList({ flow }: Props) {
         <p className="text-on-dim text-[12px]">6 of 7</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-4 flex flex-col gap-3">
+      <div className="px-5 pb-4 flex flex-col gap-3">
         <p className="text-on-dim text-[12px]">Jeevy set these based on your departure time.</p>
 
         {reminders.map((r, i) => (
@@ -68,7 +68,7 @@ export function Screen6PackingList({ flow }: Props) {
         </motion.div>
       </div>
 
-      <div className="px-5 pb-8 pt-4 border-t border-border bg-surface-0 shrink-0">
+      <div className="px-5 pb-8 pt-4 border-t border-border bg-surface-0">
         <button
           onClick={handleConfirm}
           className="w-full bg-accent text-white text-[14px] font-semibold py-3.5 rounded-xl hover:bg-accent/90 transition-colors"

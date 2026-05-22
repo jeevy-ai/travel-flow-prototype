@@ -10,7 +10,7 @@ export function Screen7Itinerary({ flow }: Props) {
   const total = flow.totalCount
 
   return (
-    <div className="flex flex-col h-full bg-surface-0">
+    <div className="flex flex-col bg-surface-0">
       <div className="px-5 pt-10 pb-5">
         <p className="text-on-dim text-[11px] uppercase tracking-wider font-medium mb-1">Your itinerary</p>
         <motion.h1
@@ -30,7 +30,7 @@ export function Screen7Itinerary({ flow }: Props) {
         >Nov 9–12 · 4 days</motion.p>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-5 pb-4 flex flex-col gap-4">
+      <div className="px-5 pb-4 flex flex-col gap-4">
         <motion.div
           className="bg-success/10 border border-success/30 rounded-2xl px-4 py-4"
           initial={{ opacity: 0, scale: 0.95 }}
