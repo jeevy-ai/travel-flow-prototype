@@ -1,20 +1,10 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import type { TimelineEntry, FlowEngine, AlternativeOption } from '../../hooks/useFlowEngine'
+import type { TimelineEntry, FlowEngine, AlternativeOption, EntryType } from '../../hooks/useFlowEngine'
 import { ImageSlot } from '../timeline/ImageSlot'
 import { TimelineEntryExpanded } from '../timeline/TimelineEntryExpanded'
 
-const ENTRY_ICONS: Record<string, string> = {
-  flight_outbound: '✈',
-  flight_return: '✈',
-  hotel: '🏨',
-  conference_venue: '🎙',
-  conference_session: '📋',
-  reminders: '🔔',
-  restaurant: '🍽',
-  activity: '🌟',
-  ride: '🚗',
-}
+// ── Entry title ────────────────────────────────────────────────────────────────
 
 function entryTitle(entry: TimelineEntry): string {
   switch (entry.type) {
@@ -42,16 +32,91 @@ function formatTime(iso: string | null): string {
   return `${match[1]}:${match[2]}`
 }
 
-const SCREEN_FOR_ENTRY: Record<string, number> = {
-  flt_outbound: 2,
-  flt_return: 2,
-  hotel_main: 3,
-  'WS2026-K01': 4,
-  'WS2026-K02': 4,
-  'WS2026-K08': 4,
-  'WS2026-W07': 4,
-  reminders: 6,
+// ── Provider badge ─────────────────────────────────────────────────────────────
+
+const PROVIDER_CONFIG: Record<EntryType, { bg: string; label?: string; emoji?: string }> = {
+  ride:               { bg: '#1CC760', label: 'BOLT' },
+  restaurant:         { bg: '#C05621', emoji: '🍽' },
+  activity:           { bg: '#553C9A', emoji: '🌟' },
+  hotel:              { bg: '#C4956A', emoji: '🏨' },
+  flight_outbound:    { bg: '#2B6CB0', emoji: '✈' },
+  flight_return:      { bg: '#2B6CB0', emoji: '✈' },
+  conference_venue:   { bg: '#434FC0', emoji: '🎙' },
+  conference_session: { bg: '#38B2AC', emoji: '📋' },
+  reminders:          { bg: '#38A169', emoji: '🔔' },
 }
+
+function ProviderBadge({ entry }: { entry: TimelineEntry }) {
+  const cfg = PROVIDER_CONFIG[entry.type]
+  if (!cfg) return null
+  return (
+    <div
+      className="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center"
+      style={{ background: cfg.bg }}
+    >
+      {cfg.label
+        ? <span className="text-[9px] font-black text-white tracking-tight">{cfg.label}</span>
+        : <span className="text-[15px]">{cfg.emoji}</span>
+      }
+    </div>
+  )
+}
+
+// ── Info strip (static facts: time · duration · price) ────────────────────────
+
+function InfoStrip({ entry }: { entry: TimelineEntry }) {
+  const d = entry.data
+  const time = formatTime(entry.scheduledAt)
+  const items: string[] = []
+
+  switch (entry.type) {
+    case 'ride':
+      items.push(`🕗 ${time}`)
+      if (d['duration']) items.push(String(d['duration']))
+      if (d['cost']) items.push(String(d['cost']))
+      break
+    case 'restaurant':
+      items.push(`🕗 ${time}`)
+      if (d['priceRange']) items.push(String(d['priceRange']).split(' · ')[0])
+      if (d['distanceFromHotel']) items.push(String(d['distanceFromHotel']).split(' · ')[0])
+      break
+    case 'activity':
+      items.push(`🕗 ${time}`)
+      if (d['duration']) items.push(String(d['duration']))
+      if (d['cost']) items.push(String(d['cost']).split('+')[0].trim())
+      break
+    case 'hotel':
+      items.push('Nov 10–12 · 2 nights')
+      if (d['pricePerNight']) items.push(`$${d['pricePerNight']}/night`)
+      if (d['distanceToVenue']) items.push(String(d['distanceToVenue']))
+      break
+    case 'flight_outbound':
+    case 'flight_return':
+      items.push(`🕗 ${time}`)
+      if (d['duration']) items.push(String(d['duration']))
+      if (d['fare']) items.push(String(d['fare']))
+      break
+    case 'conference_session':
+      items.push(`🕗 ${time}`)
+      if (d['room']) items.push(String(d['room']))
+      break
+    default:
+      items.push(`🕗 ${time}`)
+  }
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      {items.filter(Boolean).map((item, i) => (
+        <span key={i} className="text-on-dim text-[11px] flex items-center">
+          {i > 0 && <span className="text-on-dim/30 mx-1">·</span>}
+          {item}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+// ── Status chip ────────────────────────────────────────────────────────────────
 
 function StatusChip({ entry }: { entry: TimelineEntry }) {
   switch (entry.state) {
@@ -88,7 +153,8 @@ function StatusChip({ entry }: { entry: TimelineEntry }) {
       )
     case 'custom-pending':
       return (
-        <span className="text-[10px] font-semibold text-[#c084fc] bg-[#c084fc]/10 px-2 py-0.5 rounded-full whitespace-nowrap max-w-[160px] truncate" title={entry.customOverrideText}>
+        <span className="text-[10px] font-semibold text-[#c084fc] bg-[#c084fc]/10 px-2 py-0.5 rounded-full whitespace-nowrap max-w-[160px] truncate"
+          title={entry.customOverrideText}>
           ✎ {entry.customOverrideText || 'Custom option'}
         </span>
       )
@@ -97,7 +163,19 @@ function StatusChip({ entry }: { entry: TimelineEntry }) {
   }
 }
 
-// ── Dismiss sheet ─────────────────────────────────────────────────────────────
+const SCREEN_FOR_ENTRY: Record<string, number> = {
+  flt_outbound: 2,
+  flt_return: 2,
+  hotel_main: 3,
+  'WS2026-K01': 4,
+  'WS2026-K02': 4,
+  'WS2026-K08': 4,
+  'WS2026-W07': 4,
+  reminders: 6,
+}
+
+// ── Dismiss sheet ──────────────────────────────────────────────────────────────
+
 interface DismissSheetProps {
   onSelf: () => void
   onCustom: (text: string) => void
@@ -238,6 +316,8 @@ function DismissSheet({ onSelf, onCustom, onEnrich, onClose, alternatives }: Dis
   )
 }
 
+// ── CompactEntryRow ────────────────────────────────────────────────────────────
+
 interface Props {
   entry: TimelineEntry
   flow: FlowEngine
@@ -254,27 +334,21 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
   const isDismissed = entry.state === 'self-managed' || entry.state === 'custom-pending'
   const hasConflict = entry.id === 'WS2026-K08' && Boolean(entry.data['conflictDetected']) && !flow.conflictResolved
   const swapScreen = SCREEN_FOR_ENTRY[entry.id]
-  const time = formatTime(entry.scheduledAt)
   const canDismiss = !isDismissed && !flow.confirmingAll && !flow.allConfirmed
 
-  const handleSelf = () => {
-    flow.dismissEntry(entry.id, 'self')
-    setDismissOpen(false)
-  }
-
-  const handleCustom = (text: string) => {
-    flow.dismissEntry(entry.id, 'custom', text)
-    setDismissOpen(false)
-  }
-
-  const handleEnrich = (alt: AlternativeOption) => {
-    flow.enrichEntry(entry.id, alt)
-    setDismissOpen(false)
-  }
+  const handleSelf = () => { flow.dismissEntry(entry.id, 'self'); setDismissOpen(false) }
+  const handleCustom = (text: string) => { flow.dismissEntry(entry.id, 'custom', text); setDismissOpen(false) }
+  const handleEnrich = (alt: AlternativeOption) => { flow.enrichEntry(entry.id, alt); setDismissOpen(false) }
 
   const displayThumb = entry.enrichedWith?.imageThumb ?? entry.imageThumb
   const displayHero = entry.enrichedWith?.imageHero ?? entry.enrichedWith?.imageThumb ?? entry.imageHero ?? entry.imageThumb
-  const displayTagline = entry.enrichedWith?.tagline ?? entry.tagline
+  const displayGradient = entry.enrichedWith?.gradientFallback ?? entry.gradientFallback
+
+  const handleRowClick = () => {
+    if (dismissOpen) return
+    if (isActive) onDeactivate?.()
+    else onActivate?.(entry.id)
+  }
 
   return (
     <motion.div
@@ -284,53 +358,39 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
       transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1], delay: staggerIndex * 0.04 }}
     >
       <div
-        className={`rounded-xl overflow-hidden border bg-surface-1 transition-colors duration-300 ${
+        className={`rounded-xl overflow-hidden border bg-surface-1 flex flex-col transition-colors duration-300 ${
           isDismissed ? 'border-border opacity-60' :
           isActive ? 'border-accent/60 ring-1 ring-accent/20' :
           isConfirmed ? 'border-success/30' :
           hasConflict ? 'border-warning/50' : 'border-border'
         }`}
       >
-        {/* Compact row — ~80px tall */}
-        <div
-          className="flex items-center gap-3 px-3 py-2.5 cursor-pointer"
-          onClick={() => {
-            if (dismissOpen) return
-            if (isActive) {
-              onDeactivate?.()
-            } else {
-              onActivate?.(entry.id)
-            }
-          }}
-        >
-          {/* Time gutter */}
-          <div className="w-11 shrink-0 text-right">
-            <span className="text-on-dim text-[11px] font-mono leading-tight block">{time}</span>
-            <span className="text-on-dim/50 text-[14px]">{ENTRY_ICONS[entry.type] ?? '📍'}</span>
-          </div>
-
-          {/* Thumbnail */}
-          <div className={`w-[72px] h-[72px] shrink-0 rounded-lg overflow-hidden ${isDismissed ? 'grayscale' : ''}`}>
-            <ImageSlot
-              src={displayThumb}
-              alt={entryTitle(entry)}
-              gradient={entry.enrichedWith?.gradientFallback ?? entry.gradientFallback}
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2">
-              <p className={`font-semibold text-[13px] leading-tight line-clamp-2 ${isDismissed ? 'text-on-dim line-through' : 'text-on-surface'}`}>
+        {/* Main row — info left, image right */}
+        <div className="flex cursor-pointer min-h-[80px]" onClick={handleRowClick}>
+          {/* Left: provider badge + title + info strip + actions */}
+          <div className="flex-1 min-w-0 px-3 py-2.5 flex flex-col justify-between gap-1">
+            {/* Title row */}
+            <div className="flex items-start gap-2">
+              <ProviderBadge entry={entry} />
+              <p className={`flex-1 font-semibold text-[13px] leading-tight line-clamp-2 ${isDismissed ? 'text-on-dim line-through' : 'text-on-surface'}`}>
                 {entry.enrichedWith?.name ?? entryTitle(entry)}
               </p>
               {hasConflict && (
-                <span className="text-warning text-[10px] font-bold shrink-0">⚠ Conflict</span>
+                <span className="text-warning text-[10px] font-bold shrink-0">⚠</span>
+              )}
+              {!isDismissed && (
+                <span
+                  className="text-on-dim text-[18px] shrink-0 transition-transform duration-200"
+                  style={{ transform: isActive ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                >›</span>
               )}
             </div>
-            <p className="text-on-dim text-[11px] mt-0.5 truncate">{displayTagline}</p>
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+
+            {/* Info strip */}
+            <InfoStrip entry={entry} />
+
+            {/* Status + action buttons */}
+            <div className="flex items-center gap-2 flex-wrap">
               <StatusChip entry={entry} />
               {isProposed && swapScreen && !flow.confirmingAll && !flow.allConfirmed && (
                 <button
@@ -369,15 +429,15 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
             </div>
           </div>
 
-          {/* Expand chevron */}
-          {!isDismissed && (
-            <span
-              className="text-on-dim text-[18px] shrink-0 transition-transform duration-200"
-              style={{ transform: isActive ? 'rotate(90deg)' : 'rotate(0deg)' }}
-            >
-              ›
-            </span>
-          )}
+          {/* Right: image panel */}
+          <div className={`w-[88px] shrink-0 self-stretch ${isDismissed ? 'grayscale opacity-50' : ''}`}>
+            <ImageSlot
+              src={displayThumb}
+              alt={entry.enrichedWith?.name ?? entryTitle(entry)}
+              gradient={displayGradient}
+              className="w-full h-full"
+            />
+          </div>
         </div>
 
         {/* Dismiss sheet */}
@@ -393,7 +453,7 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
           )}
         </AnimatePresence>
 
-        {/* Expanded detail — full hero + accordion */}
+        {/* Expanded detail — hero + accordion */}
         <AnimatePresence>
           {isActive && !isDismissed && (
             <>
@@ -408,7 +468,7 @@ export function CompactEntryRow({ entry, flow, staggerIndex, isActive = false, o
                   <ImageSlot
                     src={displayHero}
                     alt={entry.enrichedWith?.name ?? entryTitle(entry)}
-                    gradient={entry.enrichedWith?.gradientFallback ?? entry.gradientFallback}
+                    gradient={displayGradient}
                     className="w-full h-full"
                   />
                   {hasConflict && !flow.conflictResolved && (

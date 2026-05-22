@@ -40,6 +40,7 @@ export type TimelineEntry = {
   customOverrideText?: string
   alternatives?: AlternativeOption[]
   enrichedWith?: AlternativeOption
+  dishImages?: string[]
 }
 
 function makeEntries(): TimelineEntry[] {
@@ -194,8 +195,8 @@ function makeEntries(): TimelineEntry[] {
       type: 'ride',
       state: 'proposed',
       scheduledAt: '2026-11-10T17:30:00+00:00',
-      imageThumb: null,
-      imageHero: null,
+      imageThumb: '/fixture-images/ride-executive-sedan.webp',
+      imageHero: '/fixture-images/ride-executive-sedan.webp',
       gradientFallback: GRADIENT_FALLBACKS['ride'],
       tagline: 'LIS Airport → Marriott · ~25 min · est. €35',
       ghostHeadline: 'Airport transfer',
@@ -215,8 +216,8 @@ function makeEntries(): TimelineEntry[] {
       type: 'ride',
       state: 'proposed',
       scheduledAt: '2026-11-11T08:15:00+00:00',
-      imageThumb: null,
-      imageHero: null,
+      imageThumb: '/fixture-images/ride-executive-sedan.webp',
+      imageHero: '/fixture-images/ride-executive-sedan.webp',
       gradientFallback: GRADIENT_FALLBACKS['ride'],
       tagline: 'Marriott → Altice Arena · ~15 min · est. €18',
       ghostHeadline: 'Morning transfer to venue',
@@ -236,8 +237,8 @@ function makeEntries(): TimelineEntry[] {
       type: 'ride',
       state: 'proposed',
       scheduledAt: '2026-11-12T07:00:00+00:00',
-      imageThumb: null,
-      imageHero: null,
+      imageThumb: '/fixture-images/ride-executive-sedan.webp',
+      imageHero: '/fixture-images/ride-executive-sedan.webp',
       gradientFallback: GRADIENT_FALLBACKS['ride'],
       tagline: 'Marriott → LIS Airport · ~25 min · est. €35',
       ghostHeadline: 'Departure transfer',
@@ -258,9 +259,14 @@ function makeEntries(): TimelineEntry[] {
       type: 'restaurant',
       state: 'proposed',
       scheduledAt: '2026-11-10T20:00:00+00:00',
-      imageThumb: null,
-      imageHero: null,
+      imageThumb: '/fixture-images/restaurant-dinner-lisbon.webp',
+      imageHero: '/fixture-images/restaurant-dinner-lisbon.webp',
       gradientFallback: GRADIENT_FALLBACKS['restaurant'],
+      dishImages: [
+        '/fixture-images/restaurant-dishes-solar.webp',
+        '/fixture-images/restaurant-dishes-cod.webp',
+        '/fixture-images/restaurant-dinner-lisbon.webp',
+      ],
       tagline: 'Solar dos Presuntos · Traditional Portuguese · Rua das Portas de Santo Antão',
       alternatives: [
         {
@@ -310,9 +316,14 @@ function makeEntries(): TimelineEntry[] {
       type: 'restaurant',
       state: 'proposed',
       scheduledAt: '2026-11-11T20:30:00+00:00',
-      imageThumb: null,
-      imageHero: null,
+      imageThumb: '/fixture-images/restaurant-dishes-seafood.webp',
+      imageHero: '/fixture-images/restaurant-dishes-seafood.webp',
       gradientFallback: GRADIENT_FALLBACKS['restaurant'],
+      dishImages: [
+        '/fixture-images/restaurant-dishes-seafood.webp',
+        '/fixture-images/restaurant-dishes-solar.webp',
+        '/fixture-images/restaurant-dinner-lisbon.webp',
+      ],
       tagline: 'Cervejaria Ramiro · Premium Seafood · Av. Almirante Reis',
       alternatives: [
         {
@@ -363,8 +374,8 @@ function makeEntries(): TimelineEntry[] {
       type: 'activity',
       state: 'proposed',
       scheduledAt: '2026-11-10T22:00:00+00:00',
-      imageThumb: null,
-      imageHero: null,
+      imageThumb: '/fixture-images/activity-fado-lisbon.webp',
+      imageHero: '/fixture-images/activity-club-interior.webp',
       gradientFallback: GRADIENT_FALLBACKS['activity'],
       tagline: 'Clube de Fado · Fado show · São Miguel, Alfama',
       alternatives: [
@@ -414,8 +425,8 @@ function makeEntries(): TimelineEntry[] {
       type: 'activity',
       state: 'proposed',
       scheduledAt: '2026-11-11T22:30:00+00:00',
-      imageThumb: null,
-      imageHero: null,
+      imageThumb: '/fixture-images/activity-rooftop-lisbon.webp',
+      imageHero: '/fixture-images/activity-rooftop-lisbon.webp',
       gradientFallback: GRADIENT_FALLBACKS['activity'],
       tagline: 'PARK Bar · Rooftop drinks · Calçada do Combro',
       alternatives: [

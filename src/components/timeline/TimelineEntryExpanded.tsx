@@ -237,6 +237,19 @@ export function TimelineEntryExpanded({ entry, onCollapse }: Props) {
 
       {entry.type === 'restaurant' && (
         <div className="space-y-3">
+          {/* Dish photo strip */}
+          {Array.isArray(entry.dishImages) && entry.dishImages.length > 0 && (
+            <div>
+              <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide mb-2">Signature dishes</p>
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4 pb-1">
+                {(entry.dishImages as string[]).map((src, i) => (
+                  <div key={i} className="w-24 h-24 shrink-0 rounded-xl overflow-hidden bg-surface-3">
+                    <img src={src} alt="Dish" loading="lazy" className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-y-2">
             <DetailRow label="Cuisine" value={d['cuisine']} />
             <DetailRow label="Address" value={d['address']} />
