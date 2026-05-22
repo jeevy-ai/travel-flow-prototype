@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFlowEngine } from '../../hooks/useFlowEngine'
 import type { TimelineEntry } from '../../hooks/useFlowEngine'
 import { AppHeader } from '../layout/AppHeader'
+import { DateSidebar } from '../layout/DateSidebar'
+import { TripMap } from '../map/TripMap'
 import { CompactEntryRow } from './CompactEntryRow'
 import { Screen2FlightSelection } from '../screens/Screen2FlightSelection'
 import { Screen3HotelSelection } from '../screens/Screen3HotelSelection'
@@ -12,21 +14,9 @@ import { Screen6PackingList } from '../screens/Screen6PackingList'
 
 // ---- date-grouping helpers ----
 
-/** Extract the local date string (YYYY-MM-DD) from an ISO datetime, respecting the embedded offset */
 function localDateKey(iso: string): string {
-  // e.g. "2026-11-09T22:10:00-08:00" → date part in LOCAL time at offset
-  // "2026-11-10T15:00:00+00:00" → "2026-11-10"
-  // Parse using Date and apply the offset stored in the string
   const match = iso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})([+-]\d{2}:\d{2}|Z)/)
-  if (match) {
-    // For non-UTC offsets, reconstruct local date
-    const datePart = match[1]
-    const offsetStr = match[5]
-    if (offsetStr === 'Z' || offsetStr === '+00:00') return datePart
-    // Negative offset (e.g. -08:00) means local time is BEHIND UTC, so local date stays same
-    // We just return the date portion as written (it represents the local departure date)
-    return datePart
-  }
+  if (match) return match[1]
   return iso.slice(0, 10)
 }
 
@@ -57,7 +47,6 @@ function groupByDate(entries: TimelineEntry[]): DayGroup[] {
     .map(([dateKey, groupEntries]) => ({
       dateKey,
       label: DAY_LABELS[dateKey] ?? { day: dateKey, summary: '' },
-      // Sort entries within each day by scheduled time
       entries: [...groupEntries].sort((a, b) => {
         if (!a.scheduledAt) return 1
         if (!b.scheduledAt) return -1
@@ -109,6 +98,18 @@ const CONFIRM_STEPS = [
 export function FlowPage() {
   const flow = useFlowEngine()
   const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [showMap, setShowMap] = useState(false)
+  const [activeDateKey, setActiveDateKey] = useState<string>('2026-11-09')
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+
+  const groups = groupByDate(flow.entries)
+  const dayItems = groups.map(g => ({
+    dateKey: g.dateKey,
+    shortLabel: g.label.day,
+    dotLabel: g.dateKey,
+    entryCount: g.entries.length,
+  }))
 
   const hasConflict = flow.entries.some(
     e => e.id === 'WS2026-K08' && Boolean(e.data['conflictDetected'])
@@ -121,144 +122,258 @@ export function FlowPage() {
     flow.confirmAll(allEntryIds)
   }
 
+  // Scroll to a day section
+  const scrollToDay = useCallback((dateKey: string) => {
+    const el = sectionRefs.current.get(dateKey)
+    if (el && scrollRef.current) {
+      const parent = scrollRef.current
+      const top = el.offsetTop - 110 // account for headers
+      parent.scrollTo({ top, behavior: 'smooth' })
+    }
+    setActiveDateKey(dateKey)
+  }, [])
+
+  // IntersectionObserver to track active day as user scrolls
+  useEffect(() => {
+    const scrollEl = scrollRef.current
+    if (!scrollEl) return
+
+    const observer = new IntersectionObserver(
+      entries => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const key = entry.target.getAttribute('data-date-key')
+            if (key) setActiveDateKey(key)
+          }
+        }
+      },
+      { root: scrollEl, rootMargin: '-30% 0px -60% 0px', threshold: 0 }
+    )
+
+    sectionRefs.current.forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [groups.length])
+
   return (
     <div className="flex flex-col h-screen bg-surface-0 overflow-hidden">
       <AppHeader confirmedCount={flow.confirmedCount} totalCount={flow.totalCount} />
 
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-2xl mx-auto pb-40">
+      {/* Mobile horizontal date strip */}
+      <div className="md:hidden">
+        <DateSidebar
+          days={dayItems}
+          activeDateKey={activeDateKey}
+          onSelect={scrollToDay}
+          variant="horizontal"
+        />
+      </div>
 
-          {/* Trip hero header */}
-          <motion.div
-            className="px-4 pt-5 pb-3"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {/* Destination + title */}
-            <div className="mb-3">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-accent text-[11px] font-bold tracking-widest uppercase">Jeevy arranged</span>
-              </div>
-              <h1 className="text-on-surface font-bold text-[22px] leading-tight tracking-tight">
-                Web Summit 2026
-              </h1>
-              <p className="text-on-dim text-[13px] mt-0.5">Lisbon, Portugal · Nov 9–12</p>
-            </div>
+      {/* Body: sidebar + content + map */}
+      <div className="flex flex-1 overflow-hidden">
 
-            {/* Trip summary strip */}
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
-              {[
-                { icon: '✈', label: 'SFO → LIS', sub: 'Non-stop · Business' },
-                { icon: '🏨', label: '2 nights', sub: 'Marriott Bonvoy' },
-                { icon: '🎙', label: '4 sessions', sub: 'Web Summit' },
-                { icon: '💰', label: '$7,058', sub: 'est. total' },
-                { icon: '⭐', label: 'Platinum', sub: 'Status applied' },
-              ].map((stat) => (
-                <div
-                  key={stat.label}
-                  className="shrink-0 bg-surface-1 border border-border rounded-xl px-3 py-2 min-w-[96px]"
-                >
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <span className="text-[13px]">{stat.icon}</span>
-                    <span className="text-on-surface text-[12px] font-semibold">{stat.label}</span>
-                  </div>
-                  <p className="text-on-dim text-[10px]">{stat.sub}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Jeevy note */}
-            <div className="flex items-start gap-2 mt-3 bg-accent/8 border border-accent/20 rounded-xl px-3 py-2.5">
-              <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-px">
-                <span className="text-accent text-[10px] font-bold">J</span>
-              </div>
-              <p className="text-on-dim text-[11px] leading-relaxed">
-                Picked using your Delta Platinum + Marriott Bonvoy status. Swap anything, then hit <strong className="text-on-surface">Confirm trip</strong> to book in one go.
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Conflict banner */}
-          <AnimatePresence>
-            {hasConflict && (
-              <motion.div
-                className="px-4 py-2"
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-              >
-                <div className="bg-warning/10 border border-warning/30 rounded-xl px-4 py-3 flex items-start gap-2">
-                  <span className="text-warning text-sm">⚠</span>
-                  <p className="text-warning text-[12px] leading-relaxed">
-                    <span className="font-semibold">1 schedule overlap</span> — K08 Closing Keynote conflicts with your All-Hands call.{' '}
-                    <button
-                      onClick={() => flow.startEditScreen(5)}
-                      className="underline font-semibold hover:no-underline"
-                    >
-                      Resolve →
-                    </button>
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Date-grouped timeline entries */}
-          <div className="px-4 pt-2">
-            {groupByDate(flow.entries).map((group, groupIdx) => {
-              const baseIndex = flow.entries.findIndex(e => e.id === group.entries[0].id)
-              return (
-                <div key={group.dateKey} className={groupIdx > 0 ? 'mt-6' : ''}>
-                  {/* Sticky day header */}
-                  <div className="sticky top-0 z-10 bg-surface-0/95 backdrop-blur-sm pb-2 pt-1.5 -mx-4 px-4">
-                    <div className="flex items-baseline gap-2.5">
-                      <span className="text-on-surface font-bold text-[15px] tracking-tight">{group.label.day}</span>
-                      <span className="text-on-dim/70 text-[11px] font-medium tracking-wide uppercase">{group.label.summary}</span>
-                    </div>
-                    <div className="mt-1.5 h-px bg-gradient-to-r from-accent/40 via-border to-transparent" />
-                  </div>
-                  {/* Compact rows for this day */}
-                  <div className="space-y-2 mt-2">
-                    {group.entries.map((entry, i) => (
-                      <CompactEntryRow
-                        key={entry.id}
-                        entry={entry}
-                        flow={flow}
-                        staggerIndex={baseIndex + i}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Post-confirm success */}
-          <AnimatePresence>
-            {flow.allConfirmed && (
-              <motion.div
-                className="px-4 mt-6"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 24 }}
-              >
-                <div className="bg-success/10 border border-success/30 rounded-2xl p-4 text-center mb-4">
-                  <p className="text-success font-bold text-[17px]">Trip confirmed ✓</p>
-                  <p className="text-on-dim text-[12px] mt-0.5">All bookings placed · Calendar invites sent</p>
-                </div>
-                <a
-                  href="#/itinerary/ws2026/day-of"
-                  className="block w-full text-center bg-accent text-white font-semibold text-[14px] py-3.5 rounded-xl hover:bg-accent/90 transition-colors"
-                >
-                  View day-of plan →
-                </a>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {/* Left date sidebar — desktop only */}
+        <div className="hidden md:flex w-14 lg:w-16 shrink-0 flex-col border-r border-border bg-surface-0 overflow-y-auto">
+          <DateSidebar
+            days={dayItems}
+            activeDateKey={activeDateKey}
+            onSelect={scrollToDay}
+            variant="vertical"
+          />
         </div>
-      </main>
+
+        {/* Main scrollable content */}
+        <main
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto"
+        >
+          <div className="max-w-2xl mx-auto pb-40">
+
+            {/* Trip hero header */}
+            <motion.div
+              className="px-4 pt-5 pb-3"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="mb-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-accent text-[11px] font-bold tracking-widest uppercase">Jeevy arranged</span>
+                </div>
+                <h1 className="text-on-surface font-bold text-[22px] leading-tight tracking-tight">
+                  Web Summit 2026
+                </h1>
+                <p className="text-on-dim text-[13px] mt-0.5">Lisbon, Portugal · Nov 9–12</p>
+              </div>
+
+              {/* Trip summary strip */}
+              <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
+                {[
+                  { icon: '✈', label: 'SFO → LIS', sub: 'Non-stop · Business' },
+                  { icon: '🏨', label: '2 nights', sub: 'Marriott Bonvoy' },
+                  { icon: '🎙', label: '4 sessions', sub: 'Web Summit' },
+                  { icon: '💰', label: '$7,058', sub: 'est. total' },
+                  { icon: '⭐', label: 'Platinum', sub: 'Status applied' },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="shrink-0 bg-surface-1 border border-border rounded-xl px-3 py-2 min-w-[96px]"
+                  >
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className="text-[13px]">{stat.icon}</span>
+                      <span className="text-on-surface text-[12px] font-semibold">{stat.label}</span>
+                    </div>
+                    <p className="text-on-dim text-[10px]">{stat.sub}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Jeevy note */}
+              <div className="flex items-start gap-2 mt-3 bg-accent/8 border border-accent/20 rounded-xl px-3 py-2.5">
+                <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-px">
+                  <span className="text-accent text-[10px] font-bold">J</span>
+                </div>
+                <p className="text-on-dim text-[11px] leading-relaxed">
+                  Picked using your Delta Platinum + Marriott Bonvoy status. Swap anything, then hit <strong className="text-on-surface">Confirm trip</strong> to book in one go.
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Conflict banner */}
+            <AnimatePresence>
+              {hasConflict && (
+                <motion.div
+                  className="px-4 py-2"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                >
+                  <div className="bg-warning/10 border border-warning/30 rounded-xl px-4 py-3 flex items-start gap-2">
+                    <span className="text-warning text-sm">⚠</span>
+                    <p className="text-warning text-[12px] leading-relaxed">
+                      <span className="font-semibold">1 schedule overlap</span> — K08 Closing Keynote conflicts with your All-Hands call.{' '}
+                      <button
+                        onClick={() => flow.startEditScreen(5)}
+                        className="underline font-semibold hover:no-underline"
+                      >
+                        Resolve →
+                      </button>
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Date-grouped timeline entries */}
+            <div className="px-4 pt-2">
+              {groups.map((group, groupIdx) => {
+                const baseIndex = flow.entries.findIndex(e => e.id === group.entries[0].id)
+                return (
+                  <div
+                    key={group.dateKey}
+                    className={groupIdx > 0 ? 'mt-6' : ''}
+                    ref={el => {
+                      if (el) sectionRefs.current.set(group.dateKey, el)
+                      else sectionRefs.current.delete(group.dateKey)
+                    }}
+                    data-date-key={group.dateKey}
+                  >
+                    {/* Sticky day header */}
+                    <div className="sticky top-0 z-10 bg-surface-0/95 backdrop-blur-sm pb-2 pt-1.5 -mx-4 px-4">
+                      <div className="flex items-baseline gap-2.5">
+                        <span className="text-on-surface font-bold text-[15px] tracking-tight">{group.label.day}</span>
+                        <span className="text-on-dim/70 text-[11px] font-medium tracking-wide uppercase">{group.label.summary}</span>
+                      </div>
+                      <div className="mt-1.5 h-px bg-gradient-to-r from-accent/40 via-border to-transparent" />
+                    </div>
+                    {/* Compact rows for this day */}
+                    <div className="space-y-2 mt-2">
+                      {group.entries.map((entry, i) => (
+                        <CompactEntryRow
+                          key={entry.id}
+                          entry={entry}
+                          flow={flow}
+                          staggerIndex={baseIndex + i}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Post-confirm success */}
+            <AnimatePresence>
+              {flow.allConfirmed && (
+                <motion.div
+                  className="px-4 mt-6"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 24 }}
+                >
+                  <div className="bg-success/10 border border-success/30 rounded-2xl p-4 text-center mb-4">
+                    <p className="text-success font-bold text-[17px]">Trip confirmed ✓</p>
+                    <p className="text-on-dim text-[12px] mt-0.5">All bookings placed · Calendar invites sent</p>
+                  </div>
+                  <a
+                    href="#/itinerary/ws2026/day-of"
+                    className="block w-full text-center bg-accent text-white font-semibold text-[14px] py-3.5 rounded-xl hover:bg-accent/90 transition-colors"
+                  >
+                    View day-of plan →
+                  </a>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </main>
+
+        {/* Right map panel — large desktop only (lg+) */}
+        <div className="hidden lg:block w-[360px] xl:w-[420px] shrink-0 border-l border-border relative">
+          <TripMap className="w-full h-full" />
+          {/* Map label */}
+          <div className="absolute top-3 left-3 bg-surface-0/80 backdrop-blur-sm border border-border rounded-lg px-2 py-1 pointer-events-none">
+            <p className="text-on-surface text-[11px] font-semibold">Lisbon · Nov 2026</p>
+            <p className="text-on-dim text-[10px]">7 locations pinned</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile map toggle button */}
+      <div className="lg:hidden fixed bottom-20 right-4 z-25">
+        <button
+          onClick={() => setShowMap(v => !v)}
+          className="bg-surface-1 border border-border text-on-surface text-[12px] font-semibold px-3 py-2 rounded-full shadow-lg flex items-center gap-1.5"
+        >
+          🗺 {showMap ? 'Hide map' : 'Map'}
+        </button>
+      </div>
+
+      {/* Mobile map overlay */}
+      <AnimatePresence>
+        {showMap && (
+          <motion.div
+            className="lg:hidden fixed inset-0 z-30 bg-black/60 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowMap(false)}
+          >
+            <motion.div
+              className="absolute bottom-0 left-0 right-0 h-[60vh] rounded-t-3xl overflow-hidden border-t border-border"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="absolute top-3 left-0 right-0 flex justify-center z-10 pointer-events-none">
+                <div className="w-10 h-1 rounded-full bg-white/20" />
+              </div>
+              <TripMap className="w-full h-full" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Confirm-in-progress overlay */}
       <AnimatePresence>
