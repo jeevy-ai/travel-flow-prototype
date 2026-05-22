@@ -52,13 +52,17 @@ function groupByDate(entries: TimelineEntry[]): DayGroup[] {
     group.push(entry)
     map.set(key, group)
   }
-  // Sort by date key
   return Array.from(map.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([dateKey, groupEntries]) => ({
       dateKey,
       label: DAY_LABELS[dateKey] ?? { day: dateKey, summary: '' },
-      entries: groupEntries,
+      // Sort entries within each day by scheduled time
+      entries: [...groupEntries].sort((a, b) => {
+        if (!a.scheduledAt) return 1
+        if (!b.scheduledAt) return -1
+        return new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime()
+      }),
     }))
 }
 
@@ -121,25 +125,54 @@ export function FlowPage() {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto pb-40">
 
-          {/* Jeevy intro */}
+          {/* Trip hero header */}
           <motion.div
-            className="px-4 pt-6 pb-2"
-            initial={{ opacity: 0, y: 8 }}
+            className="px-4 pt-5 pb-3"
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="bg-surface-1 rounded-2xl border border-border p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-accent text-[14px] font-bold">J</span>
-                </div>
-                <div>
-                  <p className="text-on-surface font-semibold text-[14px] mb-0.5">Jeevy arranged your Web Summit trip</p>
-                  <p className="text-on-dim text-[12px] leading-relaxed">
-                    Here's your full plan — flights, hotel, and sessions picked using your Platinum status and the conference schedule. Swap anything, then hit <strong className="text-on-surface">Confirm trip</strong> to book everything at once.
-                  </p>
-                </div>
+            {/* Destination + title */}
+            <div className="mb-3">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-accent text-[11px] font-bold tracking-widest uppercase">Jeevy arranged</span>
               </div>
+              <h1 className="text-on-surface font-bold text-[22px] leading-tight tracking-tight">
+                Web Summit 2026
+              </h1>
+              <p className="text-on-dim text-[13px] mt-0.5">Lisbon, Portugal · Nov 9–12</p>
+            </div>
+
+            {/* Trip summary strip */}
+            <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
+              {[
+                { icon: '✈', label: 'SFO → LIS', sub: 'Non-stop · Business' },
+                { icon: '🏨', label: '2 nights', sub: 'Marriott Bonvoy' },
+                { icon: '🎙', label: '4 sessions', sub: 'Web Summit' },
+                { icon: '💰', label: '$7,058', sub: 'est. total' },
+                { icon: '⭐', label: 'Platinum', sub: 'Status applied' },
+              ].map((stat) => (
+                <div
+                  key={stat.label}
+                  className="shrink-0 bg-surface-1 border border-border rounded-xl px-3 py-2 min-w-[96px]"
+                >
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="text-[13px]">{stat.icon}</span>
+                    <span className="text-on-surface text-[12px] font-semibold">{stat.label}</span>
+                  </div>
+                  <p className="text-on-dim text-[10px]">{stat.sub}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Jeevy note */}
+            <div className="flex items-start gap-2 mt-3 bg-accent/8 border border-accent/20 rounded-xl px-3 py-2.5">
+              <div className="w-5 h-5 rounded-full bg-accent/20 flex items-center justify-center shrink-0 mt-px">
+                <span className="text-accent text-[10px] font-bold">J</span>
+              </div>
+              <p className="text-on-dim text-[11px] leading-relaxed">
+                Picked using your Delta Platinum + Marriott Bonvoy status. Swap anything, then hit <strong className="text-on-surface">Confirm trip</strong> to book in one go.
+              </p>
             </div>
           </motion.div>
 
@@ -176,13 +209,12 @@ export function FlowPage() {
               return (
                 <div key={group.dateKey} className={groupIdx > 0 ? 'mt-6' : ''}>
                   {/* Sticky day header */}
-                  <div className="sticky top-0 z-10 bg-surface-0/95 backdrop-blur-sm pb-2 pt-1 -mx-4 px-4">
-                    <div className="flex items-baseline gap-3">
-                      <span className="text-on-surface font-bold text-[14px]">{group.label.day}</span>
-                      <span className="text-on-dim text-[12px]">{group.label.summary}</span>
+                  <div className="sticky top-0 z-10 bg-surface-0/95 backdrop-blur-sm pb-2 pt-1.5 -mx-4 px-4">
+                    <div className="flex items-baseline gap-2.5">
+                      <span className="text-on-surface font-bold text-[15px] tracking-tight">{group.label.day}</span>
+                      <span className="text-on-dim/70 text-[11px] font-medium tracking-wide uppercase">{group.label.summary}</span>
                     </div>
-                    {/* thin spine line under header */}
-                    <div className="mt-1.5 h-px bg-border" />
+                    <div className="mt-1.5 h-px bg-gradient-to-r from-accent/40 via-border to-transparent" />
                   </div>
                   {/* Compact rows for this day */}
                   <div className="space-y-2 mt-2">
