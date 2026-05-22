@@ -1,0 +1,16 @@
+export const ENTRY_COORDS: Record<string, [number, number]> = {
+  flt_outbound:      [38.7738, -9.1340],
+  flt_return:        [38.7738, -9.1340],
+  ride_arrival:      [38.7738, -9.1340],
+  ride_departure:    [38.7738, -9.1340],
+  hotel_main:        [38.7169, -9.1427],
+  ride_day2_venue:   [38.7633, -9.0950],
+  'WS2026-K01':      [38.7633, -9.0950],
+  'WS2026-K02':      [38.7633, -9.0950],
+  'WS2026-W07':      [38.7633, -9.0950],
+  'WS2026-K08':      [38.7633, -9.0950],
+  restaurant_nov10:  [38.7143, -9.1368],
+  activity_nov10:    [38.7109, -9.1358],
+  restaurant_nov11:  [38.7235, -9.1342],
+  activity_nov11:    [38.7074, -9.1419],
+}
