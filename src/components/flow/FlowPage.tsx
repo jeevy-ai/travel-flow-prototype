@@ -1,13 +1,66 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFlowEngine } from '../../hooks/useFlowEngine'
+import type { TimelineEntry } from '../../hooks/useFlowEngine'
 import { AppHeader } from '../layout/AppHeader'
-import { ConfirmedEntryCard } from './ConfirmedEntryCard'
+import { CompactEntryRow } from './CompactEntryRow'
 import { Screen2FlightSelection } from '../screens/Screen2FlightSelection'
 import { Screen3HotelSelection } from '../screens/Screen3HotelSelection'
 import { Screen4Sessions } from '../screens/Screen4Sessions'
 import { Screen5Restaurants } from '../screens/Screen5Restaurants'
 import { Screen6PackingList } from '../screens/Screen6PackingList'
+
+// ---- date-grouping helpers ----
+
+/** Extract the local date string (YYYY-MM-DD) from an ISO datetime, respecting the embedded offset */
+function localDateKey(iso: string): string {
+  // e.g. "2026-11-09T22:10:00-08:00" → date part in LOCAL time at offset
+  // "2026-11-10T15:00:00+00:00" → "2026-11-10"
+  // Parse using Date and apply the offset stored in the string
+  const match = iso.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2}):(\d{2})([+-]\d{2}:\d{2}|Z)/)
+  if (match) {
+    // For non-UTC offsets, reconstruct local date
+    const datePart = match[1]
+    const offsetStr = match[5]
+    if (offsetStr === 'Z' || offsetStr === '+00:00') return datePart
+    // Negative offset (e.g. -08:00) means local time is BEHIND UTC, so local date stays same
+    // We just return the date portion as written (it represents the local departure date)
+    return datePart
+  }
+  return iso.slice(0, 10)
+}
+
+const DAY_LABELS: Record<string, { day: string; summary: string }> = {
+  '2026-11-09': { day: 'Sun, Nov 9', summary: 'Day 0 — Departure from SFO' },
+  '2026-11-10': { day: 'Mon, Nov 10', summary: 'Day 1 — Web Summit opens' },
+  '2026-11-11': { day: 'Tue, Nov 11', summary: 'Day 2 — Web Summit' },
+  '2026-11-12': { day: 'Wed, Nov 12', summary: 'Return to SFO' },
+  'before-trip': { day: 'Before your trip', summary: 'Reminders' },
+}
+
+interface DayGroup {
+  dateKey: string
+  label: { day: string; summary: string }
+  entries: TimelineEntry[]
+}
+
+function groupByDate(entries: TimelineEntry[]): DayGroup[] {
+  const map = new Map<string, TimelineEntry[]>()
+  for (const entry of entries) {
+    const key = entry.scheduledAt ? localDateKey(entry.scheduledAt) : 'before-trip'
+    const group = map.get(key) ?? []
+    group.push(entry)
+    map.set(key, group)
+  }
+  // Sort by date key
+  return Array.from(map.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([dateKey, groupEntries]) => ({
+      dateKey,
+      label: DAY_LABELS[dateKey] ?? { day: dateKey, summary: '' },
+      entries: groupEntries,
+    }))
+}
 
 function SwapScreen({ flow, screenNumber }: { flow: ReturnType<typeof useFlowEngine>; screenNumber: number }) {
   switch (screenNumber) {
@@ -116,16 +169,35 @@ export function FlowPage() {
             )}
           </AnimatePresence>
 
-          {/* All pre-planned entries */}
-          <div className="px-4 pt-2 space-y-3">
-            {flow.entries.map((entry, i) => (
-              <ConfirmedEntryCard
-                key={entry.id}
-                entry={entry}
-                flow={flow}
-                staggerIndex={i}
-              />
-            ))}
+          {/* Date-grouped timeline entries */}
+          <div className="px-4 pt-2">
+            {groupByDate(flow.entries).map((group, groupIdx) => {
+              const baseIndex = flow.entries.findIndex(e => e.id === group.entries[0].id)
+              return (
+                <div key={group.dateKey} className={groupIdx > 0 ? 'mt-6' : ''}>
+                  {/* Sticky day header */}
+                  <div className="sticky top-0 z-10 bg-surface-0/95 backdrop-blur-sm pb-2 pt-1 -mx-4 px-4">
+                    <div className="flex items-baseline gap-3">
+                      <span className="text-on-surface font-bold text-[14px]">{group.label.day}</span>
+                      <span className="text-on-dim text-[12px]">{group.label.summary}</span>
+                    </div>
+                    {/* thin spine line under header */}
+                    <div className="mt-1.5 h-px bg-border" />
+                  </div>
+                  {/* Compact rows for this day */}
+                  <div className="space-y-2 mt-2">
+                    {group.entries.map((entry, i) => (
+                      <CompactEntryRow
+                        key={entry.id}
+                        entry={entry}
+                        flow={flow}
+                        staggerIndex={baseIndex + i}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
           </div>
 
           {/* Post-confirm success */}

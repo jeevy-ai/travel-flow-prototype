@@ -16,6 +16,7 @@ export type TimelineEntry = {
   id: string
   type: EntryType
   state: EntryState
+  scheduledAt: string | null
   imageThumb: string | null
   imageHero: string | null
   gradientFallback: string
@@ -32,6 +33,7 @@ function makeEntries(): TimelineEntry[] {
       id: 'flt_outbound',
       type: 'flight_outbound',
       state: 'proposed',
+      scheduledAt: fix.flightOutbound.result.payload.datetime,
       imageThumb: IMAGE_MANIFEST['flight_outbound']?.thumb ?? null,
       imageHero: IMAGE_MANIFEST['flight_outbound']?.hero ?? null,
       gradientFallback: GRADIENT_FALLBACKS['flight_outbound'],
@@ -58,6 +60,7 @@ function makeEntries(): TimelineEntry[] {
       id: 'flt_return',
       type: 'flight_return',
       state: 'proposed',
+      scheduledAt: fix.flightReturn.result.payload.datetime,
       imageThumb: IMAGE_MANIFEST['flight_return']?.thumb ?? null,
       imageHero: IMAGE_MANIFEST['flight_return']?.hero ?? null,
       gradientFallback: GRADIENT_FALLBACKS['flight_return'],
@@ -84,6 +87,7 @@ function makeEntries(): TimelineEntry[] {
       id: 'hotel_main',
       type: 'hotel',
       state: 'proposed',
+      scheduledAt: fix.hotel.result.payload.datetime,
       imageThumb: IMAGE_MANIFEST['hotel']?.thumb ?? null,
       imageHero: IMAGE_MANIFEST['hotel']?.hero ?? null,
       gradientFallback: GRADIENT_FALLBACKS['hotel'],
@@ -113,6 +117,7 @@ function makeEntries(): TimelineEntry[] {
       id: s.sessionId,
       type: 'conference_session' as EntryType,
       state: 'proposed' as EntryState,
+      scheduledAt: s.startIso,
       imageThumb: IMAGE_MANIFEST[s.sessionId]?.thumb ?? null,
       imageHero: IMAGE_MANIFEST[s.sessionId]?.hero ?? null,
       gradientFallback: GRADIENT_FALLBACKS['conference_session'],
@@ -142,6 +147,7 @@ function makeEntries(): TimelineEntry[] {
       id: 'reminders',
       type: 'reminders',
       state: 'proposed',
+      scheduledAt: fix.reminders[0]?.result.payload.dueAt ?? null,
       imageThumb: null,
       imageHero: null,
       gradientFallback: GRADIENT_FALLBACKS['reminders'],
