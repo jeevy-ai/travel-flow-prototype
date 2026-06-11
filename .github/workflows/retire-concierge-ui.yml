@@ -21,7 +21,7 @@ jobs:
           printf '/* https://travel-flow.pages.dev 301\n' > /tmp/redirect/_redirects
 
       - name: Deploy 301 redirect to concierge-ui Pages project
-        run: npx wrangler pages deploy /tmp/redirect --project-name concierge-ui --commit-dirty=true
+        run: npx wrangler pages deploy /tmp/redirect --project-name concierge-mvp-ui --commit-dirty=true
         continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
