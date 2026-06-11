@@ -1,0 +1,20 @@
+name: Retire concierge-ui (one-time redirect deploy)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-redirect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create redirect content
+        run: |
+          mkdir -p /tmp/redirect
+          printf '/* https://travel-flow.pages.dev 301\n' > /tmp/redirect/_redirects
+          cat /tmp/redirect/_redirects
+
+      - name: Deploy 301 redirect to concierge-ui Pages project
+        run: npx wrangler pages deploy /tmp/redirect --project-name concierge-ui --commit-dirty=true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
