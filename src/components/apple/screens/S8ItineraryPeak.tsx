@@ -1,6 +1,7 @@
 import { motion, useAnimation, AnimatePresence } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import type { Itinerary } from '../../../lib/conciergeApi'
 
 const RING_SIZE = 120
 const STROKE = 8
@@ -92,7 +93,11 @@ const TIMELINE: TimelineGroup[] = [
   },
 ]
 
-export function S8ItineraryPeak() {
+interface Props {
+  itinerary?: Itinerary | null
+}
+
+export function S8ItineraryPeak({ itinerary }: Props = {}) {
   const [phase, setPhase] = useState<'ring' | 'timeline'>('ring')
   const [swapOpen, setSwapOpen] = useState<string | null>(null)
   const ringControls = useAnimation()
@@ -169,7 +174,9 @@ export function S8ItineraryPeak() {
                 <p className="text-white font-semibold leading-tight" style={{ fontSize: '38px', letterSpacing: '-0.02em' }}>
                   Trip ready.
                 </p>
-                <p className="text-white/70 text-[16px] mt-2">Web Summit 2026</p>
+                <p className="text-white/70 text-[16px] mt-2">
+                  {itinerary ? itinerary.destination : 'Web Summit 2026'}
+                </p>
               </motion.div>
             </div>
           </motion.div>
@@ -199,115 +206,139 @@ export function S8ItineraryPeak() {
               />
               <div className="absolute bottom-3 left-5">
                 <p className="text-on-surface font-semibold text-[18px]" style={{ letterSpacing: '-0.01em' }}>
-                  Web Summit 2026
+                  {itinerary ? itinerary.destination : 'Web Summit 2026'}
                 </p>
-                <p className="text-on-dim text-[13px]">Lisbon · Nov 9–12 · Ready to go</p>
+                <p className="text-on-dim text-[13px]">
+                  {itinerary ? `${itinerary.dates} · Ready to go` : 'Lisbon · Nov 9–12 · Ready to go'}
+                </p>
               </div>
             </div>
 
             {/* Timeline */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pt-2 pb-28">
-              {TIMELINE.map((group, gi) => (
-                <div key={group.dateKey} className={gi > 0 ? 'mt-5' : 'mt-2'}>
-                  {/* Day header */}
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-[13px] font-semibold" style={{ color: '#9CA3AF' }}>
-                      {group.day}
-                    </span>
-                    <span className="text-[11px] uppercase tracking-wide" style={{ color: '#9CA3AF', opacity: 0.7 }}>
-                      {group.label}
-                    </span>
-                  </div>
-
-                  {/* Spine + items */}
-                  <div className="relative pl-5">
-                    {/* Vertical spine line */}
-                    <div
-                      className="absolute left-[5px] top-2 w-px"
-                      style={{
-                        background: '#E5E7EB',
-                        bottom: gi < TIMELINE.length - 1 ? -20 : 0,
-                      }}
-                    />
-                    {/* Dot */}
-                    <div
-                      className="absolute left-0 top-[7px] w-2.5 h-2.5 rounded-full"
-                      style={{ background: '#1A1A1A', border: '2px solid #F5F4F0', zIndex: 1 }}
-                    />
-
-                    {group.items.map(item => {
-                      const swapKey = `${group.dateKey}-${item.headline}`
-                      const isSwapOpen = swapOpen === swapKey
-
-                      return (
-                        <div key={item.headline} className="mb-1">
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <p className="text-[16px] font-semibold text-on-surface leading-snug">
-                                {item.headline}
-                              </p>
-                              <p className="text-[13px] text-on-dim mt-0.5">{item.sub}</p>
-                            </div>
-                            {item.swappable && (
-                              <button
-                                onClick={() => setSwapOpen(isSwapOpen ? null : swapKey)}
-                                className="shrink-0 text-[13px] font-medium mt-0.5 transition-opacity active:opacity-60"
-                                style={{ color: '#5B4FE8' }}
-                              >
-                                {isSwapOpen ? 'Done' : '[Swap]'}
-                              </button>
-                            )}
-                          </div>
-
-                          {/* Swap alternatives */}
-                          <AnimatePresence>
-                            {item.swappable && isSwapOpen && (
-                              <motion.div
-                                className="mt-2 rounded-xl overflow-hidden"
-                                style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.2 }}
-                              >
-                                {item.alts.map((alt, ai) => (
-                                  <button
-                                    key={alt}
-                                    onClick={() => setSwapOpen(null)}
-                                    className={`w-full text-left px-4 py-3 text-[14px] text-on-dim active:bg-surface-2 transition-colors ${
-                                      ai < item.alts.length - 1 ? 'border-b border-border' : ''
-                                    }`}
-                                  >
-                                    {alt}
-                                  </button>
-                                ))}
-                                <div className="px-4 py-2.5 border-t border-border">
-                                  <button
-                                    onClick={() => setSwapOpen(null)}
-                                    className="text-[12px] text-on-faint transition-opacity active:opacity-60"
-                                  >
-                                    Keep current
-                                  </button>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      )
-                    })}
-
-                    {/* Transit leg (12px muted, between groups) */}
-                    {group.transitLeg && (
-                      <div className="mt-2 mb-1 flex items-center gap-1.5">
-                        <span className="text-[14px]">{group.transitLeg.icon}</span>
-                        <span className="text-[12px]" style={{ color: '#9CA3AF' }}>
-                          {group.transitLeg.text}
+              {itinerary
+                ? itinerary.days.map((day, gi) => (
+                    <div key={day.day} className={gi > 0 ? 'mt-5' : 'mt-2'}>
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <span className="text-[13px] font-semibold" style={{ color: '#9CA3AF' }}>
+                          {day.day}
                         </span>
                       </div>
-                    )}
-                  </div>
-                </div>
-              ))}
+                      <div className="relative pl-5">
+                        <div
+                          className="absolute left-[5px] top-2 w-px"
+                          style={{
+                            background: '#E5E7EB',
+                            bottom: gi < itinerary.days.length - 1 ? -20 : 0,
+                          }}
+                        />
+                        <div
+                          className="absolute left-0 top-[7px] w-2.5 h-2.5 rounded-full"
+                          style={{ background: '#1A1A1A', border: '2px solid #F5F4F0', zIndex: 1 }}
+                        />
+                        {day.items.map((item, ii) => (
+                          <div key={ii} className="mb-3">
+                            <div className="flex items-start gap-2">
+                              <span className="text-[12px] font-medium shrink-0 mt-[3px]" style={{ color: '#5B4FE8', minWidth: 40 }}>
+                                {item.time}
+                              </span>
+                              <div>
+                                <p className="text-[15px] font-semibold text-on-surface leading-snug">{item.title}</p>
+                                <p className="text-[13px] text-on-dim mt-0.5">{item.detail}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))
+                : TIMELINE.map((group, gi) => (
+                    <div key={group.dateKey} className={gi > 0 ? 'mt-5' : 'mt-2'}>
+                      <div className="flex items-baseline gap-2 mb-2">
+                        <span className="text-[13px] font-semibold" style={{ color: '#9CA3AF' }}>
+                          {group.day}
+                        </span>
+                        <span className="text-[11px] uppercase tracking-wide" style={{ color: '#9CA3AF', opacity: 0.7 }}>
+                          {group.label}
+                        </span>
+                      </div>
+                      <div className="relative pl-5">
+                        <div
+                          className="absolute left-[5px] top-2 w-px"
+                          style={{
+                            background: '#E5E7EB',
+                            bottom: gi < TIMELINE.length - 1 ? -20 : 0,
+                          }}
+                        />
+                        <div
+                          className="absolute left-0 top-[7px] w-2.5 h-2.5 rounded-full"
+                          style={{ background: '#1A1A1A', border: '2px solid #F5F4F0', zIndex: 1 }}
+                        />
+                        {group.items.map(item => {
+                          const swapKey = `${group.dateKey}-${item.headline}`
+                          const isSwapOpen = swapOpen === swapKey
+                          return (
+                            <div key={item.headline} className="mb-1">
+                              <div className="flex items-start justify-between gap-2">
+                                <div>
+                                  <p className="text-[16px] font-semibold text-on-surface leading-snug">{item.headline}</p>
+                                  <p className="text-[13px] text-on-dim mt-0.5">{item.sub}</p>
+                                </div>
+                                {item.swappable && (
+                                  <button
+                                    onClick={() => setSwapOpen(isSwapOpen ? null : swapKey)}
+                                    className="shrink-0 text-[13px] font-medium mt-0.5 transition-opacity active:opacity-60"
+                                    style={{ color: '#5B4FE8' }}
+                                  >
+                                    {isSwapOpen ? 'Done' : '[Swap]'}
+                                  </button>
+                                )}
+                              </div>
+                              <AnimatePresence>
+                                {item.swappable && isSwapOpen && (
+                                  <motion.div
+                                    className="mt-2 rounded-xl overflow-hidden"
+                                    style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                  >
+                                    {item.alts.map((alt, ai) => (
+                                      <button
+                                        key={alt}
+                                        onClick={() => setSwapOpen(null)}
+                                        className={`w-full text-left px-4 py-3 text-[14px] text-on-dim active:bg-surface-2 transition-colors ${
+                                          ai < item.alts.length - 1 ? 'border-b border-border' : ''
+                                        }`}
+                                      >
+                                        {alt}
+                                      </button>
+                                    ))}
+                                    <div className="px-4 py-2.5 border-t border-border">
+                                      <button
+                                        onClick={() => setSwapOpen(null)}
+                                        className="text-[12px] text-on-faint transition-opacity active:opacity-60"
+                                      >
+                                        Keep current
+                                      </button>
+                                    </div>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          )
+                        })}
+                        {group.transitLeg && (
+                          <div className="mt-2 mb-1 flex items-center gap-1.5">
+                            <span className="text-[14px]">{group.transitLeg.icon}</span>
+                            <span className="text-[12px]" style={{ color: '#9CA3AF' }}>{group.transitLeg.text}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+              }
             </div>
 
             {/* Sticky CTA */}

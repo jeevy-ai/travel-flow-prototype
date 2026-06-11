@@ -1,5 +1,6 @@
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { useState } from 'react'
+import type { Itinerary } from '../../lib/conciergeApi'
 import { S1ButlerNudge } from './screens/S1ButlerNudge'
 import { S2PrefsConfirm } from './screens/S2PrefsConfirm'
 import { S3FlightSelection } from './screens/S3FlightSelection'
@@ -10,8 +11,9 @@ import { S6ConflictResolution } from './screens/S6ConflictResolution'
 import { S7ReminderSetup } from './screens/S7ReminderSetup'
 import { S7aTransitOverview } from './screens/S7aTransitOverview'
 import { S8ItineraryPeak } from './screens/S8ItineraryPeak'
+import { SButlerChat } from './screens/SButlerChat'
 
-type Screen = 's1' | 's2' | 's3' | 's4' | 's5' | 's5b' | 's6' | 's7' | 's7a' | 's8'
+type Screen = 's1' | 'sChat' | 's2' | 's3' | 's4' | 's5' | 's5b' | 's6' | 's7' | 's7a' | 's8'
 
 const SCREEN_VARIANTS: Variants = {
   initial: { opacity: 0, y: 12 },
@@ -22,6 +24,7 @@ const SCREEN_VARIANTS: Variants = {
 export function AppleFlowPage() {
   const [screen, setScreen] = useState<Screen>('s1')
   const [dismissed, setDismissed] = useState(false)
+  const [butlerItinerary, setButlerItinerary] = useState<Itinerary | null>(null)
 
   if (dismissed) {
     return (
@@ -46,8 +49,19 @@ export function AppleFlowPage() {
           {screen === 's1' && (
             <motion.div key="s1" variants={SCREEN_VARIANTS} initial="initial" animate="animate" exit="exit">
               <S1ButlerNudge
-                onSetItUp={() => next('s2')}
+                onSetItUp={() => next('sChat')}
                 onNotNow={() => setDismissed(true)}
+              />
+            </motion.div>
+          )}
+
+          {screen === 'sChat' && (
+            <motion.div key="sChat" variants={SCREEN_VARIANTS} initial="initial" animate="animate" exit="exit">
+              <SButlerChat
+                onItineraryReady={(it) => {
+                  setButlerItinerary(it)
+                  next('s8')
+                }}
               />
             </motion.div>
           )}
@@ -124,7 +138,7 @@ export function AppleFlowPage() {
 
           {screen === 's8' && (
             <motion.div key="s8" variants={SCREEN_VARIANTS} initial="initial" animate="animate" exit="exit">
-              <S8ItineraryPeak />
+              <S8ItineraryPeak itinerary={butlerItinerary} />
             </motion.div>
           )}
         </AnimatePresence>
