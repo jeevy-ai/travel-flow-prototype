@@ -1,18 +1,35 @@
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useState } from 'react'
 
 interface Props {
   onLooksRight: () => void
   onEdit: () => void
 }
 
-const PREFS = [
+const PREF_OPTIONS: Record<string, string[]> = {
+  Airline:  ['Delta Airlines', 'United Airlines', 'TAP Air Portugal', 'British Airways'],
+  Cabin:    ['Business', 'First', 'Premium Economy', 'Economy'],
+  Seat:     ['Aisle', 'Window', 'Middle'],
+  Hotel:    ['Marriott Bonvoy', 'Hilton', 'Hyatt', 'IHG', 'No preference'],
+}
+
+const INITIAL_PREFS = [
   { label: 'Airline', value: 'Delta Airlines' },
-  { label: 'Cabin', value: 'Business' },
-  { label: 'Seat', value: 'Aisle' },
-  { label: 'Hotel', value: 'Marriott Bonvoy' },
+  { label: 'Cabin',   value: 'Business' },
+  { label: 'Seat',    value: 'Aisle' },
+  { label: 'Hotel',   value: 'Marriott Bonvoy' },
 ]
 
 export function S2PrefsConfirm({ onLooksRight, onEdit }: Props) {
+  const [prefs, setPrefs] = useState(INITIAL_PREFS)
+  const [customizeOpen, setCustomizeOpen] = useState(false)
+  const [editingLabel, setEditingLabel] = useState<string | null>(null)
+
+  function setPrefValue(label: string, value: string) {
+    setPrefs(prev => prev.map(p => p.label === label ? { ...p, value } : p))
+    setEditingLabel(null)
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-surface-0">
       <div className="flex-1 px-6 pt-14 pb-6">
@@ -33,18 +50,19 @@ export function S2PrefsConfirm({ onLooksRight, onEdit }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 }}
         >
-          {PREFS.map((pref, i) => (
-            <button
+          {prefs.map((pref, i) => (
+            <div
               key={pref.label}
-              onClick={onEdit}
-              className={`w-full flex items-center justify-between px-5 py-4 active:bg-surface-2 transition-colors ${i < PREFS.length - 1 ? 'border-b border-border' : ''}`}
+              className={i < prefs.length - 1 ? 'border-b border-border' : ''}
             >
-              <span className="text-[13px] text-on-faint">{pref.label}</span>
-              <div className="flex items-center gap-2">
-                <span className="text-[17px] font-semibold text-on-surface">{pref.value}</span>
-                <span className="text-on-faint text-[15px]">›</span>
+              <div className="w-full flex items-center justify-between px-5 py-4">
+                <span className="text-[13px] text-on-faint">{pref.label}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[17px] font-semibold text-on-surface">{pref.value}</span>
+                  <span className="text-on-faint text-[15px]">›</span>
+                </div>
               </div>
-            </button>
+            </div>
           ))}
         </motion.div>
       </div>
@@ -63,9 +81,94 @@ export function S2PrefsConfirm({ onLooksRight, onEdit }: Props) {
         >
           Looks right
         </button>
+
+        <button
+          onClick={() => setCustomizeOpen(v => !v)}
+          className="w-full text-center text-[14px] font-medium py-1 transition-opacity active:opacity-60"
+          style={{ color: '#5B4FE8' }}
+        >
+          Customize ›
+        </button>
+
+        <AnimatePresence>
+          {customizeOpen && (
+            <motion.div
+              className="rounded-2xl overflow-hidden"
+              style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.22 }}
+            >
+              {prefs.map((pref, i) => {
+                const opts = PREF_OPTIONS[pref.label] ?? []
+                const isEditing = editingLabel === pref.label
+
+                return (
+                  <div key={pref.label} className={i < prefs.length - 1 ? 'border-b border-border' : ''}>
+                    <button
+                      className="w-full flex items-center justify-between px-5 py-4 active:bg-surface-2 transition-colors"
+                      onClick={() => setEditingLabel(isEditing ? null : pref.label)}
+                    >
+                      <span className="text-[14px] text-on-dim">{pref.label}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[15px] font-medium text-on-surface">{pref.value}</span>
+                        <span
+                          className="text-[13px] font-medium"
+                          style={{ color: '#5B4FE8' }}
+                        >
+                          {isEditing ? 'Done' : 'Edit'}
+                        </span>
+                      </div>
+                    </button>
+
+                    <AnimatePresence>
+                      {isEditing && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.18 }}
+                          className="px-4 pb-3"
+                        >
+                          <div className="flex flex-wrap gap-2">
+                            {opts.map(opt => (
+                              <button
+                                key={opt}
+                                onClick={() => setPrefValue(pref.label, opt)}
+                                className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                                style={
+                                  pref.value === opt
+                                    ? { background: '#1A1A1A', color: '#FFFFFF' }
+                                    : { background: '#F5F4F0', color: '#6B7280' }
+                                }
+                              >
+                                {opt}
+                              </button>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )
+              })}
+
+              <div className="px-5 py-3.5 border-t border-border">
+                <button
+                  onClick={() => setCustomizeOpen(false)}
+                  className="text-[13px] text-on-dim transition-opacity active:opacity-60"
+                >
+                  Back to recommended
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <button
           onClick={onEdit}
-          className="w-full py-3 text-center text-[15px] font-medium text-on-dim transition-opacity active:opacity-60"
+          className="w-full py-2 text-center text-[15px] font-medium text-on-dim transition-opacity active:opacity-60"
         >
           Edit anything
         </button>

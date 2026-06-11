@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 
 interface Props {
@@ -6,8 +6,14 @@ interface Props {
   onSeeAlts: () => void
 }
 
+const TIMES = ['Any time', 'Morning (6–12)', 'Afternoon (12–18)', 'Evening (18–24)']
+const AIRLINES = ['Any airline', 'Delta', 'United', 'TAP Air Portugal', 'British Airways']
+
 export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
   const [altsOpen, setAltsOpen] = useState(false)
+  const [customizeOpen, setCustomizeOpen] = useState(false)
+  const [selectedTime, setSelectedTime] = useState('Any time')
+  const [selectedAirline, setSelectedAirline] = useState('Any airline')
 
   return (
     <div className="flex flex-col min-h-screen bg-surface-0">
@@ -109,6 +115,74 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
         >
           Book this flight
         </button>
+
+        <button
+          onClick={() => setCustomizeOpen(v => !v)}
+          className="w-full text-center text-[14px] font-medium py-1 transition-opacity active:opacity-60"
+          style={{ color: '#5B4FE8' }}
+        >
+          Customize ›
+        </button>
+
+        <AnimatePresence>
+          {customizeOpen && (
+            <motion.div
+              className="rounded-2xl overflow-hidden px-5 py-4"
+              style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.22 }}
+            >
+              <div className="mb-4">
+                <p className="text-[13px] text-on-faint mb-2">Departure time</p>
+                <div className="flex flex-wrap gap-2">
+                  {TIMES.map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setSelectedTime(t)}
+                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                      style={
+                        selectedTime === t
+                          ? { background: '#1A1A1A', color: '#FFFFFF' }
+                          : { background: '#F5F4F0', color: '#6B7280' }
+                      }
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <p className="text-[13px] text-on-faint mb-2">Airline</p>
+                <div className="flex flex-wrap gap-2">
+                  {AIRLINES.map(a => (
+                    <button
+                      key={a}
+                      onClick={() => setSelectedAirline(a)}
+                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                      style={
+                        selectedAirline === a
+                          ? { background: '#1A1A1A', color: '#FFFFFF' }
+                          : { background: '#F5F4F0', color: '#6B7280' }
+                      }
+                    >
+                      {a}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={() => setCustomizeOpen(false)}
+                className="text-[13px] text-on-dim transition-opacity active:opacity-60"
+              >
+                Back to recommended
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </div>
   )

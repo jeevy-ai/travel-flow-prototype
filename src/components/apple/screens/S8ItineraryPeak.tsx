@@ -7,61 +7,109 @@ const STROKE = 8
 const RADIUS = (RING_SIZE - STROKE) / 2
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
-const TIMELINE = [
+type TimelineItem =
+  | { kind: 'booking'; headline: string; sub: string; swappable: true; alts: string[] }
+  | { kind: 'info'; headline: string; sub: string; swappable: false }
+
+interface TimelineGroup {
+  dateKey: string
+  day: string
+  label: string
+  items: TimelineItem[]
+  transitLeg?: { icon: string; text: string }
+}
+
+const TIMELINE: TimelineGroup[] = [
   {
-    dateKey: 'nov9',
+    dateKey: 'nov9-depart',
     day: 'Sun, Nov 9',
     label: 'Depart',
     items: [
-      { headline: 'Delta · SFO → LIS', sub: 'Departs 22:10 · Arrives +1 06:45', tap: false },
+      {
+        kind: 'booking',
+        headline: 'United · SFO → LIS',
+        sub: 'Departs 22:10 · Arrives +1 07:45',
+        swappable: true,
+        alts: [
+          'TAP Air Portugal TP236 · Nov 9 23:45 · Non-stop',
+          'Delta UA88 · 14:30 · 1 stop via JFK',
+          'British Airways BA498 · 10:00 · 1 stop via LHR',
+        ],
+      },
     ],
+    transitLeg: { icon: '🚕', text: 'Taxi · 25 min · ~€18' },
   },
   {
-    dateKey: 'nov10',
-    day: 'Mon, Nov 10',
+    dateKey: 'nov10-checkin',
+    day: 'Sun, Nov 10',
     label: 'Arrive + Check-in',
     items: [
-      { headline: 'Marriott Lisbon', sub: 'Check-in from 15:00', tap: true },
+      {
+        kind: 'booking',
+        headline: 'Bairro Alto Hotel',
+        sub: 'Check-in from 15:00',
+        swappable: true,
+        alts: [
+          'Memmo Alfama · Boutique · Castle views · €380/night',
+          'Marriott Lisbon · 4.8km · €289/night',
+          'Palácio Belmonte · 15th-century palace · €650/night',
+        ],
+      },
     ],
+    transitLeg: { icon: '🚶', text: 'Walk · 8 min' },
   },
   {
-    dateKey: 'nov10-12',
-    day: 'Nov 10–11',
+    dateKey: 'nov9-12-conf',
+    day: 'Nov 9–12',
     label: 'Conference',
     items: [
-      { headline: 'Web Summit 2026', sub: '⭐ The Age of Ambient AI · Nov 10 09:30', tap: false },
+      {
+        kind: 'info',
+        headline: 'Web Summit 2026',
+        sub: '⭐ AI & Product · Nov 9 10:00',
+        swappable: false,
+      },
     ],
+    transitLeg: { icon: '🚇', text: 'Metro · 12 min · ~€1.50' },
   },
   {
-    dateKey: 'nov12',
-    day: 'Wed, Nov 12',
-    label: 'Depart Lisbon',
+    dateKey: 'nov9-dinner',
+    day: 'Nov 9',
+    label: 'Dinner',
     items: [
-      { headline: 'Delta · LIS → SFO', sub: 'Departs 09:30 · Arrives 12:30 PST', tap: false },
+      {
+        kind: 'booking',
+        headline: 'Cervejaria Ramiro',
+        sub: '19:30 · Table for 2 · Indoor',
+        swappable: true,
+        alts: [
+          'Solar dos Presuntos · Traditional · €€',
+          'Taberna da Rua das Flores · Tapas · €€',
+          'Belcanto · Fine dining · €€€€',
+        ],
+      },
     ],
   },
 ]
 
 export function S8ItineraryPeak() {
   const [phase, setPhase] = useState<'ring' | 'timeline'>('ring')
+  const [swapOpen, setSwapOpen] = useState<string | null>(null)
   const ringControls = useAnimation()
   const textControls = useAnimation()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     async function runEntrance() {
-      // Ring draws 0 → 100% over 800ms
       await ringControls.start({
         strokeDashoffset: 0,
         transition: { duration: 0.8, ease: 'easeInOut' },
       })
-      // "Trip ready" springs in
       await textControls.start({
         opacity: 1,
         scale: 1,
         transition: { type: 'spring', stiffness: 260, damping: 20 },
       })
-      // After a moment, transition to timeline
       await new Promise(r => setTimeout(r, 900))
       setPhase('timeline')
     }
@@ -79,7 +127,6 @@ export function S8ItineraryPeak() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
-            {/* Lisbon photograph */}
             <div className="absolute inset-0">
               <img
                 src="/fixture-images/city-lisbon.webp"
@@ -90,10 +137,8 @@ export function S8ItineraryPeak() {
               <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.25)' }} />
             </div>
 
-            {/* Ring + text */}
             <div className="relative flex flex-col items-center gap-6">
               <svg width={RING_SIZE} height={RING_SIZE} style={{ transform: 'rotate(-90deg)' }}>
-                {/* Track */}
                 <circle
                   cx={RING_SIZE / 2}
                   cy={RING_SIZE / 2}
@@ -102,7 +147,6 @@ export function S8ItineraryPeak() {
                   stroke="rgba(255,255,255,0.2)"
                   strokeWidth={STROKE}
                 />
-                {/* Progress */}
                 <motion.circle
                   cx={RING_SIZE / 2}
                   cy={RING_SIZE / 2}
@@ -162,12 +206,9 @@ export function S8ItineraryPeak() {
             </div>
 
             {/* Timeline */}
-            <div
-              ref={scrollRef}
-              className="flex-1 overflow-y-auto px-5 pt-2 pb-28"
-            >
+            <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pt-2 pb-28">
               {TIMELINE.map((group, gi) => (
-                <div key={group.dateKey} className={gi > 0 ? 'mt-6' : 'mt-2'}>
+                <div key={group.dateKey} className={gi > 0 ? 'mt-5' : 'mt-2'}>
                   {/* Day header */}
                   <div className="flex items-baseline gap-2 mb-2">
                     <span className="text-[13px] font-semibold" style={{ color: '#9CA3AF' }}>
@@ -179,36 +220,99 @@ export function S8ItineraryPeak() {
                   </div>
 
                   {/* Spine + items */}
-                  <div className="relative pl-4">
+                  <div className="relative pl-5">
                     {/* Vertical spine line */}
-                    {gi < TIMELINE.length - 1 && (
-                      <div
-                        className="absolute left-[5px] top-2 bottom-0 w-px"
-                        style={{ background: '#E5E7EB', transform: 'translateY(4px)' }}
-                      />
-                    )}
+                    <div
+                      className="absolute left-[5px] top-2 w-px"
+                      style={{
+                        background: '#E5E7EB',
+                        bottom: gi < TIMELINE.length - 1 ? -20 : 0,
+                      }}
+                    />
                     {/* Dot */}
                     <div
                       className="absolute left-0 top-[7px] w-2.5 h-2.5 rounded-full"
                       style={{ background: '#1A1A1A', border: '2px solid #F5F4F0', zIndex: 1 }}
                     />
 
-                    {group.items.map(item => (
-                      <div key={item.headline} className="mb-1">
-                        <p className="text-[16px] font-semibold text-on-surface leading-snug">{item.headline}</p>
-                        <p className="text-[13px] text-on-dim mt-0.5">{item.sub}</p>
-                        {item.tap && (
-                          <p className="text-[12px] mt-0.5" style={{ color: '#9CA3AF' }}>↳ tap for details</p>
-                        )}
+                    {group.items.map(item => {
+                      const swapKey = `${group.dateKey}-${item.headline}`
+                      const isSwapOpen = swapOpen === swapKey
+
+                      return (
+                        <div key={item.headline} className="mb-1">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="text-[16px] font-semibold text-on-surface leading-snug">
+                                {item.headline}
+                              </p>
+                              <p className="text-[13px] text-on-dim mt-0.5">{item.sub}</p>
+                            </div>
+                            {item.swappable && (
+                              <button
+                                onClick={() => setSwapOpen(isSwapOpen ? null : swapKey)}
+                                className="shrink-0 text-[13px] font-medium mt-0.5 transition-opacity active:opacity-60"
+                                style={{ color: '#5B4FE8' }}
+                              >
+                                {isSwapOpen ? 'Done' : '[Swap]'}
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Swap alternatives */}
+                          <AnimatePresence>
+                            {item.swappable && isSwapOpen && (
+                              <motion.div
+                                className="mt-2 rounded-xl overflow-hidden"
+                                style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                {item.alts.map((alt, ai) => (
+                                  <button
+                                    key={alt}
+                                    onClick={() => setSwapOpen(null)}
+                                    className={`w-full text-left px-4 py-3 text-[14px] text-on-dim active:bg-surface-2 transition-colors ${
+                                      ai < item.alts.length - 1 ? 'border-b border-border' : ''
+                                    }`}
+                                  >
+                                    {alt}
+                                  </button>
+                                ))}
+                                <div className="px-4 py-2.5 border-t border-border">
+                                  <button
+                                    onClick={() => setSwapOpen(null)}
+                                    className="text-[12px] text-on-faint transition-opacity active:opacity-60"
+                                  >
+                                    Keep current
+                                  </button>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      )
+                    })}
+
+                    {/* Transit leg (12px muted, between groups) */}
+                    {group.transitLeg && (
+                      <div className="mt-2 mb-1 flex items-center gap-1.5">
+                        <span className="text-[14px]">{group.transitLeg.icon}</span>
+                        <span className="text-[12px]" style={{ color: '#9CA3AF' }}>
+                          {group.transitLeg.text}
+                        </span>
                       </div>
-                    ))}
+                    )}
                   </div>
                 </div>
               ))}
             </div>
 
             {/* Sticky CTA */}
-            <div className="fixed bottom-0 left-0 right-0 flex flex-col items-center gap-2 px-5 pb-10 pt-4"
+            <div
+              className="fixed bottom-0 left-0 right-0 flex flex-col items-center gap-2 px-5 pb-10 pt-4"
               style={{ background: 'linear-gradient(to top, #F5F4F0 80%, transparent 100%)' }}
             >
               <div className="w-full max-w-[430px]">
@@ -222,7 +326,7 @@ export function S8ItineraryPeak() {
                   to="/itinerary/ws2026/day-of"
                   className="block w-full text-center text-[15px] font-medium text-on-dim py-3 transition-opacity active:opacity-60"
                 >
-                  View day-of plan
+                  Share trip
                 </Link>
               </div>
             </div>
