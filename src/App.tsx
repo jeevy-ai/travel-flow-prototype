@@ -1,9 +1,9 @@
 import { createHashRouter, RouterProvider } from 'react-router-dom'
-import { FlowPage } from './components/flow/FlowPage'
+import { AppleFlowPage } from './components/apple/AppleFlowPage'
 import { DayOfPlanPage } from './pages/DayOfPlanPage'
 
 const router = createHashRouter([
-  { path: '/', element: <FlowPage /> },
+  { path: '/', element: <AppleFlowPage /> },
   { path: '/itinerary/:tripId/day-of', element: <DayOfPlanPage /> },
 ])
 

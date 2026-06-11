@@ -1,0 +1,120 @@
+import { motion } from 'framer-motion'
+import { useState } from 'react'
+
+interface Props {
+  onBook: () => void
+  onDifferentHotel: () => void
+}
+
+export function S4HotelSelection({ onBook, onDifferentHotel }: Props) {
+  const [altsOpen, setAltsOpen] = useState(false)
+
+  return (
+    <div className="flex flex-col min-h-screen bg-surface-0">
+      <div className="flex-1 px-6 pt-14 pb-6 overflow-y-auto">
+        <motion.h1
+          className="font-semibold text-[28px] text-on-surface mb-5"
+          style={{ letterSpacing: '-0.02em' }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0] }}
+        >
+          Here's your hotel.
+        </motion.h1>
+
+        {/* Amber conflict banner */}
+        <motion.div
+          className="rounded-xl px-4 py-3 mb-4 flex items-start gap-2"
+          style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.04 }}
+        >
+          <span className="text-[13px] mt-px" style={{ color: '#F59E0B' }}>⚠</span>
+          <p className="text-[13px]" style={{ color: '#92400E' }}>
+            No Marriott nearby — closest match shown.
+          </p>
+        </motion.div>
+
+        {/* Hotel card */}
+        <motion.div
+          className="rounded-2xl overflow-hidden"
+          style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.07 }}
+        >
+          {/* Full-bleed hotel photo */}
+          <div className="relative h-[160px] overflow-hidden">
+            <img
+              src="/fixture-images/hotel-marriott-lisbon-exterior.webp"
+              alt="Marriott Lisbon exterior"
+              className="w-full h-full object-cover"
+            />
+          </div>
+
+          {/* Card body */}
+          <div className="px-5 py-4">
+            <p className="text-[17px] font-semibold text-on-surface mb-1">Marriott Lisbon</p>
+            <p className="text-[16px] text-on-dim">Nov 10–12 · 2 nights · 8 min taxi</p>
+          </div>
+        </motion.div>
+
+        {/* Different hotel link */}
+        <motion.div
+          className="mt-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.28, delay: 0.12 }}
+        >
+          <button
+            onClick={() => setAltsOpen(v => !v)}
+            className="text-on-dim text-[15px] font-medium w-full text-center py-2 transition-opacity active:opacity-60"
+          >
+            {altsOpen ? 'Hide alternatives' : 'Different hotel'}
+          </button>
+
+          {altsOpen && (
+            <motion.div
+              className="mt-3 rounded-2xl overflow-hidden"
+              style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              transition={{ duration: 0.22 }}
+            >
+              {[
+                'Bairro Alto Hotel · 5-star · Chiado · €420/night',
+                'Memmo Alfama · Boutique · Castle views · €380/night',
+                'Palácio Belmonte · 15th-century palace · €650/night',
+              ].map((alt, i) => (
+                <button
+                  key={alt}
+                  onClick={onDifferentHotel}
+                  className={`w-full text-left px-5 py-3.5 text-[14px] text-on-dim active:bg-surface-2 transition-colors ${i < 2 ? 'border-b border-border' : ''}`}
+                >
+                  {alt}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Sticky CTA */}
+      <motion.div
+        className="px-5 pb-10 pt-4 bg-surface-0"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
+      >
+        <button
+          onClick={onBook}
+          className="w-full py-[18px] rounded-2xl font-semibold text-[16px] text-white transition-opacity active:opacity-80"
+          style={{ background: '#5B4FE8' }}
+        >
+          Book this hotel
+        </button>
+      </motion.div>
+    </div>
+  )
+}
