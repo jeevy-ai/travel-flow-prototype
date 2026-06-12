@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { AnimatePresence, motion, useDragControls } from 'framer-motion'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { EventCategory, Itinerary, ItineraryDay, ItineraryItem, TransportLeg } from '../../../lib/conciergeApi'
 
 // ── Fixture itinerary (demo fallback) ──────────────────────────────────────
@@ -111,12 +111,12 @@ const FIXTURE: Itinerary = {
 
 // ── Category styles (per YOU-750 spec) ────────────────────────────────────
 
-const CATEGORY_STYLE: Record<EventCategory, { bg: string; icon: string }> = {
-  conference:    { bg: '#EEF2FF', icon: '📅' },
-  dining:        { bg: '#FFFBEB', icon: '🍽️' },
-  explore:       { bg: '#ECFDF5', icon: '📍' },
-  accommodation: { bg: '#F0F9FF', icon: '🏨' },
-  other:         { bg: '#F9FAFB', icon: '✨' },
+const CATEGORY_STYLE: Record<EventCategory, { bg: string; icon: string; label: string }> = {
+  conference:    { bg: '#EEF2FF', icon: '📅', label: 'Conference' },
+  dining:        { bg: '#FFFBEB', icon: '🍽️', label: 'Dining' },
+  explore:       { bg: '#ECFDF5', icon: '📍', label: 'Explore' },
+  accommodation: { bg: '#F0F9FF', icon: '🏨', label: 'Stay' },
+  other:         { bg: '#F9FAFB', icon: '✨', label: 'Other' },
 }
 
 // ── Transport mode icons (per YOU-750 spec) ───────────────────────────────
@@ -126,9 +126,9 @@ const TRANSPORT_ICON: Record<string, string> = {
   ferry: '⛴️', bus: '🚌', car: '🚗', train: '🚆', uber: '🚗',
 }
 
-// ── EventCard (per YOU-750 spec) ──────────────────────────────────────────
+// ── EventCard — tappable, no × button (AC#1, AC#2) ───────────────────────
 
-function EventCard({ item, onRemove }: { item: ItineraryItem; onRemove?: () => void }) {
+function EventCard({ item, onClick }: { item: ItineraryItem; onClick: () => void }) {
   const [imgErr, setImgErr] = useState(false)
   const cat = item.category ?? 'other'
   const catStyle = CATEGORY_STYLE[cat] ?? CATEGORY_STYLE.other
@@ -141,63 +141,78 @@ function EventCard({ item, onRemove }: { item: ItineraryItem; onRemove?: () => v
       exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.18 } }}
       style={{ borderRadius: 12, background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', overflow: 'hidden' }}
     >
-      {/* Image — full-width, 160px */}
-      {item.imageUrl && !imgErr ? (
-        <img
-          src={item.imageUrl}
-          alt={item.title}
-          onError={() => setImgErr(true)}
-          style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }}
-        />
-      ) : (
-        <div
-          style={{
-            width: '100%', height: 160,
-            background: catStyle.bg,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
-        >
-          <span style={{ fontSize: 36 }}>{catStyle.icon}</span>
-        </div>
-      )}
-
-      {/* Content — 8px top, 12px sides + bottom */}
-      <div style={{ padding: '8px 12px 12px' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3, flexWrap: 'wrap' as const }}>
-              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--accent)', flexShrink: 0 }}>
-                {item.time}
-              </span>
-              <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.25 }}>
-                {item.title}
-              </span>
-            </div>
-            <p style={{
-              fontSize: 13, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4,
-              overflow: 'hidden', display: '-webkit-box',
-              WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
+      {/* Full card is a single tap target — no × in read state (AC#1) */}
+      <button
+        onClick={onClick}
+        aria-label={`View details for ${item.title}`}
+        style={{
+          display: 'block', width: '100%', background: 'none',
+          border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left',
+        }}
+      >
+        {/* Image — full-width, 160px */}
+        <div style={{ position: 'relative', height: 160, overflow: 'hidden' }}>
+          {item.imageUrl && !imgErr ? (
+            <img
+              src={item.imageUrl}
+              alt={item.title}
+              onError={() => setImgErr(true)}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          ) : (
+            <div style={{
+              width: '100%', height: '100%',
+              background: catStyle.bg,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
-              {item.detail}
-            </p>
-          </div>
-
-          {onRemove && (
-            <button
-              onClick={onRemove}
-              aria-label={`Remove ${item.title}`}
-              style={{
-                width: 28, height: 28, borderRadius: '50%',
-                background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer',
-                flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--text-tertiary)', fontSize: 16, lineHeight: 1, marginTop: 1,
-              }}
-            >
-              ×
-            </button>
+              <span style={{ fontSize: 36 }}>{catStyle.icon}</span>
+            </div>
           )}
+          {/* Time chip (bottom-left) */}
+          {item.time && (
+            <div style={{
+              position: 'absolute', bottom: 8, left: 10,
+              background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)',
+              borderRadius: 6, padding: '2px 8px',
+            }}>
+              <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{item.time}</span>
+            </div>
+          )}
+          {/* Category badge (top-left) */}
+          <div style={{
+            position: 'absolute', top: 8, left: 10,
+            background: catStyle.bg, borderRadius: 6, padding: '2px 8px',
+          }}>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#111827' }}>
+              {catStyle.icon} {catStyle.label}
+            </span>
+          </div>
+          {/* › chevron — tappability signifier (AC#2) */}
+          <div style={{
+            position: 'absolute', top: 8, right: 10,
+            background: 'rgba(0,0,0,0.30)', borderRadius: '50%',
+            width: 24, height: 24,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            pointerEvents: 'none',
+          }}>
+            <span style={{ color: 'white', fontSize: 14, lineHeight: 1 }}>›</span>
+          </div>
         </div>
-      </div>
+
+        {/* Content */}
+        <div style={{ padding: '8px 12px 12px' }}>
+          <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.25 }}>
+            {item.title}
+          </p>
+          <p style={{
+            fontSize: 13, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4,
+            overflow: 'hidden', display: '-webkit-box',
+            WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
+          }}>
+            {item.detail}
+          </p>
+        </div>
+      </button>
     </motion.div>
   )
 }
@@ -234,20 +249,204 @@ function PersonalizationTag({ name = 'Jeevy' }: { name?: string }) {
   )
 }
 
-// ── AlterSheet ────────────────────────────────────────────────────────────
+// ── ItemDetailSheet — AC#3: bottom sheet, 60vh, slide-up, scrim, swipe-dismiss ──
 
-function AlterSheet({ onSubmit, onDismiss, isLoading }: {
+interface ItemDetailSheetProps {
+  item: ItineraryItem | null
+  onClose: () => void
+  onRemove: (item: ItineraryItem) => void
+  onChangeItem: (item: ItineraryItem) => void
+}
+
+function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSheetProps) {
+  const controls = useDragControls()
+  const [imgErr, setImgErr] = useState(false)
+
+  const cat = item?.category ?? 'other'
+  const catStyle = CATEGORY_STYLE[cat] ?? CATEGORY_STYLE.other
+
+  useEffect(() => { setImgErr(false) }, [item?.title])
+
+  // Close on Escape
+  useEffect(() => {
+    if (!item) return
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [item, onClose])
+
+  // Lock body scroll
+  useEffect(() => {
+    if (item) {
+      document.body.style.overflow = 'hidden'
+      return () => { document.body.style.overflow = '' }
+    }
+  }, [item])
+
+  return (
+    <AnimatePresence>
+      {item && (
+        <>
+          {/* Scrim */}
+          <motion.div
+            className="fixed inset-0 z-40"
+            style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22 }}
+            onClick={onClose}
+          />
+
+          {/* Sheet — 60vh max, slide-up 300ms ease-out (AC#3) */}
+          <motion.div
+            drag="y"
+            dragControls={controls}
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={{ top: 0, bottom: 0.4 }}
+            onDragEnd={(_: unknown, info: { offset: { y: number } }) => {
+              if (info.offset.y > 80) onClose()
+            }}
+            className="fixed bottom-0 left-0 right-0 z-50 flex flex-col"
+            style={{
+              maxHeight: '60vh',
+              background: 'var(--bg-secondary)',
+              borderTop: '1px solid var(--border)',
+              borderRadius: '24px 24px 0 0',
+              overflow: 'hidden',
+            }}
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            {/* Drag handle */}
+            <div
+              style={{ display: 'flex', justifyContent: 'center', paddingTop: 12, paddingBottom: 4, cursor: 'grab', flexShrink: 0 }}
+              onPointerDown={e => controls.start(e)}
+            >
+              <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--border)' }} />
+            </div>
+
+            {/* Scrollable body */}
+            <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+              {/* Hero image — 160px per spec */}
+              <div style={{ position: 'relative', height: 160, flexShrink: 0, overflow: 'hidden' }}>
+                {item.imageUrl && !imgErr ? (
+                  <img
+                    src={item.imageUrl}
+                    alt={item.title}
+                    onError={() => setImgErr(true)}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '100%', height: '100%',
+                    background: catStyle.bg,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <span style={{ fontSize: 48 }}>{catStyle.icon}</span>
+                  </div>
+                )}
+                {/* Time chip */}
+                {item.time && (
+                  <div style={{
+                    position: 'absolute', bottom: 8, left: 12,
+                    background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+                    borderRadius: 6, padding: '3px 10px',
+                  }}>
+                    <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{item.time}</span>
+                  </div>
+                )}
+                {/* Category badge */}
+                <div style={{
+                  position: 'absolute', top: 8, left: 12,
+                  background: catStyle.bg, borderRadius: 6, padding: '3px 10px',
+                }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#111827' }}>
+                    {catStyle.icon} {catStyle.label}
+                  </span>
+                </div>
+              </div>
+
+              {/* Title + detail */}
+              <div style={{ padding: '14px 16px 8px' }}>
+                <h2 style={{
+                  fontSize: 17, fontWeight: 700, color: 'var(--text-primary)',
+                  margin: '0 0 6px', lineHeight: 1.3,
+                }}>
+                  {item.title}
+                </h2>
+                {item.detail && (
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                    {item.detail}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Action buttons — sticky, min-h-44 (WCAG 2.5.5) (AC#3, AC#6) */}
+            <div style={{
+              padding: '12px 16px 20px',
+              borderTop: '1px solid var(--border)',
+              background: 'var(--bg-secondary)',
+              flexShrink: 0,
+            }}>
+              {/* Primary: Change this item — AC#4 pre-fill wired via onChangeItem */}
+              <button
+                onClick={() => onChangeItem(item)}
+                style={{
+                  width: '100%', minHeight: 44, borderRadius: 12,
+                  background: 'var(--text-primary)', color: 'white',
+                  fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  marginBottom: 8,
+                }}
+              >
+                <span>✏️</span>
+                <span>Change this item</span>
+              </button>
+              {/* Secondary: Remove from plan — removal moved inside sheet (AC#5) */}
+              <button
+                onClick={() => onRemove(item)}
+                style={{
+                  width: '100%', minHeight: 44, borderRadius: 12,
+                  background: 'none', color: 'var(--text-secondary)',
+                  fontWeight: 500, fontSize: 13,
+                  border: '1px solid var(--border)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  transition: 'color 0.15s, border-color 0.15s',
+                }}
+              >
+                <span>🗑</span>
+                <span>Remove from plan</span>
+              </button>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  )
+}
+
+// ── AlterSheet — AC#4: accepts prefilledText for "Change this item" ───────
+
+function AlterSheet({ onSubmit, onDismiss, isLoading, prefilledText = '' }: {
   onSubmit: (instruction: string) => void
   onDismiss: () => void
   isLoading: boolean
+  prefilledText?: string
 }) {
-  const [draft, setDraft] = useState('')
+  const [draft, setDraft] = useState(prefilledText)
   const SUGGESTIONS = [
     'Make the pace more relaxed',
     'Add a seafood dinner on day 2',
     'Swap morning activity for a museum',
     'Add a rooftop bar in the evening',
   ]
+
+  // Sync when prefilledText changes (re-opened for different item)
+  useEffect(() => { setDraft(prefilledText) }, [prefilledText])
 
   return (
     <motion.div
@@ -298,12 +497,12 @@ function AlterSheet({ onSubmit, onDismiss, isLoading }: {
   )
 }
 
-// ── Day section ────────────────────────────────────────────────────────────
+// ── DaySection ────────────────────────────────────────────────────────────
 
-function DaySection({ day, removedKeys, onRemove }: {
+function DaySection({ day, removedKeys, onOpen }: {
   day: ItineraryDay
   removedKeys: Set<string>
-  onRemove: (key: string) => void
+  onOpen: (item: ItineraryItem, key: string) => void
 }) {
   const visibleItems = day.items.filter((_, i) => !removedKeys.has(`${day.day}:${i}`))
   if (visibleItems.length === 0) return null
@@ -324,7 +523,7 @@ function DaySection({ day, removedKeys, onRemove }: {
           const showLeg = !!item.transportAfter && hasNextVisible
           return (
             <div key={itemKey}>
-              <EventCard item={item} onRemove={() => onRemove(itemKey)} />
+              <EventCard item={item} onClick={() => onOpen(item, itemKey)} />
               {showLeg && item.transportAfter && <TransportLegPill leg={item.transportAfter} />}
             </div>
           )
@@ -346,7 +545,14 @@ interface Props {
 
 export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', loadStatus = 'idle', onStartOver }: Props) {
   const [alterOpen, setAlterOpen] = useState(false)
+  const [alterPrefilledText, setAlterPrefilledText] = useState('')
   const [removedKeys, setRemovedKeys] = useState<Set<string>>(new Set())
+  // AC#3: item detail sheet state
+  const [activeItem, setActiveItem] = useState<ItineraryItem | null>(null)
+  const [activeItemKey, setActiveItemKey] = useState<string | null>(null)
+  // AC#5: undo toast state
+  const [undoState, setUndoState] = useState<{ key: string; title: string } | null>(null)
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const display = itinerary ?? FIXTURE
@@ -357,12 +563,60 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
     }
   }, [itinerary])
 
+  // Cleanup undo timer
+  useEffect(() => {
+    return () => { if (undoTimerRef.current) clearTimeout(undoTimerRef.current) }
+  }, [])
+
   async function handleAlterSubmit(instruction: string) {
     if (!alterPlan) return
     setAlterOpen(false)
+    setAlterPrefilledText('')
     setRemovedKeys(new Set())
     await alterPlan(instruction)
   }
+
+  // AC#3: open detail sheet
+  const handleOpenItem = useCallback((item: ItineraryItem, key: string) => {
+    setActiveItem(item)
+    setActiveItemKey(key)
+  }, [])
+
+  const handleCloseSheet = useCallback(() => {
+    setActiveItem(null)
+    setActiveItemKey(null)
+  }, [])
+
+  // AC#5: remove via sheet → undo toast (removal moved inside sheet)
+  const handleRemoveItem = useCallback((item: ItineraryItem) => {
+    if (!activeItemKey) return
+    const key = activeItemKey
+    setRemovedKeys(prev => new Set([...prev, key]))
+    setActiveItem(null)
+    setActiveItemKey(null)
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    setUndoState({ key, title: item.title })
+    undoTimerRef.current = setTimeout(() => setUndoState(null), 5000)
+  }, [activeItemKey])
+
+  const handleUndoRemove = useCallback(() => {
+    if (!undoState) return
+    setRemovedKeys(prev => {
+      const next = new Set(prev)
+      next.delete(undoState.key)
+      return next
+    })
+    setUndoState(null)
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+  }, [undoState])
+
+  // AC#4: "Change this item" → open AlterSheet with item title pre-filled
+  const handleChangeItem = useCallback((item: ItineraryItem) => {
+    setActiveItem(null)
+    setActiveItemKey(null)
+    setAlterPrefilledText(item.title)
+    setAlterOpen(true)
+  }, [])
 
   const heroImage = display.days[0]?.items[0]?.imageUrl ?? '/fixture-images/city-lisbon.webp'
   const busy = alterStatus === 'altering' || loadStatus === 'loading'
@@ -383,11 +637,13 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
           background: 'linear-gradient(to bottom, transparent 30%, var(--bg-secondary) 100%)',
         }} />
 
+        {/* ← Back — min 44px tap target (AC#6) */}
         {onStartOver && (
           <button onClick={onStartOver} style={{
             position: 'absolute', top: 52, left: 16,
             background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(6px)',
-            border: 'none', borderRadius: 999, padding: '6px 14px',
+            border: 'none', borderRadius: 999,
+            minHeight: 44, padding: '0 16px',
             color: 'white', fontSize: 13, cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: 5,
           }}>
@@ -442,7 +698,7 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
               key={day.day}
               day={day}
               removedKeys={removedKeys}
-              onRemove={key => setRemovedKeys(prev => new Set([...prev, key]))}
+              onOpen={handleOpenItem}
             />
           ))}
         </div>
@@ -455,6 +711,7 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
         background: 'linear-gradient(to top, var(--bg-secondary) 80%, transparent 100%)',
       }}>
         <div style={{ maxWidth: 430, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {/* Add to Calendar — already ≥44px */}
           <button
             style={{
               width: '100%', padding: '16px 0', borderRadius: 16,
@@ -465,14 +722,16 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
             Add to Calendar
           </button>
 
+          {/* ✏️ Change something? — min 44px tap target (AC#6) */}
           {alterPlan && (
             <button
-              onClick={() => !busy && setAlterOpen(true)}
+              onClick={() => !busy && (setAlterPrefilledText(''), setAlterOpen(true))}
               disabled={busy}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 background: 'none', border: 'none', cursor: busy ? 'not-allowed' : 'pointer',
-                color: 'var(--text-secondary)', fontSize: 14, padding: '4px 0',
+                color: 'var(--text-secondary)', fontSize: 14,
+                minHeight: 44, padding: '0 8px',
                 opacity: busy ? 0.4 : 1, transition: 'opacity 0.15s',
               }}
             >
@@ -481,10 +740,13 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
             </button>
           )}
 
+          {/* Share trip — min 44px tap target (AC#6) */}
           <button
             style={{
               background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--text-tertiary)', fontSize: 14, textAlign: 'center', padding: '2px 0',
+              color: 'var(--text-tertiary)', fontSize: 14,
+              minHeight: 44,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}
           >
             Share trip
@@ -492,13 +754,60 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
         </div>
       </div>
 
+      {/* AC#3: Item Detail Bottom Sheet */}
+      <ItemDetailSheet
+        item={activeItem}
+        onClose={handleCloseSheet}
+        onRemove={handleRemoveItem}
+        onChangeItem={handleChangeItem}
+      />
+
+      {/* AC#5: Undo toast — 5s, appears above sticky bar */}
+      <AnimatePresence>
+        {undoState && (
+          <motion.div
+            className="fixed left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
+            style={{ bottom: 120 }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+          >
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+              borderRadius: 16, boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+              padding: '12px 16px', maxWidth: 360, width: '100%',
+              pointerEvents: 'auto',
+            }}>
+              <span style={{ flex: 1, fontSize: 13, color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                Removed <strong style={{ color: 'var(--text-primary)' }}>{undoState.title}</strong>
+              </span>
+              <button
+                onClick={handleUndoRemove}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  color: 'var(--accent)', fontWeight: 700, fontSize: 13,
+                  flexShrink: 0, minHeight: 44, minWidth: 44,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0 4px',
+                }}
+              >
+                Undo
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Alter sheet */}
       <AnimatePresence>
         {alterOpen && (
           <AlterSheet
             onSubmit={handleAlterSubmit}
-            onDismiss={() => setAlterOpen(false)}
+            onDismiss={() => { setAlterOpen(false); setAlterPrefilledText('') }}
             isLoading={alterStatus === 'altering'}
+            prefilledText={alterPrefilledText}
           />
         )}
       </AnimatePresence>
