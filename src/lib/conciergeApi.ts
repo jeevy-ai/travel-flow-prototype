@@ -9,12 +9,15 @@ export interface TransportLeg {
   notes?: string
 }
 
+export type EventCategory = 'conference' | 'dining' | 'explore' | 'accommodation' | 'other'
+
 export interface ItineraryItem {
   time: string
   title: string
   detail: string
   imageQuery?: string
   imageUrl?: string
+  category?: EventCategory
   transportAfter?: TransportLeg
 }
 

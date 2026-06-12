@@ -15,7 +15,36 @@ interface Props {
 }
 
 // ---------------------------------------------------------------------------
-// Transport connector between items
+// Fixture image resolver — maps item content to available fixture assets
+// ---------------------------------------------------------------------------
+
+const CONFERENCE_IMAGES = [
+  '/fixture-images/conference-session-keynote-k01.webp',
+  '/fixture-images/conference-session-keynote-k02.webp',
+  '/fixture-images/conference-session-keynote-k08.webp',
+  '/fixture-images/conference-session-keynote-w07.webp',
+]
+
+function inferFixtureImage(item: ItineraryItem, index: number): string {
+  const text = `${item.title} ${item.detail} ${item.imageQuery ?? ''}`.toLowerCase()
+
+  if (/conference|summit|keynote|session|talk|workshop|networking|expo/.test(text)) {
+    return CONFERENCE_IMAGES[index % CONFERENCE_IMAGES.length]
+  }
+  if (/dinner|restaurant|lunch|cuisine|food|eat|dining|tavern|michelin|tasting/.test(text)) {
+    return '/fixture-images/restaurant-dinner-lisbon.webp'
+  }
+  if (/hotel|check.?in|check.?out|accommodation|room|suite|sleep/.test(text)) {
+    return '/fixture-images/hotel-marriott-lisbon-exterior.webp'
+  }
+  if (/arrive|arrival|airport|portela|lis|flight|transfer/.test(text)) {
+    return '/fixture-images/flight-outbound-business-cabin.webp'
+  }
+  return '/fixture-images/city-lisbon.webp'
+}
+
+// ---------------------------------------------------------------------------
+// Transport connector between items — pill with vertical connector line
 // ---------------------------------------------------------------------------
 
 function TransportConnector({ leg }: { leg: TransportLeg }) {
@@ -24,50 +53,76 @@ function TransportConnector({ leg }: { leg: TransportLeg }) {
     ferry: '⛴️', bus: '🚌', car: '🚗', train: '🚆',
   }
   const icon = icons[leg.mode.toLowerCase()] ?? '➡️'
+
   return (
-    <div className="flex items-center gap-2 py-2 pl-1">
-      <span className="text-[13px]">{icon}</span>
-      <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>
-        {leg.mode} · {leg.duration}
-        {leg.notes && ` · ${leg.notes}`}
-      </span>
+    <div className="flex flex-col items-center my-0.5" style={{ paddingLeft: '20px' }}>
+      <div className="w-px h-3" style={{ background: 'var(--border)' }} />
+      <div
+        className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px]"
+        style={{
+          background: 'var(--bg-secondary)',
+          color: 'var(--text-tertiary)',
+          border: '1px solid var(--border)',
+        }}
+      >
+        <span style={{ fontSize: 13 }}>{icon}</span>
+        <span>{leg.duration}{leg.notes ? ` · ${leg.notes}` : ''}</span>
+      </div>
+      <div className="w-px h-3" style={{ background: 'var(--border)' }} />
     </div>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Single timeline item card with image
+// Single timeline item card with image at top — card-first layout
 // ---------------------------------------------------------------------------
 
-function ItemCard({ item }: { item: ItineraryItem }) {
+function ItemCard({ item, index }: { item: ItineraryItem; index: number }) {
   const [imgError, setImgError] = useState(false)
+  const resolvedSrc = (!imgError && item.imageUrl) ? item.imageUrl : inferFixtureImage(item, index)
 
   return (
-    <div className="mb-3">
-      {item.imageUrl && !imgError && (
-        <div
-          className="rounded-xl overflow-hidden mb-2"
-          style={{ height: 140 }}
-        >
-          <img
-            src={item.imageUrl}
-            alt={item.title}
-            className="w-full h-full object-cover"
-            onError={() => setImgError(true)}
-            style={{ filter: 'brightness(0.95) saturate(1.1)' }}
-          />
-        </div>
-      )}
-      <div className="flex items-start gap-2">
-        <span
-          className="text-[12px] font-medium shrink-0 mt-[3px]"
-          style={{ color: 'var(--accent)', minWidth: 40 }}
-        >
-          {item.time}
-        </span>
-        <div>
-          <p className="text-[15px] font-semibold text-on-surface leading-snug">{item.title}</p>
-          <p className="text-[13px] text-on-dim mt-0.5">{item.detail}</p>
+    <div
+      className="mb-3 rounded-xl overflow-hidden"
+      style={{
+        background: 'var(--bg)',
+        boxShadow: 'var(--shadow-card)',
+        border: '1px solid var(--border)',
+      }}
+    >
+      {/* Image at top — 160px tall, full-bleed */}
+      <div style={{ height: 160, overflow: 'hidden' }}>
+        <img
+          src={resolvedSrc}
+          alt={item.title}
+          className="w-full h-full object-cover"
+          style={{ filter: 'brightness(0.93) saturate(1.08)' }}
+          onError={() => setImgError(true)}
+        />
+      </div>
+      {/* Content below */}
+      <div className="px-3 py-3">
+        <div className="flex items-start gap-2.5">
+          <span
+            className="text-[12px] font-medium shrink-0"
+            style={{ color: 'var(--accent)', minWidth: 52, marginTop: 2 }}
+          >
+            {item.time}
+          </span>
+          <div className="min-w-0">
+            <p
+              className="text-[15px] font-semibold leading-snug"
+              style={{ color: 'var(--text-primary)' }}
+            >
+              {item.title}
+            </p>
+            <p
+              className="text-[13px] mt-0.5 leading-relaxed"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              {item.detail}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -75,7 +130,30 @@ function ItemCard({ item }: { item: ItineraryItem }) {
 }
 
 // ---------------------------------------------------------------------------
-// Alter sheet
+// Personalization cue — "Curated for you by Jeevy"
+// ---------------------------------------------------------------------------
+
+function PersonalizationTag() {
+  return (
+    <motion.div
+      className="flex items-center justify-center gap-1.5 py-3"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ delay: 0.3, duration: 0.4 }}
+    >
+      <span style={{ color: 'var(--accent)', fontSize: 11 }}>✦</span>
+      <span
+        className="text-[12px] tracking-wide"
+        style={{ color: 'var(--text-tertiary)', fontVariant: 'normal' }}
+      >
+        Curated for you by Jeevy
+      </span>
+    </motion.div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Alter sheet — bottom sheet to request plan changes
 // ---------------------------------------------------------------------------
 
 function AlterSheet({
@@ -91,7 +169,7 @@ function AlterSheet({
   const SUGGESTIONS = [
     'Make the pace more relaxed',
     'Add a seafood dinner on day 2',
-    'Swap the morning activity for a museum visit',
+    'Swap morning activity for a museum',
     'Add a rooftop bar in the evening',
   ]
 
@@ -104,12 +182,12 @@ function AlterSheet({
     >
       <div
         className="absolute inset-0"
-        style={{ background: 'rgba(0,0,0,0.5)' }}
+        style={{ background: 'rgba(0,0,0,0.48)' }}
         onClick={onDismiss}
       />
       <motion.div
         className="relative rounded-t-3xl pb-10 pt-6 px-5"
-        style={{ background: 'var(--bg-secondary)' }}
+        style={{ background: 'var(--bg)' }}
         initial={{ y: '100%' }}
         animate={{ y: 0 }}
         exit={{ y: '100%' }}
@@ -117,9 +195,12 @@ function AlterSheet({
       >
         <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'var(--border)' }} />
         <p className="text-[11px] font-mono uppercase tracking-widest mb-1" style={{ color: 'var(--text-tertiary)' }}>
-          Jeevy · Alter plan
+          Jeevy · Update plan
         </p>
-        <h2 className="text-[22px] font-semibold mb-4" style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+        <h2
+          className="text-[22px] font-semibold mb-4"
+          style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}
+        >
           What would you like to change?
         </h2>
 
@@ -129,7 +210,11 @@ function AlterSheet({
               key={s}
               onClick={() => setDraft(s)}
               className="text-[13px] px-3 py-1.5 rounded-full border transition-colors"
-              style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg)' }}
+              style={{
+                borderColor: draft === s ? 'var(--accent)' : 'var(--border)',
+                color: draft === s ? 'var(--accent)' : 'var(--text-secondary)',
+                background: draft === s ? 'var(--accent-light)' : 'var(--bg-secondary)',
+              }}
             >
               {s}
             </button>
@@ -139,14 +224,15 @@ function AlterSheet({
         <textarea
           value={draft}
           onChange={e => setDraft(e.target.value)}
-          placeholder="e.g. Add a cooking class on day 2, remove the museum visit"
+          placeholder="e.g. Move the dinner to Alfama, add a wine tasting"
           rows={3}
           className="w-full rounded-2xl px-4 py-3 text-[15px] outline-none resize-none mb-4"
           style={{
-            background: 'var(--bg)',
+            background: 'var(--bg-secondary)',
             color: 'var(--text-primary)',
             border: '1px solid var(--border)',
           }}
+          autoFocus
         />
 
         <button
@@ -236,7 +322,7 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle' }: 
     await alterPlan(instruction)
   }
 
-  const heroImage = itinerary?.days[0]?.items[0]?.imageUrl
+  const heroImage = itinerary?.days[0]?.items[0]?.imageUrl ?? '/fixture-images/city-lisbon.webp'
 
   return (
     <div className="flex flex-col min-h-screen bg-surface-0 relative overflow-hidden">
@@ -251,13 +337,13 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle' }: 
           >
             <div className="absolute inset-0">
               <img
-                src={heroImage ?? '/fixture-images/city-lisbon.webp'}
+                src={heroImage}
                 alt={itinerary?.destination ?? 'Destination'}
                 className="w-full h-full object-cover"
-                style={{ filter: 'saturate(1.1) brightness(0.85)' }}
+                style={{ filter: 'saturate(1.1) brightness(0.82)' }}
                 onError={(e) => { (e.target as HTMLImageElement).src = '/fixture-images/city-lisbon.webp' }}
               />
-              <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.25)' }} />
+              <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.22)' }} />
             </div>
 
             <div className="relative flex flex-col items-center gap-6">
@@ -300,24 +386,32 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle' }: 
             {/* Hero peek */}
             <div className="relative h-[180px] shrink-0 overflow-hidden">
               <img
-                src={heroImage ?? '/fixture-images/city-lisbon.webp'}
+                src={heroImage}
                 alt={itinerary?.destination ?? 'Destination'}
                 className="w-full h-full object-cover"
-                style={{ filter: 'saturate(1.05) brightness(0.9)' }}
+                style={{ filter: 'saturate(1.05) brightness(0.88)' }}
                 onError={(e) => { (e.target as HTMLImageElement).src = '/fixture-images/city-lisbon.webp' }}
               />
               <div
                 className="absolute inset-0"
-                style={{ background: 'linear-gradient(to bottom, transparent 30%, var(--bg-secondary) 100%)' }}
+                style={{ background: 'linear-gradient(to bottom, transparent 25%, rgba(0,0,0,0.55) 100%)' }}
               />
-              <div className="absolute bottom-3 left-5">
-                <p className="text-on-surface font-semibold text-[18px]" style={{ letterSpacing: '-0.01em' }}>
-                  {itinerary ? itinerary.destination : 'Web Summit 2026'}
+              <div className="absolute bottom-4 left-5">
+                <p className="text-white font-semibold text-[20px]" style={{ letterSpacing: '-0.02em', textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
+                  {itinerary ? itinerary.destination : 'Web Summit 2026 · Lisbon'}
                 </p>
-                <p className="text-on-dim text-[13px]">
-                  {itinerary ? `${itinerary.dates} · Personalised for Noah` : 'Lisbon · Nov 9–12 · Ready to go'}
+                <p className="text-white/75 text-[13px] mt-0.5">
+                  {itinerary ? itinerary.dates : 'Nov 9–12 · Ready to go'}
                 </p>
               </div>
+            </div>
+
+            {/* Personalization cue */}
+            <div
+              className="px-5 pb-1 pt-0"
+              style={{ borderBottom: '1px solid var(--separator)' }}
+            >
+              <PersonalizationTag />
             </div>
 
             {/* Alter status banner */}
@@ -344,36 +438,36 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle' }: 
             </AnimatePresence>
 
             {/* Timeline */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pt-2 pb-36">
+            <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pt-3 pb-40">
               {itinerary
                 ? itinerary.days.map((day, gi) => (
-                    <div key={day.day} className={gi > 0 ? 'mt-5' : 'mt-2'}>
-                      <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-[13px] font-semibold" style={{ color: 'var(--text-tertiary)' }}>
+                    <div key={day.day} className={gi > 0 ? 'mt-6' : 'mt-1'}>
+                      {/* Day header */}
+                      <div className="flex items-baseline gap-2 mb-3 pl-1">
+                        <span
+                          className="text-[12px] font-semibold uppercase tracking-widest"
+                          style={{ color: 'var(--text-tertiary)' }}
+                        >
                           {day.day}
                         </span>
                       </div>
-                      <div className="relative pl-5">
-                        <div
-                          className="absolute left-[5px] top-2 w-px"
-                          style={{
-                            background: 'var(--border)',
-                            bottom: gi < itinerary.days.length - 1 ? -20 : 0,
-                          }}
-                        />
-                        <div
-                          className="absolute left-0 top-[7px] w-2.5 h-2.5 rounded-full"
-                          style={{ background: 'var(--text-primary)', border: '2px solid var(--bg-secondary)', zIndex: 1 }}
-                        />
-                        {day.items.map((item, ii) => (
-                          <div key={ii}>
-                            <ItemCard item={item} />
-                            {item.transportAfter && ii < day.items.length - 1 && (
-                              <TransportConnector leg={item.transportAfter} />
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                      {/* Items with inline transport connectors */}
+                      {day.items.map((item, ii) => (
+                        <div key={ii}>
+                          {/* Skeleton shimmer during alter */}
+                          {alterStatus === 'altering' ? (
+                            <div
+                              className="mb-3 rounded-xl overflow-hidden"
+                              style={{ height: 200, background: 'linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg) 50%, var(--bg-secondary) 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }}
+                            />
+                          ) : (
+                            <ItemCard item={item} index={gi * 10 + ii} />
+                          )}
+                          {item.transportAfter && ii < day.items.length - 1 && (
+                            <TransportConnector leg={item.transportAfter} />
+                          )}
+                        </div>
+                      ))}
                     </div>
                   ))
                 : TIMELINE.map((group, gi) => (
@@ -441,31 +535,41 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle' }: 
               }
             </div>
 
-            {/* Sticky CTA */}
+            {/* Sticky CTAs */}
             <div
-              className="fixed bottom-0 left-0 right-0 flex flex-col items-center gap-2 px-5 pb-10 pt-4"
-              style={{ background: 'linear-gradient(to top, var(--bg-secondary) 80%, transparent 100%)' }}
+              className="fixed bottom-0 left-0 right-0 flex flex-col items-center gap-2 px-5 pb-10 pt-5"
+              style={{ background: 'linear-gradient(to top, var(--bg-secondary) 75%, transparent 100%)' }}
             >
-              <div className="w-full max-w-[430px] flex flex-col gap-2">
-                {alterPlan && (
-                  <button
-                    onClick={() => setAlterOpen(true)}
-                    disabled={alterStatus === 'altering'}
-                    className="w-full py-4 rounded-2xl font-semibold text-[16px] transition-opacity disabled:opacity-40"
-                    style={{ background: 'var(--accent)', color: 'white' }}
-                  >
-                    {alterStatus === 'altering' ? 'Updating…' : 'Alter this plan →'}
-                  </button>
-                )}
+              <div className="w-full max-w-[430px] flex flex-col gap-2.5">
+                {/* Primary: Add to Calendar */}
                 <button
                   className="w-full py-4 rounded-2xl font-semibold text-[16px] text-white transition-opacity active:opacity-80"
                   style={{ background: 'var(--text-primary)' }}
                 >
                   Add to Calendar
                 </button>
+
+                {/* Secondary: Change something */}
+                {alterPlan && (
+                  <button
+                    onClick={() => setAlterOpen(true)}
+                    disabled={alterStatus === 'altering'}
+                    className="w-full py-3.5 rounded-2xl font-medium text-[15px] transition-opacity disabled:opacity-40 active:opacity-70"
+                    style={{
+                      background: 'transparent',
+                      color: 'var(--text-secondary)',
+                      border: '1px solid var(--border)',
+                    }}
+                  >
+                    {alterStatus === 'altering' ? '✦ Updating your plan…' : '✏️  Change something?'}
+                  </button>
+                )}
+
+                {/* Tertiary: Share */}
                 <Link
                   to="/itinerary/ws2026/day-of"
-                  className="block w-full text-center text-[15px] font-medium text-on-dim py-2 transition-opacity active:opacity-60"
+                  className="block w-full text-center text-[14px] font-medium py-1 transition-opacity active:opacity-60"
+                  style={{ color: 'var(--text-tertiary)' }}
                 >
                   Share trip
                 </Link>
@@ -485,6 +589,13 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle' }: 
           />
         )}
       </AnimatePresence>
+
+      <style>{`
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+      `}</style>
     </div>
   )
 }
