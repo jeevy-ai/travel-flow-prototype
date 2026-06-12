@@ -1,6 +1,6 @@
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { useState } from 'react'
-import type { Itinerary } from '../../lib/conciergeApi'
+import { useButlerChat } from '../../hooks/useButlerChat'
 import { S1ButlerNudge } from './screens/S1ButlerNudge'
 import { S2PrefsConfirm } from './screens/S2PrefsConfirm'
 import { S3FlightSelection } from './screens/S3FlightSelection'
@@ -24,14 +24,14 @@ const SCREEN_VARIANTS: Variants = {
 export function AppleFlowPage() {
   const [screen, setScreen] = useState<Screen>('s1')
   const [dismissed, setDismissed] = useState(false)
-  const [butlerItinerary, setButlerItinerary] = useState<Itinerary | null>(null)
+  const butler = useButlerChat()
 
   if (dismissed) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-surface-0 gap-4">
         <p className="text-on-dim text-[16px]">Come back when you're ready.</p>
         <button
-          onClick={() => { setDismissed(false); setScreen('s1') }}
+          onClick={() => { setDismissed(false); setScreen('s1'); butler.reset() }}
           className="text-[15px] font-medium text-on-surface underline"
         >
           Start over
@@ -58,10 +58,12 @@ export function AppleFlowPage() {
           {screen === 'sChat' && (
             <motion.div key="sChat" variants={SCREEN_VARIANTS} initial="initial" animate="animate" exit="exit">
               <SButlerChat
-                onItineraryReady={(it) => {
-                  setButlerItinerary(it)
-                  next('s8')
-                }}
+                messages={butler.messages}
+                status={butler.status}
+                error={butler.error}
+                itinerary={butler.itinerary}
+                sendMessage={butler.sendMessage}
+                onItineraryReady={() => next('s8')}
               />
             </motion.div>
           )}
@@ -138,7 +140,11 @@ export function AppleFlowPage() {
 
           {screen === 's8' && (
             <motion.div key="s8" variants={SCREEN_VARIANTS} initial="initial" animate="animate" exit="exit">
-              <S8ItineraryPeak itinerary={butlerItinerary} />
+              <S8ItineraryPeak
+                itinerary={butler.itinerary}
+                alterPlan={butler.alterPlan}
+                alterStatus={butler.status === 'altering' ? 'altering' : 'idle'}
+              />
             </motion.div>
           )}
         </AnimatePresence>

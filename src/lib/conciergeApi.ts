@@ -3,10 +3,19 @@ export interface ChatMessage {
   content: string
 }
 
+export interface TransportLeg {
+  mode: string
+  duration: string
+  notes?: string
+}
+
 export interface ItineraryItem {
   time: string
   title: string
   detail: string
+  imageQuery?: string
+  imageUrl?: string
+  transportAfter?: TransportLeg
 }
 
 export interface ItineraryDay {
@@ -26,19 +35,36 @@ export interface ConciergeResponse {
   itinerary: Itinerary | null
 }
 
-const ENDPOINT = 'https://ai-action-service.noahlaux.workers.dev/concierge/itinerary'
+const BASE = 'https://ai-action-service.noahlaux.workers.dev'
+const ITINERARY_ENDPOINT = `${BASE}/concierge/itinerary`
+const ALTER_ENDPOINT = `${BASE}/concierge/itinerary/alter`
 
-export async function sendToConcierge(messages: ChatMessage[]): Promise<ConciergeResponse> {
-  const res = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages }),
-  })
-
+async function parseResponse(res: Response): Promise<ConciergeResponse> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({})) as { error?: string }
     throw new Error(body.error ?? `Request failed: ${res.status}`)
   }
-
   return res.json() as Promise<ConciergeResponse>
+}
+
+export async function sendToConcierge(messages: ChatMessage[]): Promise<ConciergeResponse> {
+  const res = await fetch(ITINERARY_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages }),
+  })
+  return parseResponse(res)
+}
+
+export async function alterItinerary(
+  instruction: string,
+  currentItinerary: Itinerary,
+  messages?: ChatMessage[],
+): Promise<ConciergeResponse> {
+  const res = await fetch(ALTER_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ instruction, currentItinerary, messages }),
+  })
+  return parseResponse(res)
 }

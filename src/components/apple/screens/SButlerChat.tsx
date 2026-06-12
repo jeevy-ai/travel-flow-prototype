@@ -1,10 +1,15 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import { useButlerChat } from '../../../hooks/useButlerChat'
-import type { Itinerary } from '../../../lib/conciergeApi'
+import type { ChatMessage, Itinerary } from '../../../lib/conciergeApi'
+import type { ChatStatus } from '../../../hooks/useButlerChat'
 
 interface Props {
-  onItineraryReady: (itinerary: Itinerary) => void
+  messages: ChatMessage[]
+  status: ChatStatus
+  error: string | null
+  itinerary: Itinerary | null
+  sendMessage: (text: string) => Promise<void>
+  onItineraryReady: () => void
 }
 
 function TypingDots() {
@@ -23,8 +28,7 @@ function TypingDots() {
   )
 }
 
-export function SButlerChat({ onItineraryReady }: Props) {
-  const { messages, status, error, itinerary, sendMessage } = useButlerChat()
+export function SButlerChat({ messages, status, error, itinerary, sendMessage, onItineraryReady }: Props) {
   const [draft, setDraft] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -35,7 +39,7 @@ export function SButlerChat({ onItineraryReady }: Props) {
 
   useEffect(() => {
     if (itinerary) {
-      const t = setTimeout(() => onItineraryReady(itinerary), 800)
+      const t = setTimeout(() => onItineraryReady(), 800)
       return () => clearTimeout(t)
     }
   }, [itinerary, onItineraryReady])
@@ -45,7 +49,7 @@ export function SButlerChat({ onItineraryReady }: Props) {
     const text = draft.trim()
     if (!text || status === 'loading') return
     setDraft('')
-    sendMessage(text)
+    void sendMessage(text)
   }
 
   return (
@@ -57,7 +61,7 @@ export function SButlerChat({ onItineraryReady }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.2 }}
         >
-          <p className="text-[13px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Your butler</p>
+          <p className="text-[13px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Your butler · Jeevy</p>
           <h1
             className="font-semibold text-[28px] leading-tight mt-0.5"
             style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}
@@ -70,16 +74,12 @@ export function SButlerChat({ onItineraryReady }: Props) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-5 pb-4">
         {messages.length === 0 && status === 'idle' && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-2"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2">
             <div
               className="rounded-2xl px-4 py-3 max-w-[85%] text-[15px] leading-relaxed"
               style={{ background: 'var(--bg)', color: 'var(--text-primary)', boxShadow: 'var(--shadow-card)' }}
             >
-              Tell me about your trip — destination, dates, who's going — and I'll build your itinerary.
+              Hi Noah! Tell me about your trip — destination and dates — and I'll build a personalised itinerary just for you.
             </div>
           </motion.div>
         )}
@@ -136,7 +136,7 @@ export function SButlerChat({ onItineraryReady }: Props) {
               <button
                 className="block mt-1 text-[13px] font-medium underline"
                 style={{ color: 'var(--danger)' }}
-                onClick={() => sendMessage(messages[messages.length - 2]?.content ?? '')}
+                onClick={() => void sendMessage(messages[messages.length - 2]?.content ?? '')}
               >
                 Try again
               </button>
@@ -146,7 +146,7 @@ export function SButlerChat({ onItineraryReady }: Props) {
 
         {itinerary && (
           <motion.div
-            initial={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 4 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, delay: 0.1 }}
             className="mt-4 flex justify-start"
