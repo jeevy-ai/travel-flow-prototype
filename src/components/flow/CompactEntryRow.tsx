@@ -39,9 +39,9 @@ const PROVIDER_CONFIG: Record<EntryType, { bg: string; label?: string; emoji?: s
   restaurant:         { bg: '#C05621', emoji: '🍽' },
   activity:           { bg: '#553C9A', emoji: '🌟' },
   hotel:              { bg: '#C4956A', emoji: '🏨' },
-  flight_outbound:    { bg: '#2B6CB0', emoji: '✈' },
-  flight_return:      { bg: '#2B6CB0', emoji: '✈' },
-  conference_venue:   { bg: '#434FC0', emoji: '🎙' },
+  flight_outbound:    { bg: 'var(--accent)', emoji: '✈' },
+  flight_return:      { bg: 'var(--accent)', emoji: '✈' },
+  conference_venue:   { bg: 'var(--accent)', emoji: '🎙' },
   conference_session: { bg: '#38B2AC', emoji: '📋' },
   reminders:          { bg: '#38A169', emoji: '🔔' },
 }

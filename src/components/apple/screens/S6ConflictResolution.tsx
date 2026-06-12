@@ -12,19 +12,19 @@ export function S6ConflictResolution({ onKeepSession, onKeepMeeting }: Props) {
         <motion.h1
           className="font-semibold text-[28px] text-on-surface mb-6"
           style={{ letterSpacing: '-0.02em' }}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0] }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0] }}
         >
           One overlap.
         </motion.h1>
 
         <motion.div
           className="rounded-2xl overflow-hidden"
-          style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-          initial={{ opacity: 0, y: 12 }}
+          style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 }}
         >
           <div className="px-5 pt-5 pb-4">
             <p className="text-[16px] text-on-surface leading-relaxed">
@@ -56,7 +56,7 @@ export function S6ConflictResolution({ onKeepSession, onKeepMeeting }: Props) {
           className="text-[13px] text-on-dim text-center mt-4 leading-relaxed"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.28, delay: 0.15 }}
+          transition={{ duration: 0.2, delay: 0.15 }}
         >
           Jeevy will reschedule whichever you don't keep.
         </motion.p>

@@ -19,7 +19,7 @@ export function GhostCard({ entry, onLetJeevyArrange }: Props) {
   return (
     <div
       className="rounded-xl overflow-hidden"
-      style={{ border: '1.5px dashed #D4C9BC', background: '#FAF9F7', opacity: 0.85 }}
+      style={{ border: '1.5px dashed var(--border)', background: 'var(--bg-secondary)', opacity: 0.85 }}
     >
       <div className="relative" style={{ aspectRatio: '16/9' }}>
         <ImageSlot
@@ -30,13 +30,13 @@ export function GhostCard({ entry, onLetJeevyArrange }: Props) {
           overlay
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10">
-          <span className="text-4xl" style={{ color: '#4A5568' }}>
+          <span className="text-4xl" style={{ color: 'var(--text-secondary)' }}>
             {ENTRY_ICONS[entry.type] ?? '📍'}
           </span>
-          <p className="text-[#2D3748] font-semibold text-[14px] text-center px-4">
+          <p className="text-text-primary font-semibold text-[14px] text-center px-4">
             {entry.ghostHeadline}
           </p>
-          <p className="text-[#718096] text-[12px] text-center px-6">
+          <p className="text-text-secondary text-[12px] text-center px-6">
             {entry.ghostSubtext}
           </p>
         </div>
@@ -51,7 +51,7 @@ export function GhostCard({ entry, onLetJeevyArrange }: Props) {
         </button>
         <button
           className="flex-1 text-[13px] font-medium py-2 rounded-lg border transition-colors hover:opacity-80"
-          style={{ borderColor: '#D4C9BC', color: '#4A5568' }}
+          style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
         >
           Add manually
         </button>

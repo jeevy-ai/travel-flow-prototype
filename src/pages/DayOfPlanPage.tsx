@@ -5,7 +5,7 @@ export function DayOfPlanPage() {
   return (
     <div
       className="relative flex flex-col min-h-screen overflow-hidden"
-      style={{ background: '#0A0A0A' }}
+      style={{ background: 'var(--text-primary)' }}
     >
       {/* Subtle background photo — desaturated and dark */}
       <div className="absolute inset-0">

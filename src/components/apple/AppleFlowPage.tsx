@@ -17,8 +17,8 @@ type Screen = 's1' | 'sChat' | 's2' | 's3' | 's4' | 's5' | 's5b' | 's6' | 's7' |
 
 const SCREEN_VARIANTS: Variants = {
   initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.28, ease: 'easeOut' } },
-  exit: { opacity: 0, y: -8, transition: { duration: 0.18, ease: 'easeIn' } },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.2, ease: 'easeOut' } },
+  exit: { opacity: 0, y: -8, transition: { duration: 0.15, ease: 'easeIn' } },
 }
 
 export function AppleFlowPage() {

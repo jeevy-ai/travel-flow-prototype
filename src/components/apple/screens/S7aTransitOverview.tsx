@@ -86,9 +86,9 @@ export function S7aTransitOverview({ onLooksGood }: Props) {
         <motion.h1
           className="font-semibold text-[28px] text-on-surface mb-1"
           style={{ letterSpacing: '-0.02em' }}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0] }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0] }}
         >
           Your route.
         </motion.h1>
@@ -97,7 +97,7 @@ export function S7aTransitOverview({ onLooksGood }: Props) {
           className="text-[16px] text-on-dim mb-8"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.28, delay: 0.04 }}
+          transition={{ duration: 0.2, delay: 0.04 }}
         >
           How you move between the dots.
         </motion.p>
@@ -109,12 +109,12 @@ export function S7aTransitOverview({ onLooksGood }: Props) {
             return (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 1, y: 0 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 + i * 0.06 }}
+                transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 + i * 0.06 }}
               >
                 {/* Origin label */}
-                <p className="text-[13px] mb-2" style={{ color: '#9CA3AF' }}>{leg.fromLabel}</p>
+                <p className="text-[13px] mb-2" style={{ color: 'var(--text-tertiary)' }}>{leg.fromLabel}</p>
 
                 {/* Connector line + leg card */}
                 <div className="flex gap-3 mb-2">
@@ -122,14 +122,14 @@ export function S7aTransitOverview({ onLooksGood }: Props) {
                   <div className="flex flex-col items-center pt-1">
                     <div
                       className="w-0 flex-1"
-                      style={{ borderLeft: '1.5px dashed #E5E7EB', minHeight: 60 }}
+                      style={{ borderLeft: '1.5px dashed var(--border)', minHeight: 60 }}
                     />
                   </div>
 
                   {/* Leg card */}
                   <div
                     className="flex-1 rounded-xl mb-2 overflow-hidden"
-                    style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                    style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
                   >
                     <div className="px-4 py-4">
                       <p className="text-[16px] font-semibold text-on-surface">
@@ -148,29 +148,29 @@ export function S7aTransitOverview({ onLooksGood }: Props) {
           })}
 
           {/* Final destination */}
-          <p className="text-[13px]" style={{ color: '#9CA3AF' }}>Cervejaria Ramiro · 19:30</p>
+          <p className="text-[13px]" style={{ color: 'var(--text-tertiary)' }}>Cervejaria Ramiro · 19:30</p>
         </div>
       </div>
 
       {/* Sticky CTA + Customize */}
       <motion.div
         className="px-5 pb-10 pt-4 bg-surface-0 flex flex-col gap-3"
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
+        transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
       >
         <button
           onClick={onLooksGood}
           className="w-full py-[18px] rounded-2xl font-semibold text-[16px] text-white transition-opacity active:opacity-80"
-          style={{ background: '#1A1A1A' }}
+          style={{ background: 'var(--text-primary)' }}
         >
           Looks good
         </button>
 
         <button
           onClick={() => { setCustomizeOpen(v => !v); setExpandedLeg(customizeOpen ? null : 0) }}
-          className="w-full text-center text-[14px] font-medium py-1 transition-opacity active:opacity-60"
-          style={{ color: '#5B4FE8' }}
+          className="w-full text-center text-[14px] font-medium py-3 min-h-[44px] flex items-center justify-center transition-opacity active:opacity-60"
+          style={{ color: 'var(--accent)' }}
         >
           Customize ›
         </button>
@@ -179,11 +179,11 @@ export function S7aTransitOverview({ onLooksGood }: Props) {
           {customizeOpen && (
             <motion.div
               className="rounded-2xl overflow-hidden"
-              style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.22 }}
+              transition={{ duration: 0.2 }}
             >
               {legs.map((leg, i) => {
                 const isExpanded = expandedLeg === i
@@ -204,7 +204,7 @@ export function S7aTransitOverview({ onLooksGood }: Props) {
                       </div>
                       <span
                         className="text-[13px] font-medium"
-                        style={{ color: '#5B4FE8' }}
+                        style={{ color: 'var(--accent)' }}
                       >
                         {isExpanded ? 'Done' : 'Change'}
                       </span>
@@ -233,8 +233,8 @@ export function S7aTransitOverview({ onLooksGood }: Props) {
                                   onClick={() => swapMode(i, m)}
                                   className="flex flex-col items-center gap-1 py-3 px-2 rounded-xl text-[12px] transition-colors active:opacity-70"
                                   style={isSelected
-                                    ? { background: '#1A1A1A', color: '#FFFFFF' }
-                                    : { background: '#F5F4F0', color: '#6B7280' }
+                                    ? { background: 'var(--text-primary)', color: 'var(--bg)' }
+                                    : { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }
                                   }
                                 >
                                   <span className="text-[22px]">{mm.icon}</span>

@@ -27,9 +27,9 @@ export function S1ButlerNudge({ onSetItUp, onNotNow }: Props) {
       <div className="relative flex flex-col flex-1 justify-end">
         <motion.div
           className="px-6 pb-4"
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.15 }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.15 }}
         >
           <p className="text-white/60 text-[13px] mb-1 tracking-wide">
             Web Summit 2026 · Lisbon
@@ -43,14 +43,14 @@ export function S1ButlerNudge({ onSetItUp, onNotNow }: Props) {
         <motion.div
           className="relative px-5 pt-4 pb-8 flex flex-col gap-3"
           style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 100%)' }}
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.22 }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.22 }}
         >
           <button
             onClick={onSetItUp}
             className="w-full py-[18px] rounded-2xl font-semibold text-[16px] text-white transition-opacity active:opacity-80"
-            style={{ background: '#1A1A1A' }}
+            style={{ background: 'var(--text-primary)' }}
           >
             Set it up
           </button>

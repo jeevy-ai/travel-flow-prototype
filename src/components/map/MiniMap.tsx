@@ -38,7 +38,7 @@ export function MiniMap({ lat, lng, label, emoji = '📍', className = '' }: Pro
       className: '',
       html: `<div style="
         width:36px;height:36px;border-radius:50%;
-        background:rgba(108,122,255,0.9);
+        background:var(--accent);
         border:2px solid white;
         display:flex;align-items:center;justify-content:center;
         font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,0.4);

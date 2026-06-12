@@ -9,10 +9,10 @@ export function ProgressRing({ percent, size = 48, stroke = 3, animate = true }:
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#2e3240" strokeWidth={stroke} />
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="var(--border)" strokeWidth={stroke} />
       <motion.circle
         cx={size / 2} cy={size / 2} r={r}
-        fill="none" stroke="#34c97d" strokeWidth={stroke}
+        fill="none" stroke="var(--success)" strokeWidth={stroke}
         strokeLinecap="round"
         strokeDasharray={circumference}
         initial={{ strokeDashoffset: animate ? circumference : offset }}

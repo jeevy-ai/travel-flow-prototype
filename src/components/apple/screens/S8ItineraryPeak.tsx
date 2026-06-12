@@ -202,7 +202,7 @@ export function S8ItineraryPeak({ itinerary }: Props = {}) {
               />
               <div
                 className="absolute inset-0"
-                style={{ background: 'linear-gradient(to bottom, transparent 30%, #F5F4F0 100%)' }}
+                style={{ background: 'linear-gradient(to bottom, transparent 30%, var(--bg-secondary) 100%)' }}
               />
               <div className="absolute bottom-3 left-5">
                 <p className="text-on-surface font-semibold text-[18px]" style={{ letterSpacing: '-0.01em' }}>
@@ -220,7 +220,7 @@ export function S8ItineraryPeak({ itinerary }: Props = {}) {
                 ? itinerary.days.map((day, gi) => (
                     <div key={day.day} className={gi > 0 ? 'mt-5' : 'mt-2'}>
                       <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-[13px] font-semibold" style={{ color: '#9CA3AF' }}>
+                        <span className="text-[13px] font-semibold" style={{ color: 'var(--text-tertiary)' }}>
                           {day.day}
                         </span>
                       </div>
@@ -228,18 +228,18 @@ export function S8ItineraryPeak({ itinerary }: Props = {}) {
                         <div
                           className="absolute left-[5px] top-2 w-px"
                           style={{
-                            background: '#E5E7EB',
+                            background: 'var(--border)',
                             bottom: gi < itinerary.days.length - 1 ? -20 : 0,
                           }}
                         />
                         <div
                           className="absolute left-0 top-[7px] w-2.5 h-2.5 rounded-full"
-                          style={{ background: '#1A1A1A', border: '2px solid #F5F4F0', zIndex: 1 }}
+                          style={{ background: 'var(--text-primary)', border: '2px solid var(--bg-secondary)', zIndex: 1 }}
                         />
                         {day.items.map((item, ii) => (
                           <div key={ii} className="mb-3">
                             <div className="flex items-start gap-2">
-                              <span className="text-[12px] font-medium shrink-0 mt-[3px]" style={{ color: '#5B4FE8', minWidth: 40 }}>
+                              <span className="text-[12px] font-medium shrink-0 mt-[3px]" style={{ color: 'var(--accent)', minWidth: 40 }}>
                                 {item.time}
                               </span>
                               <div>
@@ -255,10 +255,10 @@ export function S8ItineraryPeak({ itinerary }: Props = {}) {
                 : TIMELINE.map((group, gi) => (
                     <div key={group.dateKey} className={gi > 0 ? 'mt-5' : 'mt-2'}>
                       <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-[13px] font-semibold" style={{ color: '#9CA3AF' }}>
+                        <span className="text-[13px] font-semibold" style={{ color: 'var(--text-tertiary)' }}>
                           {group.day}
                         </span>
-                        <span className="text-[11px] uppercase tracking-wide" style={{ color: '#9CA3AF', opacity: 0.7 }}>
+                        <span className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--text-tertiary)', opacity: 0.7 }}>
                           {group.label}
                         </span>
                       </div>
@@ -266,13 +266,13 @@ export function S8ItineraryPeak({ itinerary }: Props = {}) {
                         <div
                           className="absolute left-[5px] top-2 w-px"
                           style={{
-                            background: '#E5E7EB',
+                            background: 'var(--border)',
                             bottom: gi < TIMELINE.length - 1 ? -20 : 0,
                           }}
                         />
                         <div
                           className="absolute left-0 top-[7px] w-2.5 h-2.5 rounded-full"
-                          style={{ background: '#1A1A1A', border: '2px solid #F5F4F0', zIndex: 1 }}
+                          style={{ background: 'var(--text-primary)', border: '2px solid var(--bg-secondary)', zIndex: 1 }}
                         />
                         {group.items.map(item => {
                           const swapKey = `${group.dateKey}-${item.headline}`
@@ -288,7 +288,7 @@ export function S8ItineraryPeak({ itinerary }: Props = {}) {
                                   <button
                                     onClick={() => setSwapOpen(isSwapOpen ? null : swapKey)}
                                     className="shrink-0 text-[13px] font-medium mt-0.5 transition-opacity active:opacity-60"
-                                    style={{ color: '#5B4FE8' }}
+                                    style={{ color: 'var(--accent)' }}
                                   >
                                     {isSwapOpen ? 'Done' : '[Swap]'}
                                   </button>
@@ -298,7 +298,7 @@ export function S8ItineraryPeak({ itinerary }: Props = {}) {
                                 {item.swappable && isSwapOpen && (
                                   <motion.div
                                     className="mt-2 rounded-xl overflow-hidden"
-                                    style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                                    style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
                                     initial={{ opacity: 0, height: 0 }}
                                     animate={{ opacity: 1, height: 'auto' }}
                                     exit={{ opacity: 0, height: 0 }}
@@ -332,7 +332,7 @@ export function S8ItineraryPeak({ itinerary }: Props = {}) {
                         {group.transitLeg && (
                           <div className="mt-2 mb-1 flex items-center gap-1.5">
                             <span className="text-[14px]">{group.transitLeg.icon}</span>
-                            <span className="text-[12px]" style={{ color: '#9CA3AF' }}>{group.transitLeg.text}</span>
+                            <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{group.transitLeg.text}</span>
                           </div>
                         )}
                       </div>
@@ -344,12 +344,12 @@ export function S8ItineraryPeak({ itinerary }: Props = {}) {
             {/* Sticky CTA */}
             <div
               className="fixed bottom-0 left-0 right-0 flex flex-col items-center gap-2 px-5 pb-10 pt-4"
-              style={{ background: 'linear-gradient(to top, #F5F4F0 80%, transparent 100%)' }}
+              style={{ background: 'linear-gradient(to top, var(--bg-secondary) 80%, transparent 100%)' }}
             >
               <div className="w-full max-w-[430px]">
                 <button
                   className="w-full py-[18px] rounded-2xl font-semibold text-[16px] text-white transition-opacity active:opacity-80"
-                  style={{ background: '#1A1A1A' }}
+                  style={{ background: 'var(--text-primary)' }}
                 >
                   Add to Calendar
                 </button>

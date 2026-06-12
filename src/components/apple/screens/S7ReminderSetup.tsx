@@ -26,9 +26,9 @@ export function S7ReminderSetup({ onAllSet }: Props) {
         <motion.h1
           className="font-semibold text-[28px] text-on-surface mb-6"
           style={{ letterSpacing: '-0.02em' }}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0] }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0] }}
         >
           One reminder before you go.
         </motion.h1>
@@ -36,10 +36,10 @@ export function S7ReminderSetup({ onAllSet }: Props) {
         {/* Departure card */}
         <motion.div
           className="rounded-2xl overflow-hidden"
-          style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-          initial={{ opacity: 0, y: 12 }}
+          style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 }}
         >
           <div className="px-5 pt-5 pb-4">
             <p className="text-[17px] font-semibold text-on-surface">Leave for SFO</p>
@@ -55,7 +55,7 @@ export function S7ReminderSetup({ onAllSet }: Props) {
             <button
               onClick={() => setReminderOn(v => !v)}
               className="relative w-10 h-6 rounded-full transition-colors flex items-center"
-              style={{ background: reminderOn ? '#1A1A1A' : '#E5E7EB' }}
+              style={{ background: reminderOn ? 'var(--text-primary)' : 'var(--border)' }}
               aria-label={reminderOn ? 'Disable reminder' : 'Enable reminder'}
             >
               <motion.span
@@ -72,7 +72,7 @@ export function S7ReminderSetup({ onAllSet }: Props) {
           className="mt-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.28, delay: 0.12 }}
+          transition={{ duration: 0.2, delay: 0.12 }}
         >
           <button
             onClick={() => setPackingOpen(v => !v)}
@@ -85,18 +85,18 @@ export function S7ReminderSetup({ onAllSet }: Props) {
             {packingOpen && (
               <motion.div
                 className="mt-3 rounded-2xl overflow-hidden"
-                style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.22 }}
+                transition={{ duration: 0.2 }}
               >
                 {PACKING_ITEMS.map((item, i) => (
                   <div
                     key={item}
                     className={`flex items-center gap-3 px-5 py-3.5 ${i < PACKING_ITEMS.length - 1 ? 'border-b border-border' : ''}`}
                   >
-                    <span className="text-[13px]" style={{ color: '#9CA3AF' }}>›</span>
+                    <span className="text-[13px]" style={{ color: 'var(--text-tertiary)' }}>›</span>
                     <span className="text-[15px] text-on-surface">{item}</span>
                   </div>
                 ))}
@@ -109,14 +109,14 @@ export function S7ReminderSetup({ onAllSet }: Props) {
       {/* Sticky CTA */}
       <motion.div
         className="px-5 pb-10 pt-4 bg-surface-0"
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
+        transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
       >
         <button
           onClick={onAllSet}
           className="w-full py-[18px] rounded-2xl font-semibold text-[16px] text-white transition-opacity active:opacity-80"
-          style={{ background: '#1A1A1A' }}
+          style={{ background: 'var(--text-primary)' }}
         >
           All set
         </button>

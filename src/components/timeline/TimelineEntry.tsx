@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import type { TimelineEntry as TEntry, FlowEngine } from '../../hooks/useFlowEngine'
 import { GhostCard } from './GhostCard'
 import { TimelineEntryCollapsed } from './TimelineEntryCollapsed'
@@ -13,8 +13,7 @@ interface Props {
   isExpanded: boolean
 }
 
-export function TimelineEntry({ entry, flow, staggerIndex, isExpanded }: Props) {
-  const shouldReduceMotion = useReducedMotion()
+export function TimelineEntry({ entry, flow, isExpanded }: Props) {
   const prevStateRef = useRef(entry.state)
   const [showPulse, setShowPulse] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -36,14 +35,12 @@ export function TimelineEntry({ entry, flow, staggerIndex, isExpanded }: Props) 
   }, [entry.state])
 
   const isDayOfActive = flow.dayOfActiveId === entry.id
-  const entranceDelay = shouldReduceMotion ? 0 : staggerIndex * 0.06
 
   return (
     <motion.div
       ref={ref}
-      initial={{ y: shouldReduceMotion ? 0 : 20, opacity: 0 }}
-      animate={{ y: 0, opacity: entry.state === 'ghost' ? 0.85 : 1 }}
-      transition={{ duration: shouldReduceMotion ? 0 : 0.24, ease: [0.16, 1, 0.3, 1], delay: entranceDelay }}
+      animate={{ opacity: entry.state === 'ghost' ? 0.85 : 1 }}
+      transition={{ duration: 0.20 }}
     >
       {entry.state === 'ghost' ? (
         <GhostCard entry={entry} onLetJeevyArrange={() => flow.proposeEntry(entry.id)} />

@@ -31,9 +31,9 @@ export function S5bDining({ onReserve, onSkip }: Props) {
         <motion.h1
           className="font-semibold text-[28px] text-on-surface mb-1"
           style={{ letterSpacing: '-0.02em' }}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0] }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0] }}
         >
           Dinner sorted.
         </motion.h1>
@@ -42,7 +42,7 @@ export function S5bDining({ onReserve, onSkip }: Props) {
           className="text-[16px] text-on-dim mb-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.28, delay: 0.04 }}
+          transition={{ duration: 0.2, delay: 0.04 }}
         >
           Jeevy found a table for your first night.
         </motion.p>
@@ -50,10 +50,10 @@ export function S5bDining({ onReserve, onSkip }: Props) {
         {/* Restaurant card */}
         <motion.div
           className="rounded-2xl overflow-hidden"
-          style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-          initial={{ opacity: 0, y: 12 }}
+          style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.07 }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.07 }}
         >
           {/* Full-bleed hero dish photo */}
           <div className="relative h-[200px] overflow-hidden">
@@ -101,8 +101,8 @@ export function S5bDining({ onReserve, onSkip }: Props) {
             <div className="flex items-center gap-5">
               <button
                 onClick={() => setPartySize(v => Math.max(1, v - 1))}
-                className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-[20px] text-on-surface active:opacity-60 transition-opacity"
-                style={{ background: '#F5F4F0' }}
+                className="w-11 h-11 rounded-full flex items-center justify-center font-semibold text-[20px] text-on-surface active:opacity-60 transition-opacity"
+                style={{ background: 'var(--bg-secondary)' }}
                 aria-label="Decrease party size"
               >
                 −
@@ -112,8 +112,8 @@ export function S5bDining({ onReserve, onSkip }: Props) {
               </span>
               <button
                 onClick={() => setPartySize(v => Math.min(12, v + 1))}
-                className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-[20px] text-on-surface active:opacity-60 transition-opacity"
-                style={{ background: '#F5F4F0' }}
+                className="w-11 h-11 rounded-full flex items-center justify-center font-semibold text-[20px] text-on-surface active:opacity-60 transition-opacity"
+                style={{ background: 'var(--bg-secondary)' }}
                 aria-label="Increase party size"
               >
                 +
@@ -134,8 +134,8 @@ export function S5bDining({ onReserve, onSkip }: Props) {
                   className="px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors"
                   style={
                     seating === opt
-                      ? { background: '#1A1A1A', color: '#FFFFFF' }
-                      : { background: '#F5F4F0', color: '#6B7280' }
+                      ? { background: 'var(--text-primary)', color: 'var(--bg)' }
+                      : { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }
                   }
                 >
                   {opt.charAt(0).toUpperCase() + opt.slice(1)}
@@ -149,22 +149,22 @@ export function S5bDining({ onReserve, onSkip }: Props) {
       {/* Sticky CTA area */}
       <motion.div
         className="px-5 pb-10 pt-4 bg-surface-0 flex flex-col gap-3"
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
+        transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
       >
         <button
           onClick={onReserve}
           className="w-full py-[18px] rounded-2xl font-semibold text-[16px] text-white transition-opacity active:opacity-80"
-          style={{ background: '#5B4FE8' }}
+          style={{ background: 'var(--accent)' }}
         >
           {ctaLabel}
         </button>
 
         <button
           onClick={() => setCustomizeOpen(v => !v)}
-          className="w-full text-center text-[14px] font-medium py-1 transition-opacity active:opacity-60"
-          style={{ color: '#5B4FE8' }}
+          className="w-full text-center text-[14px] font-medium py-3 min-h-[44px] flex items-center justify-center transition-opacity active:opacity-60"
+          style={{ color: 'var(--accent)' }}
         >
           Customize ›
         </button>
@@ -173,11 +173,11 @@ export function S5bDining({ onReserve, onSkip }: Props) {
           {customizeOpen && (
             <motion.div
               className="rounded-2xl overflow-hidden"
-              style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.22 }}
+              transition={{ duration: 0.2 }}
             >
               <div className="px-5 pt-4 pb-2">
                 <p className="text-[13px] font-medium text-on-dim">Other restaurants</p>
@@ -208,7 +208,7 @@ export function S5bDining({ onReserve, onSkip }: Props) {
 
         <button
           onClick={onSkip}
-          className="w-full py-2 text-center text-[15px] font-medium text-on-dim transition-opacity active:opacity-60"
+          className="w-full py-3 min-h-[44px] flex items-center justify-center text-[15px] font-medium text-on-dim transition-opacity active:opacity-60"
         >
           Skip dining
         </button>

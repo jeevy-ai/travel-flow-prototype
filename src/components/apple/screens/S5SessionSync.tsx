@@ -43,19 +43,19 @@ export function S5SessionSync({ onAddToCalendar, onSkip }: Props) {
         <motion.h1
           className="font-semibold text-[28px] text-on-surface mb-6"
           style={{ letterSpacing: '-0.02em' }}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0] }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0] }}
         >
           Sessions worth catching.
         </motion.h1>
 
         <motion.div
           className="rounded-2xl overflow-hidden"
-          style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-          initial={{ opacity: 0, y: 12 }}
+          style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 }}
         >
           {SESSIONS.map((session, i) => (
             <div
@@ -77,14 +77,14 @@ export function S5SessionSync({ onAddToCalendar, onSkip }: Props) {
       {/* Sticky CTA */}
       <motion.div
         className="px-5 pb-10 pt-4 bg-surface-0 flex flex-col gap-3"
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
+        transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
       >
         <button
           onClick={onAddToCalendar}
           className="w-full py-[18px] rounded-2xl font-semibold text-[16px] text-white transition-opacity active:opacity-80"
-          style={{ background: '#1A1A1A' }}
+          style={{ background: 'var(--text-primary)' }}
         >
           Add to calendar
         </button>

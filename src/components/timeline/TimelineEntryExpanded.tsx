@@ -70,7 +70,7 @@ function SeatMap({ seat }: { seat: string }) {
                       key={col}
                       className={`w-7 h-5 rounded-sm flex items-center justify-center text-[9px] font-bold transition-colors ${
                         isTarget
-                          ? 'bg-accent text-white shadow-[0_0_6px_rgba(108,122,255,0.6)]'
+                          ? 'bg-accent text-white shadow-[0_0_6px_var(--shadow-focus)]'
                           : 'bg-surface-3 text-on-dim/40'
                       }`}
                       title={`${row}${col}`}

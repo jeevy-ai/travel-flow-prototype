@@ -14,7 +14,7 @@ function TypingDots() {
         <motion.div
           key={i}
           className="w-2 h-2 rounded-full"
-          style={{ background: '#9CA3AF' }}
+          style={{ background: 'var(--text-tertiary)' }}
           animate={{ opacity: [0.3, 1, 0.3] }}
           transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
         />
@@ -49,18 +49,18 @@ export function SButlerChat({ onItineraryReady }: Props) {
   }
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: '#F7F6F2' }}>
+    <div className="flex flex-col min-h-screen" style={{ background: 'var(--bg-secondary)' }}>
       {/* Header */}
       <div className="px-6 pt-14 pb-4 shrink-0">
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.26 }}
+          transition={{ duration: 0.2 }}
         >
-          <p className="text-[13px] font-medium" style={{ color: '#9CA3AF' }}>Your butler</p>
+          <p className="text-[13px] font-medium" style={{ color: 'var(--text-tertiary)' }}>Your butler</p>
           <h1
             className="font-semibold text-[28px] leading-tight mt-0.5"
-            style={{ color: '#1A1A1A', letterSpacing: '-0.02em' }}
+            style={{ color: 'var(--text-primary)', letterSpacing: '-0.02em' }}
           >
             Where would you like to go?
           </h1>
@@ -77,7 +77,7 @@ export function SButlerChat({ onItineraryReady }: Props) {
           >
             <div
               className="rounded-2xl px-4 py-3 max-w-[85%] text-[15px] leading-relaxed"
-              style={{ background: '#FFFFFF', color: '#374151', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              style={{ background: 'var(--bg)', color: 'var(--text-primary)', boxShadow: 'var(--shadow-card)' }}
             >
               Tell me about your trip — destination, dates, who's going — and I'll build your itinerary.
             </div>
@@ -90,15 +90,15 @@ export function SButlerChat({ onItineraryReady }: Props) {
               key={i}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.22 }}
+              transition={{ duration: 0.2 }}
               className={`mt-3 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
                 className="rounded-2xl px-4 py-3 max-w-[82%] text-[15px] leading-relaxed"
                 style={
                   msg.role === 'user'
-                    ? { background: '#1A1A1A', color: '#FFFFFF' }
-                    : { background: '#FFFFFF', color: '#374151', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }
+                    ? { background: 'var(--text-primary)', color: 'var(--bg)' }
+                    : { background: 'var(--bg)', color: 'var(--text-primary)', boxShadow: 'var(--shadow-card)' }
                 }
               >
                 {msg.content}
@@ -115,7 +115,7 @@ export function SButlerChat({ onItineraryReady }: Props) {
           >
             <div
               className="rounded-2xl max-w-[82%]"
-              style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
             >
               <TypingDots />
             </div>
@@ -130,12 +130,12 @@ export function SButlerChat({ onItineraryReady }: Props) {
           >
             <div
               className="rounded-2xl px-4 py-3 max-w-[82%] text-[14px] leading-snug"
-              style={{ background: '#FEE2E2', color: '#B91C1C' }}
+              style={{ background: 'var(--danger-light)', color: 'var(--danger)' }}
             >
               {error}
               <button
                 className="block mt-1 text-[13px] font-medium underline"
-                style={{ color: '#DC2626' }}
+                style={{ color: 'var(--danger)' }}
                 onClick={() => sendMessage(messages[messages.length - 2]?.content ?? '')}
               >
                 Try again
@@ -146,14 +146,14 @@ export function SButlerChat({ onItineraryReady }: Props) {
 
         {itinerary && (
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.28, delay: 0.1 }}
+            transition={{ duration: 0.2, delay: 0.1 }}
             className="mt-4 flex justify-start"
           >
             <div
               className="rounded-2xl px-4 py-3 max-w-[82%] text-[14px] leading-snug"
-              style={{ background: '#EEF2FF', color: '#3730A3' }}
+              style={{ background: 'var(--accent-light)', color: 'var(--accent)' }}
             >
               Your itinerary is ready — opening it now…
             </div>
@@ -166,7 +166,7 @@ export function SButlerChat({ onItineraryReady }: Props) {
       {/* Input bar */}
       <div
         className="shrink-0 px-4 pb-10 pt-3"
-        style={{ background: 'linear-gradient(to top, #F7F6F2 75%, transparent 100%)' }}
+        style={{ background: 'linear-gradient(to top, var(--bg-secondary) 75%, transparent 100%)' }}
       >
         <form onSubmit={handleSubmit} className="flex items-center gap-2">
           <input
@@ -178,9 +178,9 @@ export function SButlerChat({ onItineraryReady }: Props) {
             placeholder="Describe your trip…"
             className="flex-1 rounded-full px-5 py-3.5 text-[15px] outline-none disabled:opacity-50"
             style={{
-              background: '#FFFFFF',
-              color: '#1A1A1A',
-              border: '1px solid #E5E7EB',
+              background: 'var(--bg)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border)',
               boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
             }}
           />
@@ -188,7 +188,7 @@ export function SButlerChat({ onItineraryReady }: Props) {
             type="submit"
             disabled={!draft.trim() || status === 'loading' || !!itinerary}
             className="w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition-opacity disabled:opacity-30"
-            style={{ background: '#5B4FE8' }}
+            style={{ background: 'var(--accent)' }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M9 15V3M9 3L4 8M9 3l5 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

@@ -386,8 +386,8 @@ function AtmosphericCard({ entry, flow, staggerIndex, onOpen }: TimelineCardProp
 
 const PROVIDER_CONFIG: Partial<Record<EntryType, { bg: string; label?: string; emoji?: string }>> = {
   reminders:          { bg: '#38A169', emoji: '🔔' },
-  flight_outbound:    { bg: '#2B6CB0', emoji: '✈' },
-  flight_return:      { bg: '#2B6CB0', emoji: '✈' },
+  flight_outbound:    { bg: 'var(--accent)', emoji: '✈' },
+  flight_return:      { bg: 'var(--accent)', emoji: '✈' },
 }
 
 function CompactCard({ entry, flow, staggerIndex, onOpen }: TimelineCardProps) {

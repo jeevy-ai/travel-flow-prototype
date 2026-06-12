@@ -1,29 +1,53 @@
 @import "tailwindcss";
+@import "../tokens.css";
 
 @theme {
-  /* Apple-simple light palette */
-  --color-surface-0: #F5F4F0;
-  --color-surface-1: #FFFFFF;
-  --color-surface-2: #EDECEA;
-  --color-surface-3: #E4E2DD;
-  --color-on-surface: #1A1A1A;
-  --color-on-dim: #6B7280;
-  --color-on-faint: #9CA3AF;
-  /* Jeevy purple — confirmation moments only */
-  --color-accent: #5B4FE8;
-  --color-success: #22C55E;
-  --color-warning: #F59E0B;
-  --color-border: #E5E7EB;
+  /* System Light palette — YOU MVP */
+  --color-bg:           var(--bg);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-elevated:  var(--bg-elevated);
 
-  --font-family-sans: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
-  --font-family-mono: "SF Mono", "Fira Code", monospace;
+  --color-text-primary:   var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary:  var(--text-tertiary);
+
+  --color-border:    var(--border);
+  --color-separator: var(--separator);
+
+  --color-accent:       var(--accent);
+  --color-accent-light: var(--accent-light);
+
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger:  var(--danger);
+
+  --font-family-sans: var(--font);
+
+  --radius-sm:   var(--radius-sm);
+  --radius-md:   var(--radius-md);
+  --radius-lg:   var(--radius-lg);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-card:  var(--shadow-card);
+  --shadow-modal: var(--shadow-modal);
+
+  /* legacy semantic aliases — maps older class names to token vars */
+  --color-surface-0: var(--bg);
+  --color-surface-1: var(--bg);
+  --color-surface-2: var(--bg-secondary);
+  --color-surface-3: var(--bg-secondary);
+  --color-on-surface: var(--text-primary);
+  --color-on-dim: var(--text-secondary);
+  --color-on-faint: var(--text-tertiary);
 }
 
 @layer base {
   html, body {
-    background-color: #F5F4F0;
-    color: #1A1A1A;
-    font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+    background-color: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
     -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
     margin: 0;

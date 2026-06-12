@@ -21,9 +21,9 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
         <motion.h1
           className="font-semibold text-[28px] text-on-surface mb-6"
           style={{ letterSpacing: '-0.02em' }}
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0] }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0] }}
         >
           Here's your flight.
         </motion.h1>
@@ -31,10 +31,10 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
         {/* Flight card */}
         <motion.div
           className="rounded-2xl overflow-hidden"
-          style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-          initial={{ opacity: 0, y: 12 }}
+          style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 }}
+          transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.05 }}
         >
           {/* Airline photo */}
           <div className="relative h-[140px] overflow-hidden">
@@ -56,7 +56,7 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
           <div className="px-5 py-4">
             <p className="text-[17px] font-semibold text-on-surface mb-1">SFO → LIS</p>
             <p className="text-[16px] text-on-dim">Nov 9 · 10h 35m · Non-stop</p>
-            <p className="text-[13px] mt-2" style={{ color: '#9CA3AF' }}>Matches your preferences</p>
+            <p className="text-[13px] mt-2" style={{ color: 'var(--text-tertiary)' }}>Matches your preferences</p>
           </div>
         </motion.div>
 
@@ -65,11 +65,11 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
           className="mt-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.28, delay: 0.12 }}
+          transition={{ duration: 0.2, delay: 0.12 }}
         >
           <button
             onClick={() => setAltsOpen(v => !v)}
-            className="text-on-dim text-[15px] font-medium w-full text-center py-2 transition-opacity active:opacity-60"
+            className="text-on-dim text-[15px] font-medium w-full text-center py-3 min-h-[44px] flex items-center justify-center transition-opacity active:opacity-60"
           >
             {altsOpen ? 'Hide alternatives' : 'See 4 other options'}
           </button>
@@ -77,10 +77,10 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
           {altsOpen && (
             <motion.div
               className="mt-3 rounded-2xl overflow-hidden"
-              style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              transition={{ duration: 0.22 }}
+              transition={{ duration: 0.2 }}
             >
               {[
                 'Delta UA88 · 14:30 · 1 stop via JFK',
@@ -104,22 +104,22 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
       {/* Sticky CTA */}
       <motion.div
         className="px-5 pb-10 pt-4 bg-surface-0 flex flex-col gap-3"
-        initial={{ opacity: 0, y: 8 }}
+        initial={{ opacity: 1, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
+        transition={{ duration: 0.2, ease: [0.0, 0.0, 0.2, 1.0], delay: 0.1 }}
       >
         <button
           onClick={onBook}
           className="w-full py-[18px] rounded-2xl font-semibold text-[16px] text-white transition-opacity active:opacity-80"
-          style={{ background: '#5B4FE8' }}
+          style={{ background: 'var(--accent)' }}
         >
           Book this flight
         </button>
 
         <button
           onClick={() => setCustomizeOpen(v => !v)}
-          className="w-full text-center text-[14px] font-medium py-1 transition-opacity active:opacity-60"
-          style={{ color: '#5B4FE8' }}
+          className="w-full text-center text-[14px] font-medium py-3 min-h-[44px] flex items-center justify-center transition-opacity active:opacity-60"
+          style={{ color: 'var(--accent)' }}
         >
           Customize ›
         </button>
@@ -128,11 +128,11 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
           {customizeOpen && (
             <motion.div
               className="rounded-2xl overflow-hidden px-5 py-4"
-              style={{ background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+              style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.22 }}
+              transition={{ duration: 0.2 }}
             >
               <div className="mb-4">
                 <p className="text-[13px] text-on-faint mb-2">Departure time</p>
@@ -144,8 +144,8 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
                       className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
                       style={
                         selectedTime === t
-                          ? { background: '#1A1A1A', color: '#FFFFFF' }
-                          : { background: '#F5F4F0', color: '#6B7280' }
+                          ? { background: 'var(--text-primary)', color: 'var(--bg)' }
+                          : { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }
                       }
                     >
                       {t}
@@ -164,8 +164,8 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
                       className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
                       style={
                         selectedAirline === a
-                          ? { background: '#1A1A1A', color: '#FFFFFF' }
-                          : { background: '#F5F4F0', color: '#6B7280' }
+                          ? { background: 'var(--text-primary)', color: 'var(--bg)' }
+                          : { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }
                       }
                     >
                       {a}

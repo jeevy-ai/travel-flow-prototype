@@ -1,0 +1,95 @@
+/**
+ * System Light — Design Tokens
+ * YOU digital butler / AI concierge — MVP design system
+ *
+ * Direction: pure white bg, system font stack, single blue accent #1C6EF2,
+ * 8px grid, 44px min targets, 10px radius, two elevation levels, no gradients.
+ * Light mode only for MVP; dark mode is v2.
+ *
+ * Source: YOU-665 research doc (rev 2)
+ * Approved: YOU-726
+ */
+
+:root {
+  /* ── Backgrounds ──────────────────────────────────── */
+  --bg:           #FFFFFF;
+  --bg-secondary: #F7F7F8;   /* grouped content, sidebar */
+  --bg-elevated:  #FFFFFF;   /* cards, sheets */
+
+  /* ── Text ─────────────────────────────────────────── */
+  --text-primary:   #1A1A1A;
+  --text-secondary: #6B6B6B;
+  --text-tertiary:  #ABABAB;
+
+  /* ── Borders & Separators ─────────────────────────── */
+  --border:     rgba(0, 0, 0, 0.08);
+  --separator:  rgba(0, 0, 0, 0.06);
+
+  /* ── Accent — single interactive color ───────────── */
+  --accent:       #1C6EF2;
+  --accent-light: rgba(28, 110, 242, 0.08);
+  --accent-dark:  #1558CC;   /* hover / pressed state */
+
+  /* ── Semantic ─────────────────────────────────────── */
+  --success:       #1AA866;
+  --success-light: rgba(26, 168, 102, 0.10);
+  --warning:       #F09C00;
+  --warning-light: rgba(240, 156, 0, 0.10);
+  --danger:        #E5383B;
+  --danger-light:  rgba(229, 56, 59, 0.10);
+
+  /* ── Typography ───────────────────────────────────── */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+
+  --text-xs:   12px;   /* caption */
+  --text-sm:   13px;   /* footnote */
+  --text-md:   15px;   /* subheadline */
+  --text-base: 17px;   /* body */
+  --text-lg:   20px;   /* title */
+  --text-xl:   28px;   /* large title */
+
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  --leading-tight:  1.2;
+  --leading-normal: 1.4;
+  --leading-relaxed: 1.6;
+
+  /* ── Shape ────────────────────────────────────────── */
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   16px;
+  --radius-pill: 999px;
+
+  /* ── Spacing (8px grid) ───────────────────────────── */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+
+  /* ── Elevation (two levels only) ─────────────────── */
+  --shadow-card:  0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 8px 40px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-focus: 0 0 0 3px rgba(28, 110, 242, 0.25);   /* keyboard focus ring */
+
+  /* ── Layout ───────────────────────────────────────── */
+  --edge-margin:    16px;   /* compact viewports  */
+  --edge-margin-md: 20px;   /* regular viewports  */
+  --target-min:     44px;   /* Fitts's Law — iOS HIG minimum */
+
+  /* ── Motion ───────────────────────────────────────── */
+  --duration-fast:   150ms;
+  --duration-base:   200ms;
+  --duration-slow:   300ms;
+  --ease-default:    ease;
+  --ease-spring:     cubic-bezier(0.42, 0, 0.58, 1);
+}
