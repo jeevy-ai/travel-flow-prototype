@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useDragControls } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { EventCategory, Itinerary, ItineraryDay, ItineraryItem, TransportLeg } from '../../../lib/conciergeApi'
+import { ItemEditSheet } from '../ItemEditSheet'
 
 // ── Fixture itinerary (demo fallback) ──────────────────────────────────────
 
@@ -392,19 +393,19 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
               background: 'var(--bg-secondary)',
               flexShrink: 0,
             }}>
-              {/* Primary: Change this item — AC#4 pre-fill wired via onChangeItem */}
+              {/* Primary: Edit item inline — opens structured pre-fill form (YOU-759) */}
               <button
                 onClick={() => onChangeItem(item)}
                 style={{
                   width: '100%', minHeight: 44, borderRadius: 12,
-                  background: 'var(--text-primary)', color: 'white',
+                  background: 'var(--accent)', color: 'white',
                   fontWeight: 600, fontSize: 14, border: 'none', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                   marginBottom: 8,
                 }}
               >
                 <span>✏️</span>
-                <span>Change this item</span>
+                <span>Edit item</span>
               </button>
               {/* Secondary: Remove from plan — removal moved inside sheet (AC#5) */}
               <button
@@ -499,9 +500,10 @@ function AlterSheet({ onSubmit, onDismiss, isLoading, prefilledText = '' }: {
 
 // ── DaySection ────────────────────────────────────────────────────────────
 
-function DaySection({ day, removedKeys, onOpen }: {
+function DaySection({ day, removedKeys, editedItems, onOpen }: {
   day: ItineraryDay
   removedKeys: Set<string>
+  editedItems: Map<string, ItineraryItem>
   onOpen: (item: ItineraryItem, key: string) => void
 }) {
   const visibleItems = day.items.filter((_, i) => !removedKeys.has(`${day.day}:${i}`))
@@ -519,12 +521,14 @@ function DaySection({ day, removedKeys, onOpen }: {
         {visibleItems.map((item, vi) => {
           const originalIndex = day.items.indexOf(item)
           const itemKey = `${day.day}:${originalIndex}`
+          // Optimistic override: use locally-edited version if available
+          const resolvedItem = editedItems.get(itemKey) ?? item
           const hasNextVisible = vi < visibleItems.length - 1
-          const showLeg = !!item.transportAfter && hasNextVisible
+          const showLeg = !!resolvedItem.transportAfter && hasNextVisible
           return (
             <div key={itemKey}>
-              <EventCard item={item} onClick={() => onOpen(item, itemKey)} />
-              {showLeg && item.transportAfter && <TransportLegPill leg={item.transportAfter} />}
+              <EventCard item={resolvedItem} onClick={() => onOpen(resolvedItem, itemKey)} />
+              {showLeg && resolvedItem.transportAfter && <TransportLegPill leg={resolvedItem.transportAfter} />}
             </div>
           )
         })}
@@ -550,6 +554,10 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
   // AC#3: item detail sheet state
   const [activeItem, setActiveItem] = useState<ItineraryItem | null>(null)
   const [activeItemKey, setActiveItemKey] = useState<string | null>(null)
+  // YOU-759: inline edit sheet state
+  const [editItem, setEditItem] = useState<ItineraryItem | null>(null)
+  const [editItemKey, setEditItemKey] = useState<string | null>(null)
+  const [editedItems, setEditedItems] = useState<Map<string, ItineraryItem>>(new Map())
   // AC#5: undo toast state
   const [undoState, setUndoState] = useState<{ key: string; title: string } | null>(null)
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -610,12 +618,25 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
   }, [undoState])
 
-  // AC#4: "Change this item" → open AlterSheet with item title pre-filled
+  // YOU-759: "Edit item" → open structured inline edit form (pre-filled, no AI)
   const handleChangeItem = useCallback((item: ItineraryItem) => {
+    setEditItem(item)
+    setEditItemKey(activeItemKey)
     setActiveItem(null)
     setActiveItemKey(null)
-    setAlterPrefilledText(item.title)
-    setAlterOpen(true)
+  }, [activeItemKey])
+
+  const handleSaveEdit = useCallback((updated: ItineraryItem) => {
+    if (editItemKey) {
+      setEditedItems(prev => new Map(prev).set(editItemKey, updated))
+    }
+    setEditItem(null)
+    setEditItemKey(null)
+  }, [editItemKey])
+
+  const handleCancelEdit = useCallback(() => {
+    setEditItem(null)
+    setEditItemKey(null)
   }, [])
 
   const heroImage = display.days[0]?.items[0]?.imageUrl ?? '/fixture-images/city-lisbon.webp'
@@ -698,6 +719,7 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
               key={day.day}
               day={day}
               removedKeys={removedKeys}
+              editedItems={editedItems}
               onOpen={handleOpenItem}
             />
           ))}
@@ -760,6 +782,13 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
         onClose={handleCloseSheet}
         onRemove={handleRemoveItem}
         onChangeItem={handleChangeItem}
+      />
+
+      {/* YOU-759: Inline edit sheet — structured pre-fill form for transport/restaurant/flight */}
+      <ItemEditSheet
+        item={editItem}
+        onSave={handleSaveEdit}
+        onClose={handleCancelEdit}
       />
 
       {/* AC#5: Undo toast — 5s, appears above sticky bar */}
