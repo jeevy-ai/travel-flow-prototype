@@ -136,7 +136,7 @@ export function S2PrefsConfirm({ onLooksRight, onEdit }: Props) {
                               <button
                                 key={opt}
                                 onClick={() => setPrefValue(pref.label, opt)}
-                                className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                                className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors min-h-[44px] flex items-center"
                                 style={
                                   pref.value === opt
                                     ? { background: 'var(--text-primary)', color: 'var(--bg)' }

@@ -141,7 +141,7 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
                     <button
                       key={t}
                       onClick={() => setSelectedTime(t)}
-                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors min-h-[44px] flex items-center"
                       style={
                         selectedTime === t
                           ? { background: 'var(--text-primary)', color: 'var(--bg)' }
@@ -161,7 +161,7 @@ export function S3FlightSelection({ onBook, onSeeAlts }: Props) {
                     <button
                       key={a}
                       onClick={() => setSelectedAirline(a)}
-                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors min-h-[44px] flex items-center"
                       style={
                         selectedAirline === a
                           ? { background: 'var(--text-primary)', color: 'var(--bg)' }

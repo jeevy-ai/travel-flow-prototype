@@ -39,6 +39,8 @@
   --color-on-surface: var(--text-primary);
   --color-on-dim: var(--text-secondary);
   --color-on-faint: var(--text-tertiary);
+  --color-danger-light: var(--danger-light);
+  --color-state-custom: var(--state-custom);
 }
 
 @layer base {

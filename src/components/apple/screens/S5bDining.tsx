@@ -131,7 +131,7 @@ export function S5bDining({ onReserve, onSkip }: Props) {
                 <button
                   key={opt}
                   onClick={() => setSeating(opt)}
-                  className="px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                  className="px-4 py-1.5 rounded-full text-[13px] font-medium transition-colors min-h-[44px] flex items-center"
                   style={
                     seating === opt
                       ? { background: 'var(--text-primary)', color: 'var(--bg)' }

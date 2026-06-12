@@ -54,15 +54,23 @@ export function S7ReminderSetup({ onAllSet }: Props) {
             </div>
             <button
               onClick={() => setReminderOn(v => !v)}
-              className="relative w-10 h-6 rounded-full transition-colors flex items-center"
-              style={{ background: reminderOn ? 'var(--text-primary)' : 'var(--border)' }}
+              className="relative flex items-center justify-center"
+              style={{ minHeight: 'var(--target-min)', minWidth: 'var(--target-min)' }}
               aria-label={reminderOn ? 'Disable reminder' : 'Enable reminder'}
             >
-              <motion.span
-                className="absolute w-4 h-4 rounded-full bg-white"
-                animate={{ left: reminderOn ? '22px' : '3px' }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              />
+              <div
+                className="relative w-10 h-6 rounded-full flex items-center"
+                style={{
+                  background: reminderOn ? 'var(--text-primary)' : 'var(--text-tertiary)',
+                  transition: `background var(--duration-base) ease`,
+                }}
+              >
+                <motion.span
+                  className="absolute w-4 h-4 rounded-full bg-white"
+                  animate={{ left: reminderOn ? '22px' : '3px' }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                />
+              </div>
             </button>
           </div>
         </motion.div>

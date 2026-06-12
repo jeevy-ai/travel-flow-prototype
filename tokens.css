@@ -37,6 +37,7 @@
   --warning-light: rgba(240, 156, 0, 0.10);
   --danger:        #E5383B;
   --danger-light:  rgba(229, 56, 59, 0.10);
+  --state-custom:  #c084fc;   /* custom-pending workflow badge */
 
   /* ── Typography ───────────────────────────────────── */
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;

@@ -148,7 +148,7 @@ export function S4HotelSelection({ onBook, onDifferentHotel }: Props) {
                     <button
                       key={c}
                       onClick={() => setChain(c)}
-                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors min-h-[44px] flex items-center"
                       style={chain === c ? { background: 'var(--text-primary)', color: 'var(--bg)' } : { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
                     >
                       {c}
@@ -164,7 +164,7 @@ export function S4HotelSelection({ onBook, onDifferentHotel }: Props) {
                     <button
                       key={d}
                       onClick={() => setDistance(d)}
-                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors min-h-[44px] flex items-center"
                       style={distance === d ? { background: 'var(--text-primary)', color: 'var(--bg)' } : { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
                     >
                       {d}
@@ -180,7 +180,7 @@ export function S4HotelSelection({ onBook, onDifferentHotel }: Props) {
                     <button
                       key={p}
                       onClick={() => setPrice(p)}
-                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                      className="px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors min-h-[44px] flex items-center"
                       style={price === p ? { background: 'var(--text-primary)', color: 'var(--bg)' } : { background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}
                     >
                       {p}
