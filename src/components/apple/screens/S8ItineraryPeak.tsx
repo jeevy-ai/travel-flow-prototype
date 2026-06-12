@@ -1,168 +1,242 @@
-import { motion, useAnimation, AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import type { Itinerary, ItineraryItem, TransportLeg } from '../../../lib/conciergeApi'
+import type { EventCategory, Itinerary, ItineraryDay, ItineraryItem, TransportLeg } from '../../../lib/conciergeApi'
 
-const RING_SIZE = 120
-const STROKE = 8
-const RADIUS = (RING_SIZE - STROKE) / 2
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS
+// ── Fixture itinerary (demo fallback) ──────────────────────────────────────
 
-interface Props {
-  itinerary?: Itinerary | null
-  alterPlan?: (instruction: string) => Promise<void>
-  alterStatus?: 'idle' | 'altering'
-  loadStatus?: 'idle' | 'loading' | 'error'
-  onStartOver?: () => void
+const FIXTURE: Itinerary = {
+  destination: 'Lisbon, Portugal',
+  dates: 'November 9–12, 2026',
+  summary: 'Web Summit 2026 · 4 days · Personalised for Noah',
+  days: [
+    {
+      day: 'Sun, Nov 9 — Depart SFO',
+      items: [
+        {
+          time: '22:10',
+          title: 'Delta UA88 · SFO → LIS',
+          detail: 'Business class · Seat 4A · Non-stop · 10h 35m',
+          category: 'other' as EventCategory,
+          imageUrl: '/fixture-images/flight-outbound-business-cabin.webp',
+          transportAfter: { mode: 'taxi', duration: '25 min', notes: '~€18 to hotel' },
+        },
+      ],
+    },
+    {
+      day: 'Mon, Nov 10 — Arrive + Conference Day 1',
+      items: [
+        {
+          time: '08:00',
+          title: 'Bairro Alto Hotel',
+          detail: 'Check-in · Superior Room · City view · Free cancellation until Nov 7',
+          category: 'accommodation' as EventCategory,
+          imageUrl: '/fixture-images/hotel-bairro-alto.webp',
+          transportAfter: { mode: 'metro', duration: '12 min', notes: '~€1.50' },
+        },
+        {
+          time: '09:30',
+          title: 'The Age of Ambient AI',
+          detail: 'Reid Hoffman · Stage 1, Altice Arena',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k01.webp',
+          transportAfter: { mode: 'walk', duration: '5 min' },
+        },
+        {
+          time: '14:00',
+          title: 'Future of Work Keynote',
+          detail: 'Panel · Centre Stage, Altice Arena',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k02.webp',
+          transportAfter: { mode: 'taxi', duration: '15 min' },
+        },
+        {
+          time: '19:30',
+          title: 'Cervejaria Ramiro',
+          detail: 'Seafood dinner · Table for 1 · Intendente, Lisbon',
+          category: 'dining' as EventCategory,
+          imageUrl: '/fixture-images/restaurant-dishes-seafood.webp',
+        },
+      ],
+    },
+    {
+      day: 'Tue, Nov 11 — Conference Day 2',
+      items: [
+        {
+          time: '10:00',
+          title: 'Product Strategy in the AI Era',
+          detail: 'Lenny Rachitsky · Workshop Hall C · Hands-on session',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-w07.webp',
+          transportAfter: { mode: 'walk', duration: '5 min' },
+        },
+        {
+          time: '15:30',
+          title: 'Closing Keynote',
+          detail: 'Padmasree Warrior · Centre Stage, Altice Arena',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k08.webp',
+          transportAfter: { mode: 'taxi', duration: '20 min' },
+        },
+        {
+          time: '20:30',
+          title: 'Park Bar Rooftop',
+          detail: 'Cocktails with views over Lisbon · Bairro Alto',
+          category: 'explore' as EventCategory,
+          imageUrl: '/fixture-images/activity-rooftop-lisbon.webp',
+        },
+      ],
+    },
+    {
+      day: 'Wed, Nov 12 — Return',
+      items: [
+        {
+          time: '08:00',
+          title: 'Alfama Morning Walk',
+          detail: 'Fado district · Historic castle views · 1.5 hrs',
+          category: 'explore' as EventCategory,
+          imageUrl: '/fixture-images/activity-fado-lisbon.webp',
+          transportAfter: { mode: 'taxi', duration: '30 min', notes: 'To LIS airport' },
+        },
+        {
+          time: '09:30',
+          title: 'Delta UA89 · LIS → SFO',
+          detail: 'Business class · Seat 4A · Non-stop · 11h',
+          category: 'other' as EventCategory,
+          imageUrl: '/fixture-images/flight-return-business-cabin.webp',
+        },
+      ],
+    },
+  ],
 }
 
-// ---------------------------------------------------------------------------
-// Fixture image resolver — maps item content to available fixture assets
-// ---------------------------------------------------------------------------
+// ── Category styles (per YOU-750 spec) ────────────────────────────────────
 
-const CONFERENCE_IMAGES = [
-  '/fixture-images/conference-session-keynote-k01.webp',
-  '/fixture-images/conference-session-keynote-k02.webp',
-  '/fixture-images/conference-session-keynote-k08.webp',
-  '/fixture-images/conference-session-keynote-w07.webp',
-]
-
-function inferFixtureImage(item: ItineraryItem, index: number): string {
-  const text = `${item.title} ${item.detail} ${item.imageQuery ?? ''}`.toLowerCase()
-
-  if (/conference|summit|keynote|session|talk|workshop|networking|expo/.test(text)) {
-    return CONFERENCE_IMAGES[index % CONFERENCE_IMAGES.length]
-  }
-  if (/dinner|restaurant|lunch|cuisine|food|eat|dining|tavern|michelin|tasting/.test(text)) {
-    return '/fixture-images/restaurant-dinner-lisbon.webp'
-  }
-  if (/hotel|check.?in|check.?out|accommodation|room|suite|sleep/.test(text)) {
-    return '/fixture-images/hotel-marriott-lisbon-exterior.webp'
-  }
-  if (/arrive|arrival|airport|portela|lis|flight|transfer/.test(text)) {
-    return '/fixture-images/flight-outbound-business-cabin.webp'
-  }
-  return '/fixture-images/city-lisbon.webp'
+const CATEGORY_STYLE: Record<EventCategory, { bg: string; icon: string }> = {
+  conference:    { bg: '#EEF2FF', icon: '📅' },
+  dining:        { bg: '#FFFBEB', icon: '🍽️' },
+  explore:       { bg: '#ECFDF5', icon: '📍' },
+  accommodation: { bg: '#F0F9FF', icon: '🏨' },
+  other:         { bg: '#F9FAFB', icon: '✨' },
 }
 
-// ---------------------------------------------------------------------------
-// Transport connector between items — pill with vertical connector line
-// ---------------------------------------------------------------------------
+// ── Transport mode icons (per YOU-750 spec) ───────────────────────────────
 
-function TransportConnector({ leg }: { leg: TransportLeg }) {
-  const icons: Record<string, string> = {
-    walk: '🚶', taxi: '🚕', metro: '🚇', uber: '🚗', tram: '🚊',
-    ferry: '⛴️', bus: '🚌', car: '🚗', train: '🚆',
-  }
-  const icon = icons[leg.mode.toLowerCase()] ?? '➡️'
+const TRANSPORT_ICON: Record<string, string> = {
+  walk: '🚶', taxi: '🚕', metro: '🚇', tram: '🚊',
+  ferry: '⛴️', bus: '🚌', car: '🚗', train: '🚆', uber: '🚗',
+}
+
+// ── EventCard (per YOU-750 spec) ──────────────────────────────────────────
+
+function EventCard({ item, onRemove }: { item: ItineraryItem; onRemove?: () => void }) {
+  const [imgErr, setImgErr] = useState(false)
+  const cat = item.category ?? 'other'
+  const catStyle = CATEGORY_STYLE[cat] ?? CATEGORY_STYLE.other
 
   return (
-    <div className="flex flex-col items-center my-0.5" style={{ paddingLeft: '20px' }}>
-      <div className="w-px h-3" style={{ background: 'var(--border)' }} />
-      <div
-        className="flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px]"
-        style={{
-          background: 'var(--bg-secondary)',
-          color: 'var(--text-tertiary)',
-          border: '1px solid var(--border)',
-        }}
-      >
-        <span style={{ fontSize: 13 }}>{icon}</span>
-        <span>{leg.duration}{leg.notes ? ` · ${leg.notes}` : ''}</span>
-      </div>
-      <div className="w-px h-3" style={{ background: 'var(--border)' }} />
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Single timeline item card with image at top — card-first layout
-// ---------------------------------------------------------------------------
-
-function ItemCard({ item, index }: { item: ItineraryItem; index: number }) {
-  const [imgError, setImgError] = useState(false)
-  const resolvedSrc = (!imgError && item.imageUrl) ? item.imageUrl : inferFixtureImage(item, index)
-
-  return (
-    <div
-      className="mb-3 rounded-xl overflow-hidden"
-      style={{
-        background: 'var(--bg)',
-        boxShadow: 'var(--shadow-card)',
-        border: '1px solid var(--border)',
-      }}
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.18 } }}
+      style={{ borderRadius: 12, background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', overflow: 'hidden' }}
     >
-      {/* Image at top — 160px tall, full-bleed */}
-      <div style={{ height: 160, overflow: 'hidden' }}>
+      {/* Image — full-width, 160px */}
+      {item.imageUrl && !imgErr ? (
         <img
-          src={resolvedSrc}
+          src={item.imageUrl}
           alt={item.title}
-          className="w-full h-full object-cover"
-          style={{ filter: 'brightness(0.93) saturate(1.08)' }}
-          onError={() => setImgError(true)}
+          onError={() => setImgErr(true)}
+          style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }}
         />
-      </div>
-      {/* Content below */}
-      <div className="px-3 py-3">
-        <div className="flex items-start gap-2.5">
-          <span
-            className="text-[12px] font-medium shrink-0"
-            style={{ color: 'var(--accent)', minWidth: 52, marginTop: 2 }}
-          >
-            {item.time}
-          </span>
-          <div className="min-w-0">
-            <p
-              className="text-[15px] font-semibold leading-snug"
-              style={{ color: 'var(--text-primary)' }}
-            >
-              {item.title}
-            </p>
-            <p
-              className="text-[13px] mt-0.5 leading-relaxed"
-              style={{ color: 'var(--text-secondary)' }}
-            >
+      ) : (
+        <div
+          style={{
+            width: '100%', height: 160,
+            background: catStyle.bg,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <span style={{ fontSize: 36 }}>{catStyle.icon}</span>
+        </div>
+      )}
+
+      {/* Content — 8px top, 12px sides + bottom */}
+      <div style={{ padding: '8px 12px 12px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 3, flexWrap: 'wrap' as const }}>
+              <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--accent)', flexShrink: 0 }}>
+                {item.time}
+              </span>
+              <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.25 }}>
+                {item.title}
+              </span>
+            </div>
+            <p style={{
+              fontSize: 13, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.4,
+              overflow: 'hidden', display: '-webkit-box',
+              WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const,
+            }}>
               {item.detail}
             </p>
           </div>
+
+          {onRemove && (
+            <button
+              onClick={onRemove}
+              aria-label={`Remove ${item.title}`}
+              style={{
+                width: 28, height: 28, borderRadius: '50%',
+                background: 'rgba(0,0,0,0.05)', border: 'none', cursor: 'pointer',
+                flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'var(--text-tertiary)', fontSize: 16, lineHeight: 1, marginTop: 1,
+              }}
+            >
+              ×
+            </button>
+          )}
         </div>
       </div>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Personalization cue — "Curated for you by Jeevy"
-// ---------------------------------------------------------------------------
-
-function PersonalizationTag() {
-  return (
-    <motion.div
-      className="flex items-center justify-center gap-1.5 py-3"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.3, duration: 0.4 }}
-    >
-      <span style={{ color: 'var(--accent)', fontSize: 11 }}>✦</span>
-      <span
-        className="text-[12px] tracking-wide"
-        style={{ color: 'var(--text-tertiary)', fontVariant: 'normal' }}
-      >
-        Curated for you by Jeevy
-      </span>
     </motion.div>
   )
 }
 
-// ---------------------------------------------------------------------------
-// Alter sheet — bottom sheet to request plan changes
-// ---------------------------------------------------------------------------
+// ── TransportLegPill (per YOU-750 spec) ───────────────────────────────────
 
-function AlterSheet({
-  onSubmit,
-  onDismiss,
-  isLoading,
-}: {
+function TransportLegPill({ leg }: { leg: TransportLeg }) {
+  const icon = TRANSPORT_ICON[leg.mode.toLowerCase()] ?? '→'
+  const label = `~${leg.duration}${leg.notes ? ` · ${leg.notes}` : ''}`
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2px 0' }}>
+      <div style={{ width: 1, height: 16, background: 'var(--border)' }} />
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 5,
+        background: 'rgba(0,0,0,0.04)', borderRadius: 999,
+        padding: '4px 12px', fontSize: 12, color: 'var(--text-tertiary)',
+      }}>
+        <span style={{ fontSize: 13 }}>{icon}</span>
+        <span>{label}</span>
+      </div>
+      <div style={{ width: 1, height: 16, background: 'var(--border)' }} />
+    </div>
+  )
+}
+
+// ── PersonalizationTag (per YOU-750 spec) ─────────────────────────────────
+
+function PersonalizationTag({ name = 'Jeevy' }: { name?: string }) {
+  return (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 0 16px' }}>
+      <span style={{ fontSize: 11, color: '#818CF8' }}>✦</span>
+      <span style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Curated for you by {name}</span>
+    </div>
+  )
+}
+
+// ── AlterSheet ────────────────────────────────────────────────────────────
+
+function AlterSheet({ onSubmit, onDismiss, isLoading }: {
   onSubmit: (instruction: string) => void
   onDismiss: () => void
   isLoading: boolean
@@ -178,65 +252,39 @@ function AlterSheet({
   return (
     <motion.div
       className="fixed inset-0 z-50 flex flex-col justify-end"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
     >
-      <div
-        className="absolute inset-0"
-        style={{ background: 'rgba(0,0,0,0.48)' }}
-        onClick={onDismiss}
-      />
+      <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.5)' }} onClick={onDismiss} />
       <motion.div
         className="relative rounded-t-3xl pb-10 pt-6 px-5"
-        style={{ background: 'var(--bg)' }}
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
+        style={{ background: 'var(--bg-secondary)' }}
+        initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', stiffness: 380, damping: 36 }}
       >
         <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'var(--border)' }} />
         <p className="text-[11px] font-mono uppercase tracking-widest mb-1" style={{ color: 'var(--text-tertiary)' }}>
-          Jeevy · Update plan
+          Jeevy · Alter plan
         </p>
-        <h2
-          className="text-[22px] font-semibold mb-4"
-          style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}
-        >
+        <h2 className="text-[22px] font-semibold mb-4" style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
           What would you like to change?
         </h2>
-
         <div className="flex flex-wrap gap-2 mb-4">
           {SUGGESTIONS.map(s => (
-            <button
-              key={s}
-              onClick={() => setDraft(s)}
+            <button key={s} onClick={() => setDraft(s)}
               className="text-[13px] px-3 py-1.5 rounded-full border transition-colors"
-              style={{
-                borderColor: draft === s ? 'var(--accent)' : 'var(--border)',
-                color: draft === s ? 'var(--accent)' : 'var(--text-secondary)',
-                background: draft === s ? 'var(--accent-light)' : 'var(--bg-secondary)',
-              }}
-            >
+              style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg)' }}>
               {s}
             </button>
           ))}
         </div>
-
         <textarea
           value={draft}
           onChange={e => setDraft(e.target.value)}
-          placeholder="e.g. Move the dinner to Alfama, add a wine tasting"
+          placeholder={'e.g. "Move dinner somewhere in Alfama"'}
           rows={3}
           className="w-full rounded-2xl px-4 py-3 text-[15px] outline-none resize-none mb-4"
-          style={{
-            background: 'var(--bg-secondary)',
-            color: 'var(--text-primary)',
-            border: '1px solid var(--border)',
-          }}
-          autoFocus
+          style={{ background: 'var(--bg)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
         />
-
         <button
           onClick={() => draft.trim() && onSubmit(draft.trim())}
           disabled={!draft.trim() || isLoading}
@@ -250,384 +298,199 @@ function AlterSheet({
   )
 }
 
-// ---------------------------------------------------------------------------
-// Fixture timeline (shown when no live itinerary is available)
-// ---------------------------------------------------------------------------
+// ── Day section ────────────────────────────────────────────────────────────
 
-type TimelineItem =
-  | { kind: 'booking'; headline: string; sub: string; swappable: true; alts: string[] }
-  | { kind: 'info'; headline: string; sub: string; swappable: false }
+function DaySection({ day, removedKeys, onRemove }: {
+  day: ItineraryDay
+  removedKeys: Set<string>
+  onRemove: (key: string) => void
+}) {
+  const visibleItems = day.items.filter((_, i) => !removedKeys.has(`${day.day}:${i}`))
+  if (visibleItems.length === 0) return null
 
-interface TimelineGroup {
-  dateKey: string
-  day: string
-  label: string
-  items: TimelineItem[]
-  transitLeg?: { icon: string; text: string }
+  return (
+    <div>
+      <div style={{
+        fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)',
+        paddingBottom: 8, textTransform: 'uppercase' as const, letterSpacing: '0.04em',
+      }}>
+        {day.day}
+      </div>
+      <AnimatePresence>
+        {visibleItems.map((item, vi) => {
+          const originalIndex = day.items.indexOf(item)
+          const itemKey = `${day.day}:${originalIndex}`
+          const hasNextVisible = vi < visibleItems.length - 1
+          const showLeg = !!item.transportAfter && hasNextVisible
+          return (
+            <div key={itemKey}>
+              <EventCard item={item} onRemove={() => onRemove(itemKey)} />
+              {showLeg && item.transportAfter && <TransportLegPill leg={item.transportAfter} />}
+            </div>
+          )
+        })}
+      </AnimatePresence>
+    </div>
+  )
 }
 
-const TIMELINE: TimelineGroup[] = [
-  {
-    dateKey: 'nov9-depart',
-    day: 'Sun, Nov 9',
-    label: 'Depart',
-    items: [{ kind: 'booking', headline: 'United · SFO → LIS', sub: 'Departs 22:10 · Arrives +1 07:45', swappable: true, alts: ['TAP Air Portugal TP236 · Nov 9 23:45 · Non-stop', 'Delta UA88 · 14:30 · 1 stop via JFK', 'British Airways BA498 · 10:00 · 1 stop via LHR'] }],
-    transitLeg: { icon: '🚕', text: 'Taxi · 25 min · ~€18' },
-  },
-  {
-    dateKey: 'nov10-checkin',
-    day: 'Sun, Nov 10',
-    label: 'Arrive + Check-in',
-    items: [{ kind: 'booking', headline: 'Bairro Alto Hotel', sub: 'Check-in from 15:00', swappable: true, alts: ['Memmo Alfama · Boutique · Castle views · €380/night', 'Marriott Lisbon · 4.8km · €289/night', 'Palácio Belmonte · 15th-century palace · €650/night'] }],
-    transitLeg: { icon: '🚶', text: 'Walk · 8 min' },
-  },
-  {
-    dateKey: 'nov9-12-conf',
-    day: 'Nov 9–12',
-    label: 'Conference',
-    items: [{ kind: 'info', headline: 'Web Summit 2026', sub: '⭐ AI & Product · Nov 9 10:00', swappable: false }],
-    transitLeg: { icon: '🚇', text: 'Metro · 12 min · ~€1.50' },
-  },
-  {
-    dateKey: 'nov9-dinner',
-    day: 'Nov 9',
-    label: 'Dinner',
-    items: [{ kind: 'booking', headline: 'Cervejaria Ramiro', sub: '19:30 · Table for 2 · Indoor', swappable: true, alts: ['Solar dos Presuntos · Traditional · €€', 'Taberna da Rua das Flores · Tapas · €€', 'Belcanto · Fine dining · €€€€'] }],
-  },
-]
+// ── Main component ─────────────────────────────────────────────────────────
 
-// ---------------------------------------------------------------------------
-// Main screen
-// ---------------------------------------------------------------------------
+interface Props {
+  itinerary?: Itinerary | null
+  alterPlan?: (instruction: string) => Promise<void>
+  alterStatus?: 'idle' | 'altering'
+  loadStatus?: 'idle' | 'loading' | 'error'
+  onStartOver?: () => void
+}
 
 export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', loadStatus = 'idle', onStartOver }: Props) {
-  const [phase, setPhase] = useState<'ring' | 'timeline'>('ring')
-  const [swapOpen, setSwapOpen] = useState<string | null>(null)
   const [alterOpen, setAlterOpen] = useState(false)
-  const ringControls = useAnimation()
-  const textControls = useAnimation()
+  const [removedKeys, setRemovedKeys] = useState<Set<string>>(new Set())
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  const display = itinerary ?? FIXTURE
+
   useEffect(() => {
-    async function runEntrance() {
-      await ringControls.start({ strokeDashoffset: 0, transition: { duration: 0.8, ease: 'easeInOut' } })
-      await textControls.start({ opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 260, damping: 20 } })
-      await new Promise(r => setTimeout(r, 900))
-      setPhase('timeline')
+    if (itinerary && scrollRef.current) {
+      scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' })
     }
-    runEntrance()
-  }, [ringControls, textControls])
+  }, [itinerary])
 
   async function handleAlterSubmit(instruction: string) {
     if (!alterPlan) return
     setAlterOpen(false)
+    setRemovedKeys(new Set())
     await alterPlan(instruction)
   }
 
-  const heroImage = itinerary?.days[0]?.items[0]?.imageUrl ?? '/fixture-images/city-lisbon.webp'
+  const heroImage = display.days[0]?.items[0]?.imageUrl ?? '/fixture-images/city-lisbon.webp'
+  const busy = alterStatus === 'altering' || loadStatus === 'loading'
 
   return (
-    <div className="flex flex-col min-h-screen bg-surface-0 relative overflow-hidden">
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-secondary)', position: 'relative' }}>
 
-      {/* Phase 1: Full-screen photo + completeness ring */}
-      <AnimatePresence>
-        {phase === 'ring' && (
-          <motion.div
-            className="fixed inset-0 flex flex-col items-center justify-center z-20"
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="absolute inset-0">
-              <img
-                src={heroImage}
-                alt={itinerary?.destination ?? 'Destination'}
-                className="w-full h-full object-cover"
-                style={{ filter: 'saturate(1.1) brightness(0.82)' }}
-                onError={(e) => { (e.target as HTMLImageElement).src = '/fixture-images/city-lisbon.webp' }}
-              />
-              <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.22)' }} />
-            </div>
+      {/* Hero */}
+      <div style={{ position: 'relative', height: 200, overflow: 'hidden', flexShrink: 0 }}>
+        <img
+          src={heroImage}
+          alt={display.destination}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'saturate(1.05) brightness(0.88)' }}
+          onError={e => { (e.target as HTMLImageElement).src = '/fixture-images/city-lisbon.webp' }}
+        />
+        <div style={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to bottom, transparent 30%, var(--bg-secondary) 100%)',
+        }} />
 
-            <div className="relative flex flex-col items-center gap-6">
-              <svg width={RING_SIZE} height={RING_SIZE} style={{ transform: 'rotate(-90deg)' }}>
-                <circle cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RADIUS} fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth={STROKE} />
-                <motion.circle
-                  cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RADIUS} fill="none"
-                  stroke="white" strokeWidth={STROKE} strokeLinecap="round"
-                  strokeDasharray={CIRCUMFERENCE} initial={{ strokeDashoffset: CIRCUMFERENCE }}
-                  animate={ringControls}
-                />
-              </svg>
+        {onStartOver && (
+          <button onClick={onStartOver} style={{
+            position: 'absolute', top: 52, left: 16,
+            background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(6px)',
+            border: 'none', borderRadius: 999, padding: '6px 14px',
+            color: 'white', fontSize: 13, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 5,
+          }}>
+            ← Back
+          </button>
+        )}
 
+        <div style={{ position: 'absolute', bottom: 12, left: 20 }}>
+          <p style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: 20, letterSpacing: '-0.01em', margin: 0 }}>
+            {display.destination}
+          </p>
+          <p style={{ color: 'var(--text-secondary)', fontSize: 13, margin: '2px 0 0' }}>
+            {display.dates} · Ready to go
+          </p>
+        </div>
+      </div>
+
+      {/* Personalization + status banners */}
+      <div style={{ padding: '4px 20px 0' }}>
+        <PersonalizationTag name="Jeevy" />
+
+        <AnimatePresence>
+          {(loadStatus === 'loading' || alterStatus === 'altering') && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{
+                borderRadius: 10, background: 'var(--accent-light)',
+                padding: '10px 14px', marginBottom: 12,
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}
+            >
               <motion.div
-                className="text-center"
-                initial={{ opacity: 0, scale: 0.85 }}
-                animate={textControls}
-              >
-                <p className="text-white font-semibold leading-tight" style={{ fontSize: '38px', letterSpacing: '-0.02em' }}>
-                  Trip ready.
-                </p>
-                <p className="text-white/70 text-[16px] mt-2">
-                  {itinerary ? itinerary.destination : 'Web Summit 2026'}
-                </p>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0 }}
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+              <p style={{ fontSize: 13, fontWeight: 500, color: 'var(--accent)', margin: 0 }}>
+                {alterStatus === 'altering' ? 'Jeevy is updating your plan…' : 'Building your personalised itinerary…'}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-      {/* Phase 2: Timeline view */}
-      <AnimatePresence>
-        {phase === 'timeline' && (
-          <motion.div
-            className="flex flex-col min-h-screen"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.0, 0.0, 0.2, 1.0] }}
+      {/* Card stack */}
+      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 16px 200px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {display.days.map(day => (
+            <DaySection
+              key={day.day}
+              day={day}
+              removedKeys={removedKeys}
+              onRemove={key => setRemovedKeys(prev => new Set([...prev, key]))}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Sticky CTA bar */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        padding: '16px 20px 34px',
+        background: 'linear-gradient(to top, var(--bg-secondary) 80%, transparent 100%)',
+      }}>
+        <div style={{ maxWidth: 430, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <button
+            style={{
+              width: '100%', padding: '16px 0', borderRadius: 16,
+              background: 'var(--text-primary)', color: 'white',
+              fontWeight: 600, fontSize: 16, border: 'none', cursor: 'pointer',
+            }}
           >
-            {/* Hero peek */}
-            <div className="relative h-[180px] shrink-0 overflow-hidden">
-              <img
-                src={heroImage}
-                alt={itinerary?.destination ?? 'Destination'}
-                className="w-full h-full object-cover"
-                style={{ filter: 'saturate(1.05) brightness(0.88)' }}
-                onError={(e) => { (e.target as HTMLImageElement).src = '/fixture-images/city-lisbon.webp' }}
-              />
-              <div
-                className="absolute inset-0"
-                style={{ background: 'linear-gradient(to bottom, transparent 25%, rgba(0,0,0,0.55) 100%)' }}
-              />
-              <div className="absolute bottom-4 left-5">
-                <p className="text-white font-semibold text-[20px]" style={{ letterSpacing: '-0.02em', textShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
-                  {itinerary ? itinerary.destination : 'Web Summit 2026 · Lisbon'}
-                </p>
-                <p className="text-white/75 text-[13px] mt-0.5">
-                  {itinerary ? itinerary.dates : 'Nov 9–12 · Ready to go'}
-                </p>
-              </div>
-            </div>
+            Add to Calendar
+          </button>
 
-            {/* Personalization cue */}
-            <div
-              className="px-5 pb-1 pt-0"
-              style={{ borderBottom: '1px solid var(--separator)' }}
+          {alterPlan && (
+            <button
+              onClick={() => !busy && setAlterOpen(true)}
+              disabled={busy}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                background: 'none', border: 'none', cursor: busy ? 'not-allowed' : 'pointer',
+                color: 'var(--text-secondary)', fontSize: 14, padding: '4px 0',
+                opacity: busy ? 0.4 : 1, transition: 'opacity 0.15s',
+              }}
             >
-              <PersonalizationTag />
-            </div>
+              <span>✏️</span>
+              <span>Change something?</span>
+            </button>
+          )}
 
-            {/* Alter status banner */}
-            <AnimatePresence>
-              {alterStatus === 'altering' && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="px-5 py-3 flex items-center gap-2"
-                  style={{ background: 'var(--accent-light)' }}
-                >
-                  <motion.div
-                    className="w-2 h-2 rounded-full"
-                    style={{ background: 'var(--accent)' }}
-                    animate={{ opacity: [0.4, 1, 0.4] }}
-                    transition={{ duration: 1, repeat: Infinity }}
-                  />
-                  <p className="text-[13px] font-medium" style={{ color: 'var(--accent)' }}>
-                    Jeevy is updating your plan…
-                  </p>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Timeline */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pt-3 pb-40">
-              {/* Loading skeleton — shown while first itinerary is generating */}
-              {!itinerary && loadStatus === 'loading' && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 space-y-3">
-                  {[1, 2, 3].map(i => (
-                    <div
-                      key={i}
-                      className="rounded-xl overflow-hidden"
-                      style={{
-                        height: 200,
-                        background: 'linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg) 50%, var(--bg-secondary) 75%)',
-                        backgroundSize: '200% 100%',
-                        animation: `shimmer ${1.4 + i * 0.1}s infinite`,
-                        animationDelay: `${i * 0.08}s`,
-                      }}
-                    />
-                  ))}
-                  <p className="text-center text-[13px] pt-2" style={{ color: 'var(--text-tertiary)' }}>
-                    Jeevy is building your plan…
-                  </p>
-                </motion.div>
-              )}
-
-              {/* Error state */}
-              {!itinerary && loadStatus === 'error' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-8 flex flex-col items-center gap-4 px-4 text-center"
-                >
-                  <p className="text-[28px]">⚠️</p>
-                  <p className="text-[16px] font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    Couldn't build your plan
-                  </p>
-                  <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
-                    Something went wrong connecting to Jeevy.
-                  </p>
-                  {onStartOver && (
-                    <button
-                      onClick={onStartOver}
-                      className="mt-2 px-6 py-3 rounded-2xl font-medium text-[15px] text-white"
-                      style={{ background: 'var(--accent)' }}
-                    >
-                      Try again
-                    </button>
-                  )}
-                </motion.div>
-              )}
-
-              {itinerary
-                ? itinerary.days.map((day, gi) => (
-                    <div key={day.day} className={gi > 0 ? 'mt-6' : 'mt-1'}>
-                      {/* Day header */}
-                      <div className="flex items-baseline gap-2 mb-3 pl-1">
-                        <span
-                          className="text-[12px] font-semibold uppercase tracking-widest"
-                          style={{ color: 'var(--text-tertiary)' }}
-                        >
-                          {day.day}
-                        </span>
-                      </div>
-                      {/* Items with inline transport connectors */}
-                      {day.items.map((item, ii) => (
-                        <div key={ii}>
-                          {/* Skeleton shimmer during alter */}
-                          {alterStatus === 'altering' ? (
-                            <div
-                              className="mb-3 rounded-xl overflow-hidden"
-                              style={{ height: 200, background: 'linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg) 50%, var(--bg-secondary) 75%)', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }}
-                            />
-                          ) : (
-                            <ItemCard item={item} index={gi * 10 + ii} />
-                          )}
-                          {item.transportAfter && ii < day.items.length - 1 && (
-                            <TransportConnector leg={item.transportAfter} />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ))
-                : TIMELINE.map((group, gi) => (
-                    <div key={group.dateKey} className={gi > 0 ? 'mt-5' : 'mt-2'}>
-                      <div className="flex items-baseline gap-2 mb-2">
-                        <span className="text-[13px] font-semibold" style={{ color: 'var(--text-tertiary)' }}>{group.day}</span>
-                        <span className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--text-tertiary)', opacity: 0.7 }}>{group.label}</span>
-                      </div>
-                      <div className="relative pl-5">
-                        <div className="absolute left-[5px] top-2 w-px" style={{ background: 'var(--border)', bottom: gi < TIMELINE.length - 1 ? -20 : 0 }} />
-                        <div className="absolute left-0 top-[7px] w-2.5 h-2.5 rounded-full" style={{ background: 'var(--text-primary)', border: '2px solid var(--bg-secondary)', zIndex: 1 }} />
-                        {group.items.map(item => {
-                          const swapKey = `${group.dateKey}-${item.headline}`
-                          const isSwapOpen = swapOpen === swapKey
-                          return (
-                            <div key={item.headline} className="mb-1">
-                              <div className="flex items-start justify-between gap-2">
-                                <div>
-                                  <p className="text-[16px] font-semibold text-on-surface leading-snug">{item.headline}</p>
-                                  <p className="text-[13px] text-on-dim mt-0.5">{item.sub}</p>
-                                </div>
-                                {item.swappable && (
-                                  <button
-                                    onClick={() => setSwapOpen(isSwapOpen ? null : swapKey)}
-                                    className="shrink-0 text-[13px] font-medium mt-0.5 transition-opacity active:opacity-60"
-                                    style={{ color: 'var(--accent)' }}
-                                  >
-                                    {isSwapOpen ? 'Done' : '[Swap]'}
-                                  </button>
-                                )}
-                              </div>
-                              <AnimatePresence>
-                                {item.swappable && isSwapOpen && (
-                                  <motion.div
-                                    className="mt-2 rounded-xl overflow-hidden"
-                                    style={{ background: 'var(--bg)', boxShadow: 'var(--shadow-card)' }}
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.2 }}
-                                  >
-                                    {item.alts.map((alt, ai) => (
-                                      <button key={alt} onClick={() => setSwapOpen(null)} className={`w-full text-left px-4 py-3 text-[14px] text-on-dim active:bg-surface-2 transition-colors ${ai < item.alts.length - 1 ? 'border-b border-border' : ''}`}>
-                                        {alt}
-                                      </button>
-                                    ))}
-                                    <div className="px-4 py-2.5 border-t border-border">
-                                      <button onClick={() => setSwapOpen(null)} className="text-[12px] text-on-faint transition-opacity active:opacity-60">Keep current</button>
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                            </div>
-                          )
-                        })}
-                        {group.transitLeg && (
-                          <div className="mt-2 mb-1 flex items-center gap-1.5">
-                            <span className="text-[14px]">{group.transitLeg.icon}</span>
-                            <span className="text-[12px]" style={{ color: 'var(--text-tertiary)' }}>{group.transitLeg.text}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))
-              }
-            </div>
-
-            {/* Sticky CTAs */}
-            <div
-              className="fixed bottom-0 left-0 right-0 flex flex-col items-center gap-2 px-5 pb-10 pt-5"
-              style={{ background: 'linear-gradient(to top, var(--bg-secondary) 75%, transparent 100%)' }}
-            >
-              <div className="w-full max-w-[430px] flex flex-col gap-2.5">
-                {/* Primary: Add to Calendar */}
-                <button
-                  className="w-full py-4 rounded-2xl font-semibold text-[16px] text-white transition-opacity active:opacity-80"
-                  style={{ background: 'var(--text-primary)' }}
-                >
-                  Add to Calendar
-                </button>
-
-                {/* Secondary: Change something */}
-                {alterPlan && (
-                  <button
-                    onClick={() => setAlterOpen(true)}
-                    disabled={alterStatus === 'altering'}
-                    className="w-full py-3.5 rounded-2xl font-medium text-[15px] transition-opacity disabled:opacity-40 active:opacity-70"
-                    style={{
-                      background: 'transparent',
-                      color: 'var(--text-secondary)',
-                      border: '1px solid var(--border)',
-                    }}
-                  >
-                    {alterStatus === 'altering' ? '✦ Updating your plan…' : '✏️  Change something?'}
-                  </button>
-                )}
-
-                {/* Tertiary: Share */}
-                <Link
-                  to="/itinerary/ws2026/day-of"
-                  className="block w-full text-center text-[14px] font-medium py-1 transition-opacity active:opacity-60"
-                  style={{ color: 'var(--text-tertiary)' }}
-                >
-                  Share trip
-                </Link>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <button
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--text-tertiary)', fontSize: 14, textAlign: 'center', padding: '2px 0',
+            }}
+          >
+            Share trip
+          </button>
+        </div>
+      </div>
 
       {/* Alter sheet */}
       <AnimatePresence>
@@ -639,13 +502,6 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
           />
         )}
       </AnimatePresence>
-
-      <style>{`
-        @keyframes shimmer {
-          0% { background-position: 200% 0; }
-          100% { background-position: -200% 0; }
-        }
-      `}</style>
     </div>
   )
 }
