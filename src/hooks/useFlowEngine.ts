@@ -525,6 +525,7 @@ export function useFlowEngine() {
   const [confirmingAll, setConfirmingAll] = useState(false)
   const [confirmStep, setConfirmStep] = useState(-1)
   const [allConfirmed, setAllConfirmed] = useState(false)
+  const [removedIds, setRemovedIds] = useState<Set<string>>(new Set())
 
   // In pre-planned model, "advancing chat" just closes any open swap panel
   const advanceChat = useCallback((_nextScreen: number, _enrichBit?: number) => {
@@ -570,6 +571,14 @@ export function useFlowEngine() {
 
   const setPartySize = useCallback((id: string, size: number) => {
     setEntries(prev => prev.map(e => e.id === id ? { ...e, partySize: size } : e))
+  }, [])
+
+  const removeEntry = useCallback((id: string) => {
+    setRemovedIds(prev => new Set([...prev, id]))
+  }, [])
+
+  const undoRemoveEntry = useCallback((id: string) => {
+    setRemovedIds(prev => { const next = new Set(prev); next.delete(id); return next })
   }, [])
 
   const resolveConflict = useCallback(() => {
@@ -653,6 +662,9 @@ export function useFlowEngine() {
     enrichEntry,
     setRideMode,
     setPartySize,
+    removedIds,
+    removeEntry,
+    undoRemoveEntry,
     data: soloTravelFixture,
   }
 }

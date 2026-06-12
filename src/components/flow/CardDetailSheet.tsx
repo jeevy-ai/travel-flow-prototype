@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence, useDragControls } from 'framer-motion'
-import type { TimelineEntry, FlowEngine, AlternativeOption } from '../../hooks/useFlowEngine'
+import type { TimelineEntry, FlowEngine, AlternativeOption, EntryType } from '../../hooks/useFlowEngine'
 import { TimelineEntryExpanded } from '../timeline/TimelineEntryExpanded'
 import { ImageSlot } from '../timeline/ImageSlot'
 import { MiniMap } from '../map/MiniMap'
@@ -31,6 +31,36 @@ function entryEmoji(entry: TimelineEntry): string {
     case 'conference_venue': return '🎙'
     default: return '📍'
   }
+}
+
+const CATEGORY_LABELS: Partial<Record<EntryType, string>> = {
+  flight_outbound: 'Flight',
+  flight_return: 'Flight',
+  hotel: 'Hotel',
+  conference_venue: 'Venue',
+  conference_session: 'Session',
+  reminders: 'Reminders',
+  restaurant: 'Restaurant',
+  activity: 'Activity',
+  ride: 'Transport',
+}
+
+function formatTime(iso: string | null): string {
+  if (!iso) return ''
+  const match = iso.match(/T(\d{2}):(\d{2})/)
+  return match ? `${match[1]}:${match[2]}` : ''
+}
+
+// Entries with a dedicated swap screen
+const SCREEN_FOR_ENTRY: Record<string, number> = {
+  flt_outbound: 2,
+  flt_return: 2,
+  hotel_main: 3,
+  'WS2026-K01': 4,
+  'WS2026-K02': 4,
+  'WS2026-K08': 4,
+  'WS2026-W07': 4,
+  reminders: 6,
 }
 
 // Detect desktop viewport (≥768px)
@@ -118,7 +148,6 @@ function VenueMiniMap({ entry }: { entry: TimelineEntry }) {
         emoji={emoji}
         className="h-40 w-full"
       />
-      {/* Google Maps style popover overlay — bottom strip */}
       <div className="absolute bottom-0 left-0 right-0 bg-surface-0/90 backdrop-blur-sm border-t border-border px-3 py-2 flex items-center gap-2">
         <span className="text-lg shrink-0">{emoji}</span>
         <div className="flex-1 min-w-0">
@@ -138,17 +167,18 @@ function VenueMiniMap({ entry }: { entry: TimelineEntry }) {
   )
 }
 
-// ── Alternatives picker (inline in modal) ─────────────────────────────────────
+// ── Alter Plan picker (alternatives + free-text input) ────────────────────────
 
-interface AlternativesProps {
+interface AlterPlanPickerProps {
   entry: TimelineEntry
   flow: FlowEngine
+  prefilledText: string
   onClose: () => void
 }
 
-function AlternativesPicker({ entry, flow, onClose }: AlternativesProps) {
+function AlterPlanPicker({ entry, flow, prefilledText, onClose }: AlterPlanPickerProps) {
   const [mode, setMode] = useState<'menu' | 'custom'>('menu')
-  const [text, setText] = useState('')
+  const [text, setText] = useState(prefilledText)
 
   const alternatives = entry.alternatives ?? []
   const isDismissed = entry.state === 'self-managed' || entry.state === 'custom-pending'
@@ -188,11 +218,15 @@ function AlternativesPicker({ entry, flow, onClose }: AlternativesProps) {
   }
 
   return (
-    <div className="mt-3 border-t border-border pt-3 space-y-2">
-      <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide">Change this</p>
-
+    <div className="space-y-2">
       {mode === 'menu' && (
         <>
+          {/* Context chip showing what's being changed */}
+          <div className="flex items-center gap-2 px-3 py-2 bg-surface-2 rounded-xl border border-border">
+            <span className="text-[11px] text-on-dim">Changing:</span>
+            <span className="text-[12px] font-semibold text-on-surface truncate">{prefilledText}</span>
+          </div>
+
           {alternatives.length > 0 && (
             <div className="space-y-1.5">
               <p className="text-on-dim text-[11px] mb-1">Jeevy's alternatives</p>
@@ -237,12 +271,13 @@ function AlternativesPicker({ entry, flow, onClose }: AlternativesProps) {
 
       {mode === 'custom' && (
         <div className="space-y-2">
+          <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide">Describe your preference</p>
           <input
             type="text"
             value={text}
             onChange={e => setText(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleCustom() }}
-            placeholder="e.g. book a taxi instead, or stay an extra night…"
+            placeholder="e.g. vegetarian option, or different venue…"
             className="w-full bg-surface-2 border border-border rounded-lg px-3 py-2 text-on-surface text-[12px] placeholder:text-on-dim/40 outline-none focus:border-accent transition-colors"
             // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus
@@ -253,9 +288,12 @@ function AlternativesPicker({ entry, flow, onClose }: AlternativesProps) {
               disabled={!text.trim()}
               className="flex-1 bg-accent text-white text-[12px] font-semibold py-1.5 rounded-lg disabled:opacity-40 transition-opacity"
             >
-              Enrich →
+              Apply →
             </button>
-            <button onClick={() => setMode('menu')} className="px-3 text-on-dim text-[12px] hover:text-on-surface transition-colors">
+            <button
+              onClick={() => { setText(prefilledText); setMode('menu') }}
+              className="px-3 text-on-dim text-[12px] hover:text-on-surface transition-colors"
+            >
               Back
             </button>
           </div>
@@ -271,16 +309,17 @@ interface Props {
   entry: TimelineEntry | null
   flow: FlowEngine
   onClose: () => void
+  onRemove: (id: string, title: string) => void
 }
 
-export function CardDetailSheet({ entry, flow, onClose }: Props) {
+export function CardDetailSheet({ entry, flow, onClose, onRemove }: Props) {
   const controls = useDragControls()
   const isDesktop = useIsDesktop()
-  const [showAlternatives, setShowAlternatives] = useState(false)
+  const [showAlterPlan, setShowAlterPlan] = useState(false)
 
-  // Reset alternatives panel when sheet closes/changes
+  // Reset alter plan panel when sheet closes/changes
   useEffect(() => {
-    if (!entry) setShowAlternatives(false)
+    if (!entry) setShowAlterPlan(false)
   }, [entry?.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close on Escape
@@ -300,10 +339,31 @@ export function CardDetailSheet({ entry, flow, onClose }: Props) {
   }, [entry])
 
   const title = entry ? (entry.enrichedWith?.name ?? entryTitle(entry)) : ''
+  const time = entry ? formatTime(entry.scheduledAt) : ''
+  const categoryLabel = entry ? (CATEGORY_LABELS[entry.type] ?? '') : ''
   const displayHero = entry
     ? (entry.enrichedWith?.imageHero ?? entry.enrichedWith?.imageThumb ?? entry.imageHero ?? entry.imageThumb)
     : null
   const displayGradient = entry ? (entry.enrichedWith?.gradientFallback ?? entry.gradientFallback) : ''
+
+  const canChangeEntry = entry && !flow.confirmingAll && !flow.allConfirmed
+  const swapScreen = entry ? SCREEN_FOR_ENTRY[entry.id] : undefined
+
+  const handleChangeItem = () => {
+    if (!entry) return
+    if (swapScreen) {
+      flow.startEditScreen(swapScreen)
+      onClose()
+    } else {
+      setShowAlterPlan(v => !v)
+    }
+  }
+
+  const handleRemove = () => {
+    if (!entry) return
+    onRemove(entry.id, title)
+    onClose()
+  }
 
   const mobileVariants = {
     initial: { y: '100%', opacity: 1 },
@@ -316,8 +376,6 @@ export function CardDetailSheet({ entry, flow, onClose }: Props) {
     exit: { scale: 0.96, opacity: 0 },
   }
   const variants = isDesktop ? desktopVariants : mobileVariants
-
-  const canChangeEntry = entry && !flow.confirmingAll && !flow.allConfirmed
 
   return (
     <AnimatePresence>
@@ -346,9 +404,7 @@ export function CardDetailSheet({ entry, flow, onClose }: Props) {
             } : {})}
             className={[
               'fixed z-50 bg-surface-0 border border-border flex flex-col overflow-hidden',
-              // Mobile: full-width bottom sheet
               'bottom-0 left-0 right-0 rounded-t-3xl',
-              // Desktop: wider centered dialog
               'md:bottom-auto md:left-1/2 md:top-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:right-auto',
               'md:w-[680px] md:rounded-3xl md:shadow-2xl',
             ].join(' ')}
@@ -364,32 +420,32 @@ export function CardDetailSheet({ entry, flow, onClose }: Props) {
               <div className="w-10 h-1 rounded-full bg-border" />
             </div>
 
-            {/* Header */}
-            <div className="flex items-center justify-between px-4 pt-3 pb-2 md:pt-4 shrink-0">
-              <h2 className="text-on-surface font-bold text-[17px] leading-tight line-clamp-1 flex-1 mr-3">
-                {title}
-              </h2>
-              <div className="flex items-center gap-2 shrink-0">
-                {canChangeEntry && (
-                  <button
-                    onClick={() => setShowAlternatives(v => !v)}
-                    className={`text-[12px] font-medium px-3 py-1 rounded-full border transition-colors ${
-                      showAlternatives
-                        ? 'bg-accent/10 border-accent/30 text-accent'
-                        : 'border-border text-on-dim hover:text-on-surface'
-                    }`}
-                  >
-                    {showAlternatives ? '✕ Close' : '⇄ Change'}
-                  </button>
-                )}
-                <button
-                  onClick={onClose}
-                  className="w-8 h-8 rounded-full bg-surface-3 hover:bg-surface-2 flex items-center justify-center text-on-dim hover:text-on-surface transition-colors"
-                  aria-label="Close"
-                >
-                  ✕
-                </button>
+            {/* Header — title, category badge, close */}
+            <div className="flex items-start justify-between px-4 pt-3 pb-2 md:pt-4 shrink-0">
+              <div className="flex-1 mr-3 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  {categoryLabel && (
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-accent/70 bg-accent/10 px-2 py-0.5 rounded-full shrink-0">
+                      {categoryLabel}
+                    </span>
+                  )}
+                  {time && (
+                    <span className="text-[11px] font-semibold text-on-dim bg-surface-2 border border-border px-2 py-0.5 rounded-full shrink-0">
+                      {time}
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-on-surface font-bold text-[17px] leading-tight line-clamp-2">
+                  {title}
+                </h2>
               </div>
+              <button
+                onClick={onClose}
+                className="w-8 h-8 rounded-full bg-surface-3 hover:bg-surface-2 flex items-center justify-center text-on-dim hover:text-on-surface transition-colors shrink-0 mt-1"
+                aria-label="Close"
+              >
+                ✕
+              </button>
             </div>
 
             {/* Venue info strip (rating, address, links) */}
@@ -397,14 +453,19 @@ export function CardDetailSheet({ entry, flow, onClose }: Props) {
 
             {/* Scrollable body */}
             <div className="overflow-y-auto flex-1 min-h-0">
-              {/* Hero image */}
+              {/* Hero image — 160px fixed height per spec */}
               {(displayHero || displayGradient) && (
-                <div className="relative mx-4 mb-3 rounded-xl overflow-hidden shrink-0" style={{ aspectRatio: '16/9' }}>
+                <div className="relative mx-4 mb-3 rounded-xl overflow-hidden shrink-0 h-40">
                   <ImageSlot
                     src={displayHero}
                     alt={title}
                     gradient={displayGradient}
                     className="w-full h-full"
+                  />
+                  {/* Image bottom scrim */}
+                  <div
+                    className="absolute inset-x-0 bottom-0 h-1/2 pointer-events-none"
+                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 100%)' }}
                   />
                 </div>
               )}
@@ -412,20 +473,21 @@ export function CardDetailSheet({ entry, flow, onClose }: Props) {
               {/* Mini-map (venue location) */}
               <VenueMiniMap entry={entry} />
 
-              {/* Alternatives panel (toggled by "Change" button) */}
+              {/* Alter Plan section (toggled by "Change this item") */}
               <AnimatePresence>
-                {showAlternatives && (
+                {showAlterPlan && (
                   <motion.div
-                    className="mx-4 mb-3"
+                    className="mx-4 mb-3 p-3 bg-surface-1 rounded-xl border border-border"
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
                   >
-                    <AlternativesPicker
+                    <AlterPlanPicker
                       entry={entry}
                       flow={flow}
-                      onClose={() => { setShowAlternatives(false); onClose() }}
+                      prefilledText={title}
+                      onClose={() => { setShowAlterPlan(false); onClose() }}
                     />
                   </motion.div>
                 )}
@@ -438,6 +500,32 @@ export function CardDetailSheet({ entry, flow, onClose }: Props) {
                 onPartyChange={size => flow.setPartySize(entry.id, size)}
               />
             </div>
+
+            {/* Action buttons — always visible at bottom */}
+            {canChangeEntry && (
+              <div className="shrink-0 px-4 pt-3 pb-4 border-t border-border bg-surface-0 space-y-2">
+                {/* Primary: Change this item */}
+                <button
+                  onClick={handleChangeItem}
+                  className={`w-full flex items-center justify-center gap-2 min-h-[44px] font-semibold text-[14px] rounded-xl transition-colors ${
+                    showAlterPlan
+                      ? 'bg-accent/10 border border-accent/40 text-accent'
+                      : 'bg-accent text-white hover:bg-accent/90'
+                  }`}
+                >
+                  <span>✏️</span>
+                  <span>Change this item</span>
+                </button>
+                {/* Secondary: Remove from plan */}
+                <button
+                  onClick={handleRemove}
+                  className="w-full flex items-center justify-center gap-2 min-h-[44px] font-medium text-[13px] text-on-dim hover:text-warning border border-border hover:border-warning/30 rounded-xl transition-colors"
+                >
+                  <span>🗑</span>
+                  <span>Remove from plan</span>
+                </button>
+              </div>
+            )}
           </motion.div>
         </>
       )}

@@ -104,11 +104,17 @@ export function FlowPage() {
   const [showMap, setShowMap] = useState(false)
   const [activeDateKey, setActiveDateKey] = useState<string>('2026-11-09')
   const [openSheetEntryId, setOpenSheetEntryId] = useState<string | null>(null)
+  const [undoToast, setUndoToast] = useState<{ entryId: string; title: string } | null>(null)
+  const [showAlterPlanInput, setShowAlterPlanInput] = useState(false)
+  const [alterPlanText, setAlterPlanText] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
   const sectionRefs = useRef<Map<string, HTMLDivElement>>(new Map())
   const tripMapRef = useRef<TripMapHandle>(null)
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const groups = groupByDate(flow.entries)
+  // Filter out removed entries before grouping
+  const visibleEntries = flow.entries.filter(e => !flow.removedIds.has(e.id))
+  const groups = groupByDate(visibleEntries)
   const dayItems = groups.map(g => ({
     dateKey: g.dateKey,
     shortLabel: g.label.day,
@@ -116,7 +122,7 @@ export function FlowPage() {
     entryCount: g.entries.length,
   }))
 
-  const hasConflict = flow.entries.some(
+  const hasConflict = visibleEntries.some(
     e => e.id === 'WS2026-K08' && Boolean(e.data['conflictDetected'])
   ) && !flow.conflictResolved
 
@@ -126,6 +132,22 @@ export function FlowPage() {
     setShowConfirmModal(false)
     flow.confirmAll(allEntryIds)
   }
+
+  const handleRemoveEntry = useCallback((entryId: string, title: string) => {
+    flow.removeEntry(entryId)
+    setOpenSheetEntryId(null)
+    tripMapRef.current?.highlightEntry(null)
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    setUndoToast({ entryId, title })
+    undoTimerRef.current = setTimeout(() => setUndoToast(null), 5000)
+  }, [flow])
+
+  const handleUndoRemove = useCallback(() => {
+    if (!undoToast) return
+    flow.undoRemoveEntry(undoToast.entryId)
+    setUndoToast(null)
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+  }, [flow, undoToast])
 
   // Scroll to a day section
   const scrollToDay = useCallback((dateKey: string) => {
@@ -147,6 +169,11 @@ export function FlowPage() {
   const closeSheet = useCallback(() => {
     setOpenSheetEntryId(null)
     tripMapRef.current?.highlightEntry(null)
+  }, [])
+
+  // Cleanup undo timer on unmount
+  useEffect(() => {
+    return () => { if (undoTimerRef.current) clearTimeout(undoTimerRef.current) }
   }, [])
 
   // IntersectionObserver to track active day as user scrolls
@@ -326,6 +353,59 @@ export function FlowPage() {
                 )
               })}
             </div>
+
+            {/* "Change something?" footer CTA — min 44×44px tap target (WCAG 2.5.5) */}
+            {!flow.allConfirmed && !flow.confirmingAll && (
+              <div className="px-4 pt-6 pb-2">
+                <button
+                  onClick={() => setShowAlterPlanInput(v => !v)}
+                  className="w-full flex items-center justify-center gap-2 min-h-[44px] text-on-dim hover:text-on-surface border border-border hover:border-accent/30 rounded-xl text-[13px] font-medium transition-colors"
+                >
+                  <span>✏️</span>
+                  <span>Change something?</span>
+                  <span className="text-[16px] text-on-dim/50">›</span>
+                </button>
+                {/* Alter Plan input sheet */}
+                <AnimatePresence>
+                  {showAlterPlanInput && (
+                    <motion.div
+                      className="mt-3 bg-surface-1 border border-border rounded-2xl p-4 space-y-3"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <p className="text-on-surface font-semibold text-[14px]">What would you like to change?</p>
+                      <p className="text-on-dim text-[12px]">Describe any change and Jeevy will update the plan.</p>
+                      <input
+                        type="text"
+                        value={alterPlanText}
+                        onChange={e => setAlterPlanText(e.target.value)}
+                        placeholder="e.g. vegetarian dinners, earlier flights, budget hotel…"
+                        className="w-full bg-surface-0 border border-border rounded-xl px-3 py-2.5 text-on-surface text-[13px] placeholder:text-on-dim/40 outline-none focus:border-accent transition-colors"
+                        // eslint-disable-next-line jsx-a11y/no-autofocus
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          disabled={!alterPlanText.trim()}
+                          onClick={() => { setAlterPlanText(''); setShowAlterPlanInput(false) }}
+                          className="flex-1 min-h-[44px] bg-accent text-white font-semibold text-[13px] rounded-xl disabled:opacity-40 transition-opacity"
+                        >
+                          Send to Jeevy →
+                        </button>
+                        <button
+                          onClick={() => setShowAlterPlanInput(false)}
+                          className="px-4 min-h-[44px] text-on-dim text-[13px] hover:text-on-surface transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             {/* Post-confirm success */}
             <AnimatePresence>
@@ -534,7 +614,33 @@ export function FlowPage() {
         entry={flow.entries.find(e => e.id === openSheetEntryId) ?? null}
         flow={flow}
         onClose={closeSheet}
+        onRemove={handleRemoveEntry}
       />
+
+      {/* Undo toast — 5s, appears above sticky bar */}
+      <AnimatePresence>
+        {undoToast && (
+          <motion.div
+            className="fixed bottom-[80px] left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+          >
+            <div className="flex items-center gap-3 bg-surface-0 border border-border rounded-2xl shadow-lg px-4 py-3 pointer-events-auto max-w-sm w-full">
+              <span className="text-on-dim text-[13px] flex-1 truncate">
+                Removed <span className="font-semibold text-on-surface">{undoToast.title}</span>
+              </span>
+              <button
+                onClick={handleUndoRemove}
+                className="text-accent font-bold text-[13px] shrink-0 hover:text-accent/80 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                Undo
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Sticky confirm footer */}
       {!flow.allConfirmed && !flow.confirmingAll && (

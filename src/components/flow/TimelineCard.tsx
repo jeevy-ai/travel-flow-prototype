@@ -1,6 +1,5 @@
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import type { TimelineEntry, FlowEngine, AlternativeOption, EntryType } from '../../hooks/useFlowEngine'
+import { motion } from 'framer-motion'
+import type { TimelineEntry, FlowEngine, EntryType } from '../../hooks/useFlowEngine'
 import { ImageSlot } from '../timeline/ImageSlot'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -61,17 +60,6 @@ const CATEGORY_ICONS: Partial<Record<EntryType, string>> = {
   ride: '🚗',
 }
 
-const SCREEN_FOR_ENTRY: Record<string, number> = {
-  flt_outbound: 2,
-  flt_return: 2,
-  hotel_main: 3,
-  'WS2026-K01': 4,
-  'WS2026-K02': 4,
-  'WS2026-K08': 4,
-  'WS2026-W07': 4,
-  reminders: 6,
-}
-
 // ── Status chip ───────────────────────────────────────────────────────────────
 
 function StatusChip({ entry }: { entry: TimelineEntry }) {
@@ -98,102 +86,6 @@ function StatusChip({ entry }: { entry: TimelineEntry }) {
   }
 }
 
-// ── Dismiss sheet ─────────────────────────────────────────────────────────────
-
-interface DismissSheetProps {
-  onSelf: () => void
-  onCustom: (text: string) => void
-  onEnrich: (alt: AlternativeOption) => void
-  onClose: () => void
-  alternatives?: AlternativeOption[]
-}
-
-function DismissSheet({ onSelf, onCustom, onEnrich, onClose, alternatives }: DismissSheetProps) {
-  const [mode, setMode] = useState<'menu' | 'alternatives' | 'custom'>('menu')
-  const [text, setText] = useState('')
-
-  const goCustom = () => setMode('custom')
-  const handleDifferentOption = () => alternatives?.length ? setMode('alternatives') : goCustom()
-  const handleSubmit = () => { if (text.trim()) onCustom(text.trim()) }
-
-  return (
-    <motion.div
-      className="border-t border-border bg-surface-2 px-3 py-3"
-      initial={{ height: 0, opacity: 0 }}
-      animate={{ height: 'auto', opacity: 1 }}
-      exit={{ height: 0, opacity: 0 }}
-      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-    >
-      {mode === 'menu' && (
-        <div className="space-y-1.5">
-          <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide mb-2">Override this entry</p>
-          <button onClick={onSelf} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-surface-3 hover:bg-surface-3/80 border border-border text-left transition-colors">
-            <span className="text-base">✋</span>
-            <div>
-              <p className="text-on-surface text-[12px] font-semibold">I'll handle it myself</p>
-              <p className="text-on-dim text-[11px]">Mark as self-managed — Jeevy won't book or track this</p>
-            </div>
-          </button>
-          <button onClick={handleDifferentOption} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-surface-3 hover:bg-surface-3/80 border border-border text-left transition-colors">
-            <span className="text-base">✦</span>
-            <div>
-              <p className="text-on-surface text-[12px] font-semibold">Different option…</p>
-              <p className="text-on-dim text-[11px]">Pick an alternative or describe what you want</p>
-            </div>
-          </button>
-          <button onClick={onClose} className="text-on-dim text-[11px] hover:text-on-surface transition-colors mt-1 px-1">✕ Cancel</button>
-        </div>
-      )}
-
-      {mode === 'alternatives' && alternatives && (
-        <div className="space-y-1.5">
-          <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide mb-2">Jeevy's alternatives</p>
-          {alternatives.map(alt => (
-            <button key={alt.id} onClick={() => onEnrich(alt)} className="w-full flex items-center gap-3 px-2 py-2 rounded-xl bg-surface-3 hover:bg-surface-3/80 border border-border text-left transition-colors group">
-              <div className="w-12 h-12 rounded-lg shrink-0 overflow-hidden" style={{ background: alt.gradientFallback }}>
-                {alt.imageThumb && <img src={alt.imageThumb} alt={alt.name} className="w-full h-full object-cover" />}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-on-surface text-[12px] font-semibold leading-tight">{alt.name}</p>
-                <p className="text-on-dim text-[10px] mt-0.5 line-clamp-1">{alt.tagline}</p>
-              </div>
-              <span className="text-on-dim/40 text-[16px] group-hover:text-accent transition-colors shrink-0">›</span>
-            </button>
-          ))}
-          <button onClick={goCustom} className="w-full text-left text-on-dim text-[11px] hover:text-accent transition-colors px-2 py-1.5 flex items-center gap-1.5">
-            <span>✎</span><span>Type your own option…</span>
-          </button>
-          <button onClick={() => setMode('menu')} className="text-on-dim text-[11px] hover:text-on-surface transition-colors px-1">← Back</button>
-        </div>
-      )}
-
-      {mode === 'custom' && (
-        <div className="space-y-2">
-          <p className="text-on-dim text-[11px] font-mono uppercase tracking-wide">Describe your preference</p>
-          <input
-            type="text"
-            value={text}
-            onChange={e => setText(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleSubmit() }}
-            placeholder="e.g. book a taxi instead, or stay an extra night…"
-            className="w-full bg-surface-3 border border-border rounded-lg px-3 py-2 text-on-surface text-[12px] placeholder:text-on-dim/40 outline-none focus:border-accent transition-colors"
-            // eslint-disable-next-line jsx-a11y/no-autofocus
-            autoFocus
-          />
-          <div className="flex gap-2">
-            <button onClick={handleSubmit} disabled={!text.trim()} className="flex-1 bg-accent text-white text-[12px] font-semibold py-1.5 rounded-lg disabled:opacity-40 transition-opacity">
-              Enrich →
-            </button>
-            <button onClick={() => alternatives ? setMode('alternatives') : setMode('menu')} className="px-3 text-on-dim text-[12px] hover:text-on-surface transition-colors">
-              Back
-            </button>
-          </div>
-        </div>
-      )}
-    </motion.div>
-  )
-}
-
 // ── Ghost card variant ────────────────────────────────────────────────────────
 
 function GhostVariant({ entry }: { entry: TimelineEntry }) {
@@ -212,65 +104,6 @@ function GhostVariant({ entry }: { entry: TimelineEntry }) {
   )
 }
 
-// ── Actions row (shared) ──────────────────────────────────────────────────────
-
-interface ActionsRowProps {
-  entry: TimelineEntry
-  flow: FlowEngine
-  dismissOpen: boolean
-  setDismissOpen: (v: boolean | ((prev: boolean) => boolean)) => void
-}
-
-function ActionsRow({ entry, flow, dismissOpen, setDismissOpen }: ActionsRowProps) {
-  const isProposed = entry.state === 'proposed'
-  const isConfirmed = entry.state === 'confirmed' || entry.state === 'calendar-synced'
-  const isDismissed = entry.state === 'self-managed' || entry.state === 'custom-pending'
-  const canDismiss = !isDismissed && !flow.confirmingAll && !flow.allConfirmed
-  const swapScreen = SCREEN_FOR_ENTRY[entry.id]
-
-  if (flow.confirmingAll || flow.allConfirmed) return null
-
-  return (
-    <div className="px-3 pb-2.5 flex items-center gap-2">
-      {isProposed && swapScreen && (
-        <button
-          onClick={() => flow.startEditScreen(swapScreen)}
-          className="text-[11px] font-medium text-on-dim bg-surface-2 hover:bg-surface-3 px-2.5 py-1 rounded-full border border-border transition-colors"
-        >
-          ⇄ Swap
-        </button>
-      )}
-      {isConfirmed && swapScreen && (
-        <button
-          onClick={() => flow.startEditScreen(swapScreen)}
-          className="text-[11px] font-medium text-on-dim bg-surface-2 hover:bg-surface-3 px-2.5 py-1 rounded-full border border-border transition-colors"
-        >
-          ✏ Edit
-        </button>
-      )}
-      <div className="flex-1" />
-      {canDismiss && (
-        <button
-          onClick={() => setDismissOpen(v => !v)}
-          className={`text-[11px] font-medium px-2 py-1 rounded-full transition-colors ${dismissOpen ? 'text-on-surface bg-surface-3' : 'text-on-dim/60 hover:text-on-dim'}`}
-          title="Override this entry"
-        >
-          ···
-        </button>
-      )}
-      {(isDismissed || entry.enrichedWith) && (
-        <button
-          onClick={() => flow.restoreEntry(entry.id)}
-          className="text-[11px] font-medium text-on-dim/40 hover:text-on-dim px-2 py-1 rounded-full transition-colors"
-          title="Undo"
-        >
-          ↩ Undo
-        </button>
-      )}
-    </div>
-  )
-}
-
 // ── Atmospheric card — full-bleed 160px image ─────────────────────────────────
 
 interface TimelineCardProps {
@@ -281,15 +114,9 @@ interface TimelineCardProps {
 }
 
 function AtmosphericCard({ entry, flow, staggerIndex, onOpen }: TimelineCardProps) {
-  const [dismissOpen, setDismissOpen] = useState(false)
   const isDismissed = entry.state === 'self-managed' || entry.state === 'custom-pending'
   const isConfirmed = entry.state === 'confirmed' || entry.state === 'calendar-synced'
-  const canDismiss = !isDismissed && !flow.confirmingAll && !flow.allConfirmed
   const hasConflict = entry.id === 'WS2026-K08' && Boolean(entry.data['conflictDetected']) && !flow.conflictResolved
-
-  const handleSelf = () => { flow.dismissEntry(entry.id, 'self'); setDismissOpen(false) }
-  const handleCustom = (text: string) => { flow.dismissEntry(entry.id, 'custom', text); setDismissOpen(false) }
-  const handleEnrich = (alt: AlternativeOption) => { flow.enrichEntry(entry.id, alt); setDismissOpen(false) }
 
   const displayThumb = entry.enrichedWith?.imageThumb ?? entry.imageThumb
   const displayGradient = entry.enrichedWith?.gradientFallback ?? entry.gradientFallback
@@ -309,13 +136,14 @@ function AtmosphericCard({ entry, flow, staggerIndex, onOpen }: TimelineCardProp
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1], delay: staggerIndex * 0.05 }}
     >
-      <div className={`rounded-2xl overflow-hidden border bg-surface-1 flex flex-col transition-colors duration-300 ${borderClass}`}>
+      {/* Full card is tappable — image + text area = single tap target */}
+      <button
+        className={`w-full text-left rounded-2xl overflow-hidden border bg-surface-1 flex flex-col transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${borderClass}`}
+        onClick={() => !isDismissed && onOpen(entry.id)}
+        aria-label={`View details for ${title}`}
+      >
         {/* Full-bleed 160px image with time chip overlay */}
-        <button
-          className="relative h-40 overflow-hidden w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          onClick={() => !dismissOpen && !isDismissed && onOpen(entry.id)}
-          aria-label={`View details for ${title}`}
-        >
+        <div className="relative h-40 overflow-hidden w-full">
           <div className={`w-full h-full ${isDismissed ? 'grayscale opacity-60' : ''}`}>
             <ImageSlot src={displayThumb} alt={title} gradient={displayGradient} className="w-full h-full" />
           </div>
@@ -332,25 +160,22 @@ function AtmosphericCard({ entry, flow, staggerIndex, onOpen }: TimelineCardProp
           )}
           {/* Conflict badge */}
           {hasConflict && (
-            <div className="absolute top-2 left-2">
-              <button
-                onClick={e => { e.stopPropagation(); flow.startEditScreen(5) }}
-                className="bg-warning/90 text-black text-[10px] font-bold px-2 py-1 rounded-md"
-              >
+            <div className="absolute top-2 left-2" onClick={e => { e.stopPropagation(); flow.startEditScreen(5) }}>
+              <span className="bg-warning/90 text-black text-[10px] font-bold px-2 py-1 rounded-md">
                 ⚠ Conflict — Resolve →
-              </button>
+              </span>
             </div>
           )}
-          {/* Expand hint */}
+          {/* Chevron — tappability signifier */}
           {!isDismissed && (
-            <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-black/30 flex items-center justify-center pointer-events-none">
-              <span className="text-white text-[11px] leading-none">›</span>
+            <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/30 flex items-center justify-center pointer-events-none">
+              <span className="text-white text-[12px] leading-none">›</span>
             </div>
           )}
-        </button>
+        </div>
 
         {/* Meta below image */}
-        <div className="px-3 pt-2.5 pb-1.5 flex flex-col gap-1">
+        <div className="px-3 pt-2.5 pb-3 flex flex-col gap-1">
           <p className={`font-semibold text-[14px] leading-tight ${isDismissed ? 'text-on-dim line-through' : 'text-on-surface'}`}>
             {title}
           </p>
@@ -361,23 +186,7 @@ function AtmosphericCard({ entry, flow, staggerIndex, onOpen }: TimelineCardProp
             <StatusChip entry={entry} />
           </div>
         </div>
-
-        {/* Actions row */}
-        <ActionsRow entry={entry} flow={flow} dismissOpen={dismissOpen} setDismissOpen={setDismissOpen} />
-
-        {/* Dismiss sheet */}
-        <AnimatePresence>
-          {dismissOpen && canDismiss && (
-            <DismissSheet
-              onSelf={handleSelf}
-              onCustom={handleCustom}
-              onEnrich={handleEnrich}
-              onClose={() => setDismissOpen(false)}
-              alternatives={entry.alternatives}
-            />
-          )}
-        </AnimatePresence>
-      </div>
+      </button>
     </motion.div>
   )
 }
@@ -390,15 +199,9 @@ const PROVIDER_CONFIG: Partial<Record<EntryType, { bg: string; label?: string; e
   flight_return:      { bg: 'var(--accent)', emoji: '✈' },
 }
 
-function CompactCard({ entry, flow, staggerIndex, onOpen }: TimelineCardProps) {
-  const [dismissOpen, setDismissOpen] = useState(false)
+function CompactCard({ entry, flow: _flow, staggerIndex, onOpen }: TimelineCardProps) {
   const isDismissed = entry.state === 'self-managed' || entry.state === 'custom-pending'
   const isConfirmed = entry.state === 'confirmed' || entry.state === 'calendar-synced'
-  const canDismiss = !isDismissed && !flow.confirmingAll && !flow.allConfirmed
-
-  const handleSelf = () => { flow.dismissEntry(entry.id, 'self'); setDismissOpen(false) }
-  const handleCustom = (text: string) => { flow.dismissEntry(entry.id, 'custom', text); setDismissOpen(false) }
-  const handleEnrich = (alt: AlternativeOption) => { flow.enrichEntry(entry.id, alt); setDismissOpen(false) }
 
   const title = entry.enrichedWith?.name ?? entryTitle(entry)
   const subtitle = entrySubtitle(entry)
@@ -417,10 +220,10 @@ function CompactCard({ entry, flow, staggerIndex, onOpen }: TimelineCardProps) {
       transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1], delay: staggerIndex * 0.05 }}
     >
       <div className={`rounded-xl overflow-hidden border bg-surface-1 flex flex-col transition-colors duration-300 ${borderClass}`}>
-        {/* Compact row */}
+        {/* Full row is the tap target — min 44px height satisfied by py-3 on 14px font ≥44px */}
         <button
-          className="flex items-center gap-3 px-3 py-3 w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          onClick={() => !dismissOpen && !isDismissed && onOpen(entry.id)}
+          className="flex items-center gap-3 px-3 py-3 w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-accent min-h-[44px]"
+          onClick={() => !isDismissed && onOpen(entry.id)}
           aria-label={`View details for ${title}`}
         >
           {/* Provider badge */}
@@ -455,22 +258,6 @@ function CompactCard({ entry, flow, staggerIndex, onOpen }: TimelineCardProps) {
             {!isDismissed && <span className="text-on-dim text-[16px] leading-none">›</span>}
           </div>
         </button>
-
-        {/* Actions row */}
-        <ActionsRow entry={entry} flow={flow} dismissOpen={dismissOpen} setDismissOpen={setDismissOpen} />
-
-        {/* Dismiss sheet */}
-        <AnimatePresence>
-          {dismissOpen && canDismiss && (
-            <DismissSheet
-              onSelf={handleSelf}
-              onCustom={handleCustom}
-              onEnrich={handleEnrich}
-              onClose={() => setDismissOpen(false)}
-              alternatives={entry.alternatives}
-            />
-          )}
-        </AnimatePresence>
       </div>
     </motion.div>
   )
