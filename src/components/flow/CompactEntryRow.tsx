@@ -154,7 +154,7 @@ function StatusChip({ entry }: { entry: TimelineEntry }) {
       )
     case 'custom-pending':
       return (
-        <span className="text-[10px] font-semibold text-[#c084fc] bg-[#c084fc]/10 px-2 py-0.5 rounded-full whitespace-nowrap max-w-[160px] truncate"
+        <span className="text-[10px] font-semibold text-state-custom bg-state-custom/10 px-2 py-0.5 rounded-full whitespace-nowrap max-w-[160px] truncate"
           title={entry.customOverrideText}>
           ✎ {entry.customOverrideText || 'Custom option'}
         </span>
