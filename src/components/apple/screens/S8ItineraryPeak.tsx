@@ -12,6 +12,8 @@ interface Props {
   itinerary?: Itinerary | null
   alterPlan?: (instruction: string) => Promise<void>
   alterStatus?: 'idle' | 'altering'
+  loadStatus?: 'idle' | 'loading' | 'error'
+  onStartOver?: () => void
 }
 
 // ---------------------------------------------------------------------------
@@ -298,7 +300,7 @@ const TIMELINE: TimelineGroup[] = [
 // Main screen
 // ---------------------------------------------------------------------------
 
-export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle' }: Props) {
+export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', loadStatus = 'idle', onStartOver }: Props) {
   const [phase, setPhase] = useState<'ring' | 'timeline'>('ring')
   const [swapOpen, setSwapOpen] = useState<string | null>(null)
   const [alterOpen, setAlterOpen] = useState(false)
@@ -439,6 +441,54 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle' }: 
 
             {/* Timeline */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto px-5 pt-3 pb-40">
+              {/* Loading skeleton — shown while first itinerary is generating */}
+              {!itinerary && loadStatus === 'loading' && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 space-y-3">
+                  {[1, 2, 3].map(i => (
+                    <div
+                      key={i}
+                      className="rounded-xl overflow-hidden"
+                      style={{
+                        height: 200,
+                        background: 'linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg) 50%, var(--bg-secondary) 75%)',
+                        backgroundSize: '200% 100%',
+                        animation: `shimmer ${1.4 + i * 0.1}s infinite`,
+                        animationDelay: `${i * 0.08}s`,
+                      }}
+                    />
+                  ))}
+                  <p className="text-center text-[13px] pt-2" style={{ color: 'var(--text-tertiary)' }}>
+                    Jeevy is building your plan…
+                  </p>
+                </motion.div>
+              )}
+
+              {/* Error state */}
+              {!itinerary && loadStatus === 'error' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-8 flex flex-col items-center gap-4 px-4 text-center"
+                >
+                  <p className="text-[28px]">⚠️</p>
+                  <p className="text-[16px] font-semibold" style={{ color: 'var(--text-primary)' }}>
+                    Couldn't build your plan
+                  </p>
+                  <p className="text-[14px]" style={{ color: 'var(--text-secondary)' }}>
+                    Something went wrong connecting to Jeevy.
+                  </p>
+                  {onStartOver && (
+                    <button
+                      onClick={onStartOver}
+                      className="mt-2 px-6 py-3 rounded-2xl font-medium text-[15px] text-white"
+                      style={{ background: 'var(--accent)' }}
+                    >
+                      Try again
+                    </button>
+                  )}
+                </motion.div>
+              )}
+
               {itinerary
                 ? itinerary.days.map((day, gi) => (
                     <div key={day.day} className={gi > 0 ? 'mt-6' : 'mt-1'}>
