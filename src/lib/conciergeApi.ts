@@ -19,6 +19,8 @@ export interface ItineraryItem {
   imageUrl?: string
   category?: EventCategory
   transportAfter?: TransportLeg
+  price?: string
+  localTip?: string
 }
 
 export interface ItineraryDay {

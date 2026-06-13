@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { EventCategory, Itinerary, ItineraryDay, ItineraryItem, TransportLeg } from '../../../lib/conciergeApi'
 import { ItemEditSheet } from '../ItemEditSheet'
 
-// ── Fixture itinerary (demo fallback) ──────────────────────────────────────
+// ── Fixture itineraries (demo destinations) ────────────────────────────────
 
-const FIXTURE: Itinerary = {
+const FIXTURE_LISBON: Itinerary = {
   destination: 'Lisbon, Portugal',
   dates: 'November 9–12, 2026',
   summary: 'Web Summit 2026 · 4 days · Personalised for Noah',
@@ -19,6 +19,8 @@ const FIXTURE: Itinerary = {
           detail: 'Business class · Seat 4A · Non-stop · 10h 35m',
           category: 'other' as EventCategory,
           imageUrl: '/fixture-images/flight-outbound-business-cabin.webp',
+          price: '$3,240 Business',
+          localTip: 'Seat 4A has extra aisle width on the 767-400ER. The Atlantic sunrise at ~06:00 WET is worth staying awake for.',
           transportAfter: { mode: 'taxi', duration: '25 min', notes: '~€18 to hotel' },
         },
       ],
@@ -32,6 +34,8 @@ const FIXTURE: Itinerary = {
           detail: 'Check-in · Superior Room · City view · Free cancellation until Nov 7',
           category: 'accommodation' as EventCategory,
           imageUrl: '/fixture-images/hotel-bairro-alto.webp',
+          price: '€420/night',
+          localTip: 'Ask for a room on floors 5–7 facing east — Tagus river and São Jorge Castle view at sunrise.',
           transportAfter: { mode: 'metro', duration: '12 min', notes: '~€1.50' },
         },
         {
@@ -40,6 +44,8 @@ const FIXTURE: Itinerary = {
           detail: 'Reid Hoffman · Stage 1, Altice Arena',
           category: 'conference' as EventCategory,
           imageUrl: '/fixture-images/conference-session-keynote-k01.webp',
+          price: 'Included in pass',
+          localTip: 'Front rows at Stage 1 fill 20 min early. The side aisles have power strips — good for charging.',
           transportAfter: { mode: 'walk', duration: '5 min' },
         },
         {
@@ -48,6 +54,8 @@ const FIXTURE: Itinerary = {
           detail: 'Panel · Centre Stage, Altice Arena',
           category: 'conference' as EventCategory,
           imageUrl: '/fixture-images/conference-session-keynote-k02.webp',
+          price: 'Included in pass',
+          localTip: 'The networking zone outside Centre Stage has the best startup founders between talks — bring business cards.',
           transportAfter: { mode: 'taxi', duration: '15 min' },
         },
         {
@@ -56,6 +64,8 @@ const FIXTURE: Itinerary = {
           detail: 'Seafood dinner · Table for 1 · Intendente, Lisbon',
           category: 'dining' as EventCategory,
           imageUrl: '/fixture-images/restaurant-dishes-seafood.webp',
+          price: '€€€ · avg €60/person',
+          localTip: 'Order the percebes (barnacles) and gambas al ajillo first — they go fast. Finish with the iconic prego no pão steak sandwich.',
         },
       ],
     },
@@ -68,6 +78,8 @@ const FIXTURE: Itinerary = {
           detail: 'Lenny Rachitsky · Workshop Hall C · Hands-on session',
           category: 'conference' as EventCategory,
           imageUrl: '/fixture-images/conference-session-keynote-w07.webp',
+          price: 'Included in pass',
+          localTip: 'Lenny shares his real Notion docs live — bring your laptop to follow along and fork the templates.',
           transportAfter: { mode: 'walk', duration: '5 min' },
         },
         {
@@ -76,6 +88,8 @@ const FIXTURE: Itinerary = {
           detail: 'Padmasree Warrior · Centre Stage, Altice Arena',
           category: 'conference' as EventCategory,
           imageUrl: '/fixture-images/conference-session-keynote-k08.webp',
+          price: 'Included in pass',
+          localTip: 'Stay until the end — the post-keynote cocktail reception has the best unscheduled conversations of the whole summit.',
           transportAfter: { mode: 'taxi', duration: '20 min' },
         },
         {
@@ -84,6 +98,8 @@ const FIXTURE: Itinerary = {
           detail: 'Cocktails with views over Lisbon · Bairro Alto',
           category: 'explore' as EventCategory,
           imageUrl: '/fixture-images/activity-rooftop-lisbon.webp',
+          price: '€14–20 per cocktail',
+          localTip: 'Hidden on the roof of a parking structure — look for the neon sign on Calçada do Combro 58. No reservation needed before 22:00.',
         },
       ],
     },
@@ -96,6 +112,8 @@ const FIXTURE: Itinerary = {
           detail: 'Fado district · Historic castle views · 1.5 hrs',
           category: 'explore' as EventCategory,
           imageUrl: '/fixture-images/activity-fado-lisbon.webp',
+          price: 'Free',
+          localTip: 'Start at Portas do Sol viewpoint. The bakery on Rua dos Remédios makes the best pastel de nata in the city — €1.20.',
           transportAfter: { mode: 'taxi', duration: '30 min', notes: 'To LIS airport' },
         },
         {
@@ -104,11 +122,252 @@ const FIXTURE: Itinerary = {
           detail: 'Business class · Seat 4A · Non-stop · 11h',
           category: 'other' as EventCategory,
           imageUrl: '/fixture-images/flight-return-business-cabin.webp',
+          price: '$3,240 Business',
+          localTip: 'LIS Business lounge has excellent tosta mista and espresso — arrive 45 min early to enjoy it.',
         },
       ],
     },
   ],
 }
+
+const FIXTURE_NYC: Itinerary = {
+  destination: 'New York City, NY',
+  dates: 'October 27–30, 2026',
+  summary: 'TechCrunch Disrupt 2026 · 4 days · Personalised for Noah',
+  days: [
+    {
+      day: 'Mon, Oct 27 — Depart SFO',
+      items: [
+        {
+          time: '22:00',
+          title: 'United UA194 · SFO → JFK',
+          detail: 'Business class · Seat 5A · Non-stop · 5h 30m',
+          category: 'other' as EventCategory,
+          imageUrl: '/fixture-images/flight-outbound-business-cabin.webp',
+          price: '$2,850 Polaris Business',
+          localTip: 'Row 5 window seat on the 787-9 has a direct view of the Manhattan skyline on approach to JFK from the east.',
+          transportAfter: { mode: 'taxi', duration: '45 min', notes: '~$65 to Midtown' },
+        },
+      ],
+    },
+    {
+      day: 'Tue, Oct 28 — Arrive + Conference Day 1',
+      items: [
+        {
+          time: '07:00',
+          title: 'The NoMad Hotel',
+          detail: 'Check-in · Deluxe King · Madison Square Park views · Free cancellation until Oct 24',
+          category: 'accommodation' as EventCategory,
+          price: '$389/night',
+          localTip: 'Ask for a room above floor 8 facing west — the Madison Square Park view at golden hour is worth specifying at check-in.',
+          transportAfter: { mode: 'walk', duration: '12 min', notes: 'To Javits Center' },
+        },
+        {
+          time: '09:30',
+          title: 'AI-First Startups: What Actually Worked',
+          detail: 'Panel · Main Stage, Javits Center',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k01.webp',
+          price: 'Included in pass',
+          localTip: 'Main Stage lines start 20 min before doors. The TC app has a "seat saved" feature — use it the night before.',
+          transportAfter: { mode: 'walk', duration: '5 min' },
+        },
+        {
+          time: '14:00',
+          title: 'The Next Billion Users Keynote',
+          detail: 'Sundar Pichai · Plenary Hall, Javits Center',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k02.webp',
+          price: 'Included in pass',
+          localTip: 'The Javits Center rooftop garden (Level 4) is open between sessions — great place to take calls with city views.',
+          transportAfter: { mode: 'taxi', duration: '10 min' },
+        },
+        {
+          time: '19:30',
+          title: 'Eleven Madison Park',
+          detail: 'Plant-based tasting menu · 11 courses · Flatiron District',
+          category: 'dining' as EventCategory,
+          price: '$335/person',
+          localTip: 'The black truffle custard and the celery root "shawarma" are the two most talked-about courses. Wines pairing adds $175 and is worth it.',
+        },
+      ],
+    },
+    {
+      day: 'Wed, Oct 29 — Conference Day 2',
+      items: [
+        {
+          time: '09:30',
+          title: 'Product Velocity: Shipping at AI Speed',
+          detail: 'Workshop · Hall B, Javits Center · Hands-on format',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-w07.webp',
+          price: 'Included in pass',
+          localTip: 'Bring your laptop — the workshop has live coding segments. Grab a seat near a power column.',
+          transportAfter: { mode: 'walk', duration: '5 min' },
+        },
+        {
+          time: '15:00',
+          title: 'Startup Battlefield Finals',
+          detail: 'Live pitch competition · Main Stage, Javits Center',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k08.webp',
+          price: 'Included in pass',
+          localTip: 'The Battlefield is the best networking moment of TC Disrupt — judges and investors are accessible in the lobby immediately after.',
+          transportAfter: { mode: 'taxi', duration: '25 min' },
+        },
+        {
+          time: '20:00',
+          title: 'Don Angie',
+          detail: 'Italian-American fine dining · West Village',
+          category: 'dining' as EventCategory,
+          price: '$120/person',
+          localTip: "The pinwheel lasagna and garlic knots are must-orders. Sit at the bar for solo dining — the bartender's menu suggestions are excellent.",
+        },
+      ],
+    },
+    {
+      day: 'Thu, Oct 30 — Return',
+      items: [
+        {
+          time: '07:00',
+          title: 'High Line Morning Walk',
+          detail: 'Elevated park · Hudson Yards to Chelsea · 2.3 km',
+          category: 'explore' as EventCategory,
+          price: 'Free',
+          localTip: 'Start at the 34th St–Hudson Yards entrance heading south for the best Hudson River views. Coffee at the High Line Hotel garden on the way.',
+          transportAfter: { mode: 'taxi', duration: '35 min', notes: 'To JFK airport' },
+        },
+        {
+          time: '11:30',
+          title: 'United UA195 · JFK → SFO',
+          detail: 'Business class · Seat 5A · Non-stop · 6h',
+          category: 'other' as EventCategory,
+          imageUrl: '/fixture-images/flight-return-business-cabin.webp',
+          price: '$2,850 Polaris Business',
+          localTip: 'JFK Polaris Lounge (Terminal 7) has excellent espresso and a shower suite — arrive 60 min early.',
+        },
+      ],
+    },
+  ],
+}
+
+const FIXTURE_TOKYO: Itinerary = {
+  destination: 'Tokyo, Japan',
+  dates: 'April 14–17, 2027',
+  summary: 'Tokyo AI Summit 2027 · 4 days · Personalised for Noah',
+  days: [
+    {
+      day: 'Tue, Apr 14 — Depart SFO',
+      items: [
+        {
+          time: '11:40',
+          title: 'ANA NH007 · SFO → NRT',
+          detail: 'Business class · "The Room" · Seat 1A · Non-stop · 11h',
+          category: 'other' as EventCategory,
+          imageUrl: '/fixture-images/flight-outbound-business-cabin.webp',
+          price: '$4,200 ANA Business',
+          localTip: 'ANA "The Room" suites have a closing door for full privacy. The miso ramen is the best airline meal in this class — order it early.',
+          transportAfter: { mode: 'train', duration: '53 min', notes: 'Narita Express · ¥3,070' },
+        },
+      ],
+    },
+    {
+      day: 'Wed, Apr 15 — Arrive + Opening Day',
+      items: [
+        {
+          time: '15:00',
+          title: 'Park Hyatt Tokyo',
+          detail: 'Check-in · Deluxe King · Shinjuku skyline · Free cancellation until Apr 11',
+          category: 'accommodation' as EventCategory,
+          price: '¥98,000/night (~$650)',
+          localTip: 'Ask for a west-facing room above floor 45 — on clear days Mount Fuji is visible at dawn. The New York Bar (Lost in Translation fame) is on floor 52.',
+          transportAfter: { mode: 'walk', duration: '10 min', notes: 'To summit venue' },
+        },
+        {
+          time: '17:00',
+          title: 'Tokyo AI Summit — Opening Keynote',
+          detail: 'Fei-Fei Li · Main Hall, Tokyo International Forum',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k01.webp',
+          price: 'Included in pass',
+          localTip: 'Simultaneous translation headsets at the entrance — essential for the Japanese-language speakers. Return them at the end of the day.',
+          transportAfter: { mode: 'taxi', duration: '20 min' },
+        },
+        {
+          time: '19:30',
+          title: 'Sukiyabashi Jiro Honten',
+          detail: 'Omakase sushi · 10 courses · Ginza',
+          category: 'dining' as EventCategory,
+          price: '¥40,000/person (~$265)',
+          localTip: 'No menu — 10 courses, 30 minutes. The uni (sea urchin) and toro (bluefin tuna belly) are the spiritual heart of the meal. Eat each piece immediately.',
+        },
+      ],
+    },
+    {
+      day: 'Thu, Apr 16 — Summit Day 2',
+      items: [
+        {
+          time: '10:00',
+          title: 'Agent Systems at Scale',
+          detail: 'Demis Hassabis · Main Hall, Tokyo International Forum',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k02.webp',
+          price: 'Included in pass',
+          localTip: 'The hallway track outside the main hall has the highest density of Japanese enterprise AI leaders — introduce yourself in the queue.',
+          transportAfter: { mode: 'walk', duration: '5 min' },
+        },
+        {
+          time: '14:00',
+          title: 'Enterprise AI Adoption in Japan',
+          detail: 'Panel workshop · Room G401 · Hands-on case studies',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-w07.webp',
+          price: 'Included in pass',
+          localTip: 'Japanese workshop culture values silence and reflection — bring a notebook, not just your laptop.',
+          transportAfter: { mode: 'train', duration: '15 min', notes: 'To Shinjuku' },
+        },
+        {
+          time: '20:00',
+          title: 'Golden Gai + Omoide Yokocho',
+          detail: 'Bar-hopping · Shinjuku · Izakaya crawl · ~3 bars',
+          category: 'explore' as EventCategory,
+          imageUrl: '/fixture-images/activity-club-interior.webp',
+          price: '~¥8,000/person (~$55)',
+          localTip: 'Cash only in both areas. Start at Golden Gai (choose a tiny bar with 5–8 seats), then cross to Memory Lane for yakitori. Yebisu draft from the barrel.',
+        },
+      ],
+    },
+    {
+      day: 'Fri, Apr 17 — Return',
+      items: [
+        {
+          time: '06:30',
+          title: 'Senso-ji Temple at Dawn',
+          detail: 'Buddhist temple · Asakusa · 1.5 hrs',
+          category: 'explore' as EventCategory,
+          price: 'Free',
+          localTip: 'Arrive before 07:00 to beat the crowds. The Nakamise shopping street vendors open at 08:00 — the ningyo-yaki (small cakes) are the classic souvenir.',
+          transportAfter: { mode: 'taxi', duration: '80 min', notes: 'To Narita airport' },
+        },
+        {
+          time: '12:05',
+          title: 'ANA NH008 · NRT → SFO',
+          detail: 'Business class · "The Room" · Seat 1A · Non-stop · 10h',
+          category: 'other' as EventCategory,
+          imageUrl: '/fixture-images/flight-return-business-cabin.webp',
+          price: '$4,200 ANA Business',
+          localTip: 'NRT Terminal 1 ANA Suite Lounge has a ramen station and onsen-style foot bath — arrive 90 min early.',
+        },
+      ],
+    },
+  ],
+}
+
+const DEMO_DESTINATIONS: Array<Itinerary & { flag: string; cityShort: string }> = [
+  { ...FIXTURE_LISBON, flag: '🇵🇹', cityShort: 'Lisbon' },
+  { ...FIXTURE_NYC, flag: '🗽', cityShort: 'New York' },
+  { ...FIXTURE_TOKYO, flag: '🗼', cityShort: 'Tokyo' },
+]
 
 // ── Category styles (per YOU-750 spec) ────────────────────────────────────
 
@@ -370,7 +629,7 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
                 </div>
               </div>
 
-              {/* Title + detail */}
+              {/* Title + detail + enrichment */}
               <div style={{ padding: '14px 16px 8px' }}>
                 <h2 style={{
                   fontSize: 17, fontWeight: 700, color: 'var(--text-primary)',
@@ -379,9 +638,38 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
                   {item.title}
                 </h2>
                 {item.detail && (
-                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: '0 0 10px', lineHeight: 1.5 }}>
                     {item.detail}
                   </p>
+                )}
+                {/* Price pill */}
+                {item.price && (
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginBottom: 10 }}>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 5,
+                      background: 'var(--bg)', border: '1px solid var(--border)',
+                      borderRadius: 8, padding: '4px 10px',
+                      fontSize: 12, fontWeight: 600, color: 'var(--text-primary)',
+                    }}>
+                      <span style={{ fontSize: 13 }}>💰</span>
+                      {item.price}
+                    </span>
+                  </div>
+                )}
+                {/* Local tip callout */}
+                {item.localTip && (
+                  <div style={{
+                    background: 'var(--accent-light, #EEF2FF)',
+                    borderRadius: 10, padding: '10px 12px',
+                    marginTop: 4, marginBottom: 4,
+                  }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--accent)', margin: '0 0 4px', textTransform: 'uppercase' as const, letterSpacing: '0.04em' }}>
+                      ✦ Jeevy's tip
+                    </p>
+                    <p style={{ fontSize: 13, color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                      {item.localTip}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
@@ -510,29 +798,42 @@ function DaySection({ day, removedKeys, editedItems, onOpen }: {
   if (visibleItems.length === 0) return null
 
   return (
-    <div>
+    <div style={{ paddingBottom: 24 }}>
+      {/* Sticky day header — bleeds through scroll container's 16px padding (AC1, AC2) */}
       <div style={{
-        fontSize: 12, fontWeight: 600, color: 'var(--text-tertiary)',
-        paddingBottom: 8, textTransform: 'uppercase' as const, letterSpacing: '0.04em',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+        margin: '0 -16px',
+        padding: '10px 16px',
+        background: 'var(--bg-secondary)',
+        borderBottom: '1px solid var(--border)',
+        fontSize: 12,
+        fontWeight: 600,
+        color: 'var(--text-tertiary)',
+        textTransform: 'uppercase' as const,
+        letterSpacing: '0.04em',
       }}>
         {day.day}
       </div>
-      <AnimatePresence>
-        {visibleItems.map((item, vi) => {
-          const originalIndex = day.items.indexOf(item)
-          const itemKey = `${day.day}:${originalIndex}`
-          // Optimistic override: use locally-edited version if available
-          const resolvedItem = editedItems.get(itemKey) ?? item
-          const hasNextVisible = vi < visibleItems.length - 1
-          const showLeg = !!resolvedItem.transportAfter && hasNextVisible
-          return (
-            <div key={itemKey}>
-              <EventCard item={resolvedItem} onClick={() => onOpen(resolvedItem, itemKey)} />
-              {showLeg && resolvedItem.transportAfter && <TransportLegPill leg={resolvedItem.transportAfter} />}
-            </div>
-          )
-        })}
-      </AnimatePresence>
+      <div style={{ paddingTop: 8 }}>
+        <AnimatePresence>
+          {visibleItems.map((item, vi) => {
+            const originalIndex = day.items.indexOf(item)
+            const itemKey = `${day.day}:${originalIndex}`
+            // Optimistic override: use locally-edited version if available
+            const resolvedItem = editedItems.get(itemKey) ?? item
+            const hasNextVisible = vi < visibleItems.length - 1
+            const showLeg = !!resolvedItem.transportAfter && hasNextVisible
+            return (
+              <div key={itemKey}>
+                <EventCard item={resolvedItem} onClick={() => onOpen(resolvedItem, itemKey)} />
+                {showLeg && resolvedItem.transportAfter && <TransportLegPill leg={resolvedItem.transportAfter} />}
+              </div>
+            )
+          })}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
@@ -562,8 +863,11 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
   const [undoState, setUndoState] = useState<{ key: string; title: string } | null>(null)
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  // Phase 4: demo destination selector (only active when no API itinerary)
+  const [demoDestIdx, setDemoDestIdx] = useState(0)
 
-  const display = itinerary ?? FIXTURE
+  const display = itinerary ?? DEMO_DESTINATIONS[demoDestIdx]
+  const isDemoMode = !itinerary
 
   useEffect(() => {
     if (itinerary && scrollRef.current) {
@@ -639,11 +943,16 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
     setEditItemKey(null)
   }, [])
 
-  const heroImage = display.days[0]?.items[0]?.imageUrl ?? '/fixture-images/city-lisbon.webp'
+  const HERO_FALLBACKS: Record<string, string> = {
+    'Lisbon, Portugal': '/fixture-images/city-lisbon.webp',
+    'New York City, NY': '/fixture-images/flight-outbound-business-cabin.webp',
+    'Tokyo, Japan': '/fixture-images/flight-outbound-business-cabin.webp',
+  }
+  const heroImage = display.days[0]?.items[0]?.imageUrl ?? HERO_FALLBACKS[display.destination] ?? '/fixture-images/city-lisbon.webp'
   const busy = alterStatus === 'altering' || loadStatus === 'loading'
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg-secondary)', position: 'relative' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-secondary)', position: 'relative' }}>
 
       {/* Hero */}
       <div style={{ position: 'relative', height: 200, overflow: 'hidden', flexShrink: 0 }}>
@@ -682,6 +991,39 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
         </div>
       </div>
 
+      {/* Phase 4: destination picker — only shown in demo mode */}
+      {isDemoMode && (
+        <div style={{
+          display: 'flex', gap: 8, padding: '12px 16px 4px',
+          overflowX: 'auto', flexShrink: 0,
+          scrollbarWidth: 'none',
+        }}>
+          {DEMO_DESTINATIONS.map((dest, i) => (
+            <button
+              key={dest.cityShort}
+              onClick={() => {
+                setDemoDestIdx(i)
+                setRemovedKeys(new Set())
+                setEditedItems(new Map())
+                scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+              }}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '6px 14px', borderRadius: 999, border: 'none',
+                cursor: 'pointer', flexShrink: 0, fontSize: 13, fontWeight: 600,
+                transition: 'background 0.15s, color 0.15s',
+                background: i === demoDestIdx ? 'var(--text-primary)' : 'var(--bg)',
+                color: i === demoDestIdx ? 'white' : 'var(--text-secondary)',
+                boxShadow: i === demoDestIdx ? '0 2px 8px rgba(0,0,0,0.18)' : '0 0 0 1px var(--border)',
+              }}
+            >
+              <span style={{ fontSize: 15 }}>{dest.flag}</span>
+              {dest.cityShort}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Personalization + status banners */}
       <div style={{ padding: '4px 20px 0' }}>
         <PersonalizationTag name="Jeevy" />
@@ -713,7 +1055,7 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
 
       {/* Card stack */}
       <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 16px 200px' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           {display.days.map(day => (
             <DaySection
               key={day.day}
