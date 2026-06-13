@@ -363,10 +363,242 @@ const FIXTURE_TOKYO: Itinerary = {
   ],
 }
 
+const FIXTURE_DUBAI: Itinerary = {
+  destination: 'Dubai, UAE',
+  dates: 'March 16–19, 2027',
+  summary: 'a16z Future Summit 2027 · 4 days · Personalised for Noah',
+  days: [
+    {
+      day: 'Mon, Mar 16 — Depart SFO',
+      items: [
+        {
+          time: '23:55',
+          title: 'Emirates EK225 · SFO → DXB',
+          detail: 'Business class · Suite 1A · Non-stop · 16h 15m',
+          category: 'other' as EventCategory,
+          imageUrl: '/fixture-images/flight-outbound-business-cabin.webp',
+          price: '$5,100 Business Suite',
+          localTip: 'Emirates Suite 1A has a full-length privacy door and personal mini-bar. The onboard chef will prepare a custom mezze plate on request. The Atlantic sunrise at ~05:30 UTC is worth staying awake for.',
+          transportAfter: { mode: 'taxi', duration: '35 min', notes: '~AED 90 to DIFC' },
+        },
+      ],
+    },
+    {
+      day: 'Tue, Mar 17 — Arrive + Summit Day 1',
+      items: [
+        {
+          time: '19:00',
+          title: 'Address Downtown Dubai',
+          detail: 'Check-in · Burj Khalifa View Suite · Free cancellation until Mar 13',
+          category: 'accommodation' as EventCategory,
+          imageUrl: '/fixture-images/hotel-bairro-alto.webp',
+          price: 'AED 2,800/night (~$765)',
+          localTip: 'Request a high floor facing northeast — the Burj Khalifa fountain show at 18:00 and 20:00 is visible from the room. Breakfast on the 63rd floor pool terrace is the best meal in Dubai.',
+          transportAfter: { mode: 'taxi', duration: '15 min', notes: 'To DIFC' },
+        },
+        {
+          time: '20:30',
+          title: 'a16z Future Summit — Opening Dinner',
+          detail: 'Founders reception · DIFC One Central · Invite-only',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/activity-rooftop-lisbon.webp',
+          price: 'Included in pass',
+          localTip: 'Marc Andreessen typically attends the pre-dinner cocktails at 19:45. The DIFC terrace overlooks the Dubai skyline at golden hour — the best unscheduled conversations happen here.',
+        },
+      ],
+    },
+    {
+      day: 'Wed, Mar 18 — Summit Day 2',
+      items: [
+        {
+          time: '09:30',
+          title: 'AI and the New Capital Stack',
+          detail: 'Marc Andreessen · Main Stage, Dubai World Trade Centre',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k01.webp',
+          price: 'Included in pass',
+          localTip: 'DWTC main hall fills 20 min before doors. Rows 3–6 have the best sightlines for slide content. The side balconies have exceptional acoustics for mobile note-taking.',
+          transportAfter: { mode: 'walk', duration: '5 min' },
+        },
+        {
+          time: '14:00',
+          title: 'Building in the Gulf: Regulatory Frontiers',
+          detail: 'Panel · Room 4B, DWTC · Regional market deep-dive',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k02.webp',
+          price: 'Included in pass',
+          localTip: 'DIFC and ADGM free-zone representatives sit in the front row. The 15-min networking break before Q&A is the best window to meet Gulf regulatory and VC contacts.',
+          transportAfter: { mode: 'taxi', duration: '20 min' },
+        },
+        {
+          time: '20:00',
+          title: 'Zuma Dubai',
+          detail: 'Japanese robata grill · DIFC · Table for 1',
+          category: 'dining' as EventCategory,
+          imageUrl: '/fixture-images/restaurant-dishes-seafood.webp',
+          price: 'AED 600–900/person (~$165–245)',
+          localTip: 'Rock shrimp tempura and black cod in den miso are non-negotiable. The bar menu has the best Japanese whisky selection in the Gulf. Reserve 48 hrs ahead for a terrace table.',
+        },
+      ],
+    },
+    {
+      day: 'Thu, Mar 19 — Return',
+      items: [
+        {
+          time: '06:00',
+          title: 'Gold Souk + Creek Abra',
+          detail: 'Historic trading district · Deira · 2 hrs',
+          category: 'explore' as EventCategory,
+          imageUrl: '/fixture-images/activity-fado-lisbon.webp',
+          price: 'Free entry · AED 1 Abra ferry',
+          localTip: 'Gold Souk vendors negotiate on 22k jewellery — expect 10–15% off the tag. The Spice Souk across the Creek has pure saffron at 1/3 of Western prices. The Abra water taxi (AED 1) is the best single-dirham experience in the UAE.',
+          transportAfter: { mode: 'taxi', duration: '40 min', notes: 'To DXB Terminal 3' },
+        },
+        {
+          time: '12:45',
+          title: 'Emirates EK226 · DXB → SFO',
+          detail: 'Business class · Suite 1A · Non-stop · 16h 30m',
+          category: 'other' as EventCategory,
+          imageUrl: '/fixture-images/flight-return-business-cabin.webp',
+          price: '$5,100 Business Suite',
+          localTip: 'Emirates T3 Business lounge (Concourse A) has a spa with complimentary 30-min massages — book 24h in advance via the Emirates app. The Moët & Chandon brunch buffet is open until boarding.',
+        },
+      ],
+    },
+  ],
+}
+
+const FIXTURE_LONDON: Itinerary = {
+  destination: 'London, UK',
+  dates: 'September 8–11, 2026',
+  summary: 'London AI Summit 2026 · 4 days · Personalised for Noah',
+  days: [
+    {
+      day: 'Tue, Sep 8 — Depart SFO',
+      items: [
+        {
+          time: '17:25',
+          title: 'British Airways BA286 · SFO → LHR',
+          detail: 'Business class · Club Suite 1A · Non-stop · 9h 45m',
+          category: 'other' as EventCategory,
+          imageUrl: '/fixture-images/flight-outbound-business-cabin.webp',
+          price: '$4,100 Club World',
+          localTip: 'New Club Suites in rows 1–3 have full lie-flat beds with direct aisle access. Request the pre-flight Krug champagne — complimentary for Club World. The British classics dinner tray (fish & chips, sticky toffee pudding) is worth ordering.',
+          transportAfter: { mode: 'train', duration: '45 min', notes: 'Heathrow Express · £37 to Paddington' },
+        },
+      ],
+    },
+    {
+      day: 'Wed, Sep 9 — Arrive + Summit Day 1',
+      items: [
+        {
+          time: '09:00',
+          title: 'The Ned, London',
+          detail: 'Check-in · Deluxe Room · Bank, City of London · Free cancellation until Sep 5',
+          category: 'accommodation' as EventCategory,
+          imageUrl: '/fixture-images/hotel-bairro-alto.webp',
+          price: '£550/night (~$695)',
+          localTip: 'The Ned has 9 restaurants and a rooftop pool. Millie\'s Lounge bar in the 1920s banking hall has the best pre-dinner cocktail atmosphere in the City. Ned\'s Club rooftop access is included — sunset over St Paul\'s is the payoff.',
+          transportAfter: { mode: 'tube', duration: '18 min', notes: 'Central Line to Custom House (ExCeL)' },
+        },
+        {
+          time: '11:00',
+          title: 'AI Policy in the Age of Agents',
+          detail: 'Mustafa Suleyman · Main Stage, ExCeL London',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k01.webp',
+          price: 'Included in pass',
+          localTip: 'ExCeL N4 Gallery overflow fills before the main hall — arrive 25 min early for a front-third seat. The side acoustic baffles make the left wall the best spot for clear Q&A audio.',
+          transportAfter: { mode: 'walk', duration: '5 min' },
+        },
+        {
+          time: '14:30',
+          title: 'Responsible Scaling: A European Perspective',
+          detail: 'Panel · Summit Hall B, ExCeL London',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k02.webp',
+          price: 'Included in pass',
+          localTip: 'UK AI Safety Institute delegates attend this panel. The informal networking drinks at 16:00 outside Hall B are the best opportunity to meet policy staff and DSIT officials before the dinner reception.',
+          transportAfter: { mode: 'taxi', duration: '25 min' },
+        },
+        {
+          time: '19:30',
+          title: 'St. JOHN Bar and Restaurant',
+          detail: 'Nose-to-tail British cuisine · Clerkenwell · Table for 1',
+          category: 'dining' as EventCategory,
+          imageUrl: '/fixture-images/restaurant-dishes-cod.webp',
+          price: '£70–90/person',
+          localTip: 'Bone marrow and parsley salad is the iconic starter — on the menu every day and non-negotiable. The Eccles cake with Lancashire cheese at dessert divides opinion but is essential once. Book 2 weeks ahead for Clerkenwell.',
+        },
+      ],
+    },
+    {
+      day: 'Thu, Sep 10 — Summit Day 2',
+      items: [
+        {
+          time: '10:00',
+          title: 'Building AI-Native Products at Scale',
+          detail: 'Workshop · Innovation Lab, ExCeL London · Hands-on format',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-w07.webp',
+          price: 'Included in pass',
+          localTip: 'The Innovation Lab provides workstations with live model access. The facilitator\'s annotated session notebook is shared only with active participants — contribute to the live coding sprint to get the full version.',
+          transportAfter: { mode: 'walk', duration: '5 min' },
+        },
+        {
+          time: '15:00',
+          title: 'Closing Summit Keynote',
+          detail: 'Demis Hassabis · Main Stage, ExCeL London',
+          category: 'conference' as EventCategory,
+          imageUrl: '/fixture-images/conference-session-keynote-k08.webp',
+          price: 'Included in pass',
+          localTip: 'Demis\'s Q&A runs 20 minutes — the most substantive answers come from the last 5 questions. Stay seated and be specific. The hallway track outside Main Stage has the highest density of DeepMind researchers.',
+          transportAfter: { mode: 'taxi', duration: '20 min' },
+        },
+        {
+          time: '19:00',
+          title: 'Borough Market Evening',
+          detail: 'Street food + wine bars · London Bridge · 2 hrs',
+          category: 'explore' as EventCategory,
+          imageUrl: '/fixture-images/activity-rooftop-lisbon.webp',
+          price: '£30–50',
+          localTip: 'Neal\'s Yard Dairy inside the market has the best Montgomery Cheddar and Stilton in London. Monmouth Coffee under the railway arch is the unofficial start of every Borough visit. The Arabica Bar & Kitchen terrace seats fill by 19:30.',
+        },
+      ],
+    },
+    {
+      day: 'Fri, Sep 11 — Return',
+      items: [
+        {
+          time: '07:00',
+          title: 'Tate Modern at Opening',
+          detail: 'Modern art · South Bank, Bankside · 1.5 hrs',
+          category: 'explore' as EventCategory,
+          imageUrl: '/fixture-images/activity-fado-lisbon.webp',
+          price: 'Free entry',
+          localTip: 'The Turbine Hall commission changes annually and is always free — check online before visiting. Level 6 gives the best Thames and St Paul\'s view in London. Arrive before 08:30 to have it to yourself.',
+          transportAfter: { mode: 'taxi', duration: '50 min', notes: 'To LHR Terminal 5' },
+        },
+        {
+          time: '12:30',
+          title: 'British Airways BA285 · LHR → SFO',
+          detail: 'Business class · Club Suite 1A · Non-stop · 11h',
+          category: 'other' as EventCategory,
+          imageUrl: '/fixture-images/flight-return-business-cabin.webp',
+          price: '$4,100 Club World',
+          localTip: 'BA T5 Concorde Room has a dedicated bar and à la carte dining. The chef\'s afternoon tea starts at 10:30 — arrive 75 min before departure to enjoy it. The spa has a shower suite; book ahead via the T5 app.',
+        },
+      ],
+    },
+  ],
+}
+
 const DEMO_DESTINATIONS: Array<Itinerary & { flag: string; cityShort: string }> = [
   { ...FIXTURE_LISBON, flag: '🇵🇹', cityShort: 'Lisbon' },
   { ...FIXTURE_NYC, flag: '🗽', cityShort: 'New York' },
   { ...FIXTURE_TOKYO, flag: '🗼', cityShort: 'Tokyo' },
+  { ...FIXTURE_DUBAI, flag: '🇦🇪', cityShort: 'Dubai' },
+  { ...FIXTURE_LONDON, flag: '🇬🇧', cityShort: 'London' },
 ]
 
 // ── Category styles (per YOU-750 spec) ────────────────────────────────────
@@ -947,6 +1179,8 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
     'Lisbon, Portugal': '/fixture-images/city-lisbon.webp',
     'New York City, NY': '/fixture-images/flight-outbound-business-cabin.webp',
     'Tokyo, Japan': '/fixture-images/flight-outbound-business-cabin.webp',
+    'Dubai, UAE': '/fixture-images/activity-rooftop-lisbon.webp',
+    'London, UK': '/fixture-images/activity-fado-lisbon.webp',
   }
   const heroImage = display.days[0]?.items[0]?.imageUrl ?? HERO_FALLBACKS[display.destination] ?? '/fixture-images/city-lisbon.webp'
   const busy = alterStatus === 'altering' || loadStatus === 'loading'
