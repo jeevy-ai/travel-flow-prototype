@@ -33,6 +33,9 @@ export interface Itinerary {
   dates: string
   days: ItineraryDay[]
   summary: string
+  tripPrice?: string
+  tripLocalTip?: string
+  heroImageUrl?: string
 }
 
 export interface ConciergeResponse {

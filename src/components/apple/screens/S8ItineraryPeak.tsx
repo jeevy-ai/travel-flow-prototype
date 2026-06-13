@@ -594,11 +594,41 @@ const FIXTURE_LONDON: Itinerary = {
 }
 
 const DEMO_DESTINATIONS: Array<Itinerary & { flag: string; cityShort: string }> = [
-  { ...FIXTURE_LISBON, flag: '🇵🇹', cityShort: 'Lisbon' },
-  { ...FIXTURE_NYC, flag: '🗽', cityShort: 'New York' },
-  { ...FIXTURE_TOKYO, flag: '🗼', cityShort: 'Tokyo' },
-  { ...FIXTURE_DUBAI, flag: '🇦🇪', cityShort: 'Dubai' },
-  { ...FIXTURE_LONDON, flag: '🇬🇧', cityShort: 'London' },
+  {
+    ...FIXTURE_LISBON,
+    flag: '🇵🇹', cityShort: 'Lisbon',
+    heroImageUrl: '/fixture-images/city-lisbon.webp',
+    tripPrice: '~$7,500 total estimated',
+    tripLocalTip: 'Start every morning at Pastéis de Belém — get there before 9 AM for no queue. The #28 tram from Martim Moniz to Prazeres shows you the whole city for €3. Always pay by card: taxi drivers give better service when they can\'t round up.',
+  },
+  {
+    ...FIXTURE_NYC,
+    flag: '🗽', cityShort: 'New York',
+    heroImageUrl: '/fixture-images/conference-altice-arena-venue.webp',
+    tripPrice: '~$4,200 total estimated',
+    tripLocalTip: 'Pre-book all restaurants — NYC waitlists fill within the week. The High Line is 3 blocks from Javits Center, perfect for a 20-min recharge between sessions. Citi Bike beats cabs for anything under 30 blocks.',
+  },
+  {
+    ...FIXTURE_TOKYO,
+    flag: '🗼', cityShort: 'Tokyo',
+    heroImageUrl: '/fixture-images/activity-rooftop-lisbon.webp',
+    tripPrice: '~$6,200 total estimated',
+    tripLocalTip: 'Get a Suica card at the airport arrivals hall — works on all trains, buses, and 7-Eleven. The basement food halls (depachika) in Shibuya Scramble Square serve Michelin-quality food at ¥800–1,200. Konbini breakfast beats any hotel buffet.',
+  },
+  {
+    ...FIXTURE_DUBAI,
+    flag: '🇦🇪', cityShort: 'Dubai',
+    heroImageUrl: '/fixture-images/hotel-marriott-lisbon-exterior.webp',
+    tripPrice: '~$5,800 total estimated',
+    tripLocalTip: 'Friday brunch is mandatory — even modest hotel spreads are extraordinary. Metro Gold Class covers all major conference venues for AED 8.50. Book restaurant tables 2 weeks ahead; Dubai gets booked faster than London.',
+  },
+  {
+    ...FIXTURE_LONDON,
+    flag: '🇬🇧', cityShort: 'London',
+    heroImageUrl: '/fixture-images/activity-fado-lisbon.webp',
+    tripPrice: '~$5,400 total estimated',
+    tripLocalTip: 'Oyster card beats contactless: the daily cap kicks in at £9.10. The Churchill War Rooms café does the best sandwich near Westminster, queue moves fast at 11 AM. Ask the hotel concierge for a black cab tip — they know routes Google Maps doesn\'t.',
+  },
 ]
 
 // ── Category styles (per YOU-750 spec) ────────────────────────────────────
@@ -616,6 +646,141 @@ const CATEGORY_STYLE: Record<EventCategory, { bg: string; icon: string; label: s
 const TRANSPORT_ICON: Record<string, string> = {
   walk: '🚶', taxi: '🚕', metro: '🚇', tram: '🚊',
   ferry: '⛴️', bus: '🚌', car: '🚗', train: '🚆', uber: '🚗',
+}
+
+// ── DestinationAccordionCard — YOU-775 spec: inline accordion, not a modal ──
+
+interface DestinationAccordionCardProps {
+  dest: typeof DEMO_DESTINATIONS[0]
+  isSelected: boolean
+  isExpanded: boolean
+  onExpand: () => void
+}
+
+function DestinationAccordionCard({ dest, isSelected, isExpanded, onExpand }: DestinationAccordionCardProps) {
+  const [imgErr, setImgErr] = useState(false)
+  const initial = dest.destination.charAt(0).toUpperCase()
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-expanded={isExpanded}
+      aria-label={`Show details for ${dest.destination}`}
+      onClick={onExpand}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onExpand() } }}
+      style={{
+        borderRadius: 12, background: '#FFFFFF', cursor: 'pointer',
+        border: isSelected ? '1.5px solid var(--accent)' : '1px solid rgba(0,0,0,0.08)',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.06)', overflow: 'hidden',
+        outline: 'none',
+      }}
+    >
+      {/* Collapsed header row */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 12,
+        padding: '12px 16px', minHeight: 80,
+      }}>
+        {/* Thumbnail 72×72 per YOU-775 */}
+        <div style={{
+          width: 72, height: 72, borderRadius: 8, overflow: 'hidden',
+          flexShrink: 0, background: '#F3F4F6',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {dest.heroImageUrl && !imgErr ? (
+            <img
+              src={dest.heroImageUrl} alt={dest.destination}
+              onError={() => setImgErr(true)}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+            />
+          ) : (
+            <span style={{ fontSize: 24, fontWeight: 500, color: '#9CA3AF' }}>{initial}</span>
+          )}
+        </div>
+        {/* Title + meta */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{
+            fontSize: 16, fontWeight: 600, color: 'var(--text-primary)',
+            margin: 0, lineHeight: 1.25,
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
+            {dest.flag} {dest.destination}
+          </p>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', margin: '3px 0 0' }}>
+            {dest.dates}
+          </p>
+        </div>
+        {/* Chevron — rotates 180° when expanded (YOU-775 §3) */}
+        <span style={{
+          fontSize: 18, color: '#9CA3AF', flexShrink: 0, lineHeight: 1,
+          transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+          transition: 'transform 200ms ease',
+          display: 'flex', alignItems: 'center',
+        }}>⌄</span>
+      </div>
+
+      {/* Expanded inline content — YOU-775 §3 */}
+      <AnimatePresence initial={false}>
+        {isExpanded && (
+          <motion.div
+            key="expanded"
+            initial={{ height: 0 }}
+            animate={{ height: 'auto' }}
+            exit={{ height: 0 }}
+            transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            {/* Hero image 16:9, max 220px (YOU-775 §3) */}
+            {dest.heroImageUrl && !imgErr ? (
+              <div style={{ position: 'relative', width: '100%', maxHeight: 220, overflow: 'hidden' }}>
+                <img
+                  src={dest.heroImageUrl} alt={dest.destination}
+                  style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', display: 'block', maxHeight: 220 }}
+                />
+              </div>
+            ) : null}
+            {/* Summary */}
+            <p style={{
+              fontSize: 13, color: '#374151', padding: '12px 16px 0',
+              margin: 0, lineHeight: 1.55,
+              overflow: 'hidden', display: '-webkit-box',
+              WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' as const,
+            }}>
+              {dest.summary}
+            </p>
+            {/* Local tip — amber per YOU-775 §3 */}
+            {dest.tripLocalTip && (
+              <div style={{
+                margin: '10px 16px 0',
+                borderLeft: '4px solid #FBBF24', background: '#FFFBEB',
+                borderRadius: '0 8px 8px 0', padding: '10px 12px',
+              }}>
+                <p style={{ fontSize: 11, fontWeight: 600, color: '#B45309', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                  Local tip
+                </p>
+                <p style={{
+                  fontSize: 13, color: '#374151', margin: 0, lineHeight: 1.55,
+                  overflow: 'hidden', display: '-webkit-box',
+                  WebkitLineClamp: 4, WebkitBoxOrient: 'vertical' as const,
+                }}>
+                  {dest.tripLocalTip}
+                </p>
+              </div>
+            )}
+            {/* Price row (YOU-775 §3) */}
+            {dest.tripPrice && (
+              <p style={{
+                fontSize: 13, fontWeight: 600, color: '#111827',
+                padding: '10px 16px 14px', margin: 0,
+              }}>
+                {dest.tripPrice}
+              </p>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
 }
 
 // ── EventCard — tappable, no × button (AC#1, AC#2) ───────────────────────
@@ -1097,6 +1262,8 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
   const scrollRef = useRef<HTMLDivElement>(null)
   // Phase 4: demo destination selector (only active when no API itinerary)
   const [demoDestIdx, setDemoDestIdx] = useState(0)
+  // Phase 4: which destination accordion is expanded (YOU-775 — 1 at a time)
+  const [expandedDestIdx, setExpandedDestIdx] = useState<number | null>(0)
 
   const display = itinerary ?? DEMO_DESTINATIONS[demoDestIdx]
   const isDemoMode = !itinerary
@@ -1225,35 +1392,31 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
         </div>
       </div>
 
-      {/* Phase 4: destination picker — only shown in demo mode */}
+      {/* Phase 4: destination accordion list — YOU-775 spec (inline expand, 1 at a time) */}
       {isDemoMode && (
         <div style={{
-          display: 'flex', gap: 8, padding: '12px 16px 4px',
-          overflowX: 'auto', flexShrink: 0,
-          scrollbarWidth: 'none',
+          display: 'flex', flexDirection: 'column', gap: 8,
+          padding: '12px 16px 4px', flexShrink: 0,
         }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Upcoming trips
+          </p>
           {DEMO_DESTINATIONS.map((dest, i) => (
-            <button
+            <DestinationAccordionCard
               key={dest.cityShort}
-              onClick={() => {
-                setDemoDestIdx(i)
-                setRemovedKeys(new Set())
-                setEditedItems(new Map())
-                scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+              dest={dest}
+              isSelected={i === demoDestIdx}
+              isExpanded={expandedDestIdx === i}
+              onExpand={() => {
+                const next = expandedDestIdx === i ? null : i
+                setExpandedDestIdx(next)
+                if (next !== null) {
+                  setDemoDestIdx(i)
+                  setRemovedKeys(new Set())
+                  setEditedItems(new Map())
+                }
               }}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '6px 14px', borderRadius: 999, border: 'none',
-                cursor: 'pointer', flexShrink: 0, fontSize: 13, fontWeight: 600,
-                transition: 'background 0.15s, color 0.15s',
-                background: i === demoDestIdx ? 'var(--text-primary)' : 'var(--bg)',
-                color: i === demoDestIdx ? 'white' : 'var(--text-secondary)',
-                boxShadow: i === demoDestIdx ? '0 2px 8px rgba(0,0,0,0.18)' : '0 0 0 1px var(--border)',
-              }}
-            >
-              <span style={{ fontSize: 15 }}>{dest.flag}</span>
-              {dest.cityShort}
-            </button>
+            />
           ))}
         </div>
       )}
