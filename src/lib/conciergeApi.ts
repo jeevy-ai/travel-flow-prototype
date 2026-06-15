@@ -11,6 +11,12 @@ export interface TransportLeg {
 
 export type EventCategory = 'conference' | 'dining' | 'explore' | 'accommodation' | 'other'
 
+export interface ItineraryAlternative {
+  name: string
+  tagline?: string
+  imageUrl?: string
+}
+
 export interface ItineraryItem {
   time: string
   title: string
@@ -21,6 +27,7 @@ export interface ItineraryItem {
   transportAfter?: TransportLeg
   price?: string
   localTip?: string
+  alternatives?: ItineraryAlternative[]
 }
 
 export interface ItineraryDay {

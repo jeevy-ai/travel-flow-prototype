@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import type { ItineraryItem } from '../../lib/conciergeApi'
+import type { ItineraryAlternative, ItineraryItem } from '../../lib/conciergeApi'
 
 // ── Item kind detection ───────────────────────────────────────────────────────
 
@@ -343,10 +343,11 @@ function GenericForm({ draft, onChange }: { draft: GenericDraft; onChange: (d: G
 
 // ── Inner sheet (mounted while item is non-null) ──────────────────────────────
 
-function SheetInner({ item, onSave, onClose }: {
+function SheetInner({ item, onSave, onClose, onBack }: {
   item: ItineraryItem
   onSave: (updated: ItineraryItem) => void
   onClose: () => void
+  onBack?: () => void
 }) {
   const kind = detectKind(item)
 
@@ -419,17 +420,33 @@ function SheetInner({ item, onSave, onClose }: {
 
         {/* Header */}
         <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          display: 'flex', alignItems: 'center', gap: 8,
           padding: '12px 20px 16px', flexShrink: 0,
           borderBottom: '1px solid var(--border)',
         }}>
-          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              aria-label="Back to detail"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--accent)', fontSize: 14, fontWeight: 500,
+                minHeight: 44, minWidth: 44, padding: '0 4px',
+                display: 'flex', alignItems: 'center', gap: 3,
+                fontFamily: 'inherit', flexShrink: 0,
+              }}
+            >
+              ← Back
+            </button>
+          )}
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.01em', flex: 1 }}>
             {sheetTitle}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cancel"
+            aria-label="Close"
             style={{
               width: 32, height: 32, borderRadius: '50%',
               background: 'var(--bg-secondary)', border: 'none', cursor: 'pointer',
@@ -444,6 +461,43 @@ function SheetInner({ item, onSave, onClose }: {
 
         {/* Scrollable form area */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 20px 8px' }}>
+          {/* Swap chip shortcuts — shown when alternatives available */}
+          {item.alternatives && item.alternatives.length > 0 && (
+            <div style={{ marginBottom: 20 }}>
+              <span style={{
+                fontSize: 11, color: 'var(--text-tertiary)', fontWeight: 600,
+                textTransform: 'uppercase', letterSpacing: '0.06em',
+              }}>
+                Or swap with:
+              </span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                {item.alternatives.map((alt: ItineraryAlternative) => (
+                  <button
+                    key={alt.name}
+                    type="button"
+                    onClick={() => onSave({ ...item, title: alt.name, detail: alt.tagline ?? item.detail })}
+                    style={{
+                      height: 32, borderRadius: 999,
+                      background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+                      color: 'var(--text-secondary)', fontSize: 11, cursor: 'pointer',
+                      padding: '0 10px', fontFamily: 'inherit',
+                      transition: 'border-color 0.15s, color 0.15s',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--accent)'
+                      ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--accent)'
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--border)'
+                      ;(e.currentTarget as HTMLButtonElement).style.color = 'var(--text-secondary)'
+                    }}
+                  >
+                    {alt.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           {kind === 'flight' && <FlightForm draft={flightDraft} onChange={setFlightDraft} />}
           {kind === 'restaurant' && <RestaurantForm draft={restaurantDraft} onChange={setRestaurantDraft} />}
           {(kind === 'transport' || kind === 'generic') && <GenericForm draft={genericDraft} onChange={setGenericDraft} />}
@@ -498,9 +552,10 @@ export interface ItemEditSheetProps {
   item: ItineraryItem | null
   onSave: (updated: ItineraryItem) => void
   onClose: () => void
+  onBack?: () => void
 }
 
-export function ItemEditSheet({ item, onSave, onClose }: ItemEditSheetProps) {
+export function ItemEditSheet({ item, onSave, onClose, onBack }: ItemEditSheetProps) {
   return (
     <AnimatePresence>
       {item && (
@@ -509,6 +564,7 @@ export function ItemEditSheet({ item, onSave, onClose }: ItemEditSheetProps) {
           item={item}
           onSave={updated => { onSave(updated); onClose() }}
           onClose={onClose}
+          onBack={onBack}
         />
       )}
     </AnimatePresence>

@@ -1502,6 +1502,12 @@ function AlterSheet({ onSubmit, onDismiss, isLoading, prefilledText = '', mode =
 }) {
   const [draft, setDraft] = useState(prefilledText)
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onDismiss() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onDismiss])
+
   const SUGGESTIONS_ALTER = [
     'Make the pace more relaxed',
     'Add a seafood dinner on day 2',
@@ -1537,7 +1543,18 @@ function AlterSheet({ onSubmit, onDismiss, isLoading, prefilledText = '', mode =
         initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
         transition={{ type: 'spring', stiffness: 380, damping: 36 }}
       >
-        <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'var(--border)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--border)', flex: 1 }} />
+          <button
+            onClick={onDismiss}
+            aria-label="Close"
+            style={{
+              marginLeft: 12, background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--text-tertiary)', fontSize: 20, lineHeight: 1,
+              padding: '4px 8px', borderRadius: 8, display: 'flex', alignItems: 'center',
+            }}
+          >×</button>
+        </div>
         <p className="text-[11px] font-mono uppercase tracking-widest mb-1" style={{ color: 'var(--text-tertiary)' }}>
           {mode === 'personalize' ? 'Jeevy · Personalise' : 'Jeevy · Alter plan'}
         </p>
@@ -1673,6 +1690,8 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
   const [transportModes, setTransportModes] = useState<Map<string, string>>(new Map())
   const [preferenceChips, setPreferenceChips] = useState<string[]>([])
   const [barFlash, setBarFlash] = useState(false)
+  const [submitToast, setSubmitToast] = useState<string | null>(null)
+  const submitToastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [prevDetailItem, setPrevDetailItem] = useState<ItineraryItem | null>(null)
   const [prevDetailItemKey, setPrevDetailItemKey] = useState<string | null>(null)
   const prevAlterStatusRef = useRef(alterStatus)
@@ -1719,6 +1738,12 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
     appliedBadgeTimersRef.current.set(key, timer)
   }, [])
 
+  function showSubmitToast(msg: string) {
+    if (submitToastTimerRef.current) clearTimeout(submitToastTimerRef.current)
+    setSubmitToast(msg)
+    submitToastTimerRef.current = setTimeout(() => setSubmitToast(null), 3000)
+  }
+
   async function handleAlterSubmit(instruction: string) {
     if (alterMode === 'personalize') {
       setPreferenceChips(prev => [...prev, instruction])
@@ -1726,13 +1751,18 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
       setAlterPrefilledText('')
       if (alterPlan) {
         await alterPlan(`Apply this preference to the itinerary: ${instruction}`)
+      } else {
+        showSubmitToast('Preference saved — Jeevy will apply it to your plan')
       }
     } else {
-      if (!alterPlan) return
       setAlterOpen(false)
       setAlterPrefilledText('')
-      setRemovedKeys(new Set())
-      await alterPlan(instruction)
+      if (alterPlan) {
+        setRemovedKeys(new Set())
+        await alterPlan(instruction)
+      } else {
+        showSubmitToast('Plan update noted — Jeevy is on it')
+      }
     }
   }
 
@@ -1888,38 +1918,40 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
 
       {/* Destination accordion */}
       {isDemoMode && (
-        <div style={{
-          flexShrink: 0,
-          maxHeight: 'min(280px, 33vh)',
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch' as const,
-        }}>
+        <div style={{ flexShrink: 0 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', margin: 0, padding: '12px 16px 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Upcoming trips
+          </p>
+          {/* Constrained scroll container — sibling of label, not a descendant */}
           <div style={{
-            display: 'flex', flexDirection: 'column', gap: 8,
-            padding: '12px 16px 4px',
+            maxHeight: 280,
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch' as const,
           }}>
-            <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              Upcoming trips
-            </p>
-            {DEMO_DESTINATIONS.map((dest, i) => (
-              <DestinationAccordionCard
-                key={dest.cityShort}
-                dest={dest}
-                isSelected={i === demoDestIdx}
-                isExpanded={expandedDestIdx === i}
-                onExpand={() => {
-                  const next = expandedDestIdx === i ? null : i
-                  setExpandedDestIdx(next)
-                  if (next !== null) {
-                    setDemoDestIdx(i)
-                    setRemovedKeys(new Set())
-                    setEditedItems(new Map())
-                    setTransportModes(new Map())
-                    setAppliedBadgeKeys(new Set())
-                  }
-                }}
-              />
-            ))}
+            <div style={{
+              display: 'flex', flexDirection: 'column', gap: 8,
+              padding: '0 16px 8px',
+            }}>
+              {DEMO_DESTINATIONS.map((dest, i) => (
+                <DestinationAccordionCard
+                  key={dest.cityShort}
+                  dest={dest}
+                  isSelected={i === demoDestIdx}
+                  isExpanded={expandedDestIdx === i}
+                  onExpand={() => {
+                    const next = expandedDestIdx === i ? null : i
+                    setExpandedDestIdx(next)
+                    if (next !== null) {
+                      setDemoDestIdx(i)
+                      setRemovedKeys(new Set())
+                      setEditedItems(new Map())
+                      setTransportModes(new Map())
+                      setAppliedBadgeKeys(new Set())
+                    }
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -2079,6 +2111,30 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
               >
                 Undo
               </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Submit confirmation toast */}
+      <AnimatePresence>
+        {submitToast && (
+          <motion.div
+            className="fixed left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
+            style={{ bottom: 170 }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+          >
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              background: 'var(--accent)', borderRadius: 16,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.18)',
+              padding: '12px 16px', maxWidth: 360, width: '100%',
+            }}>
+              <span style={{ fontSize: 15 }}>✓</span>
+              <span style={{ flex: 1, fontSize: 13, color: 'white', fontWeight: 500 }}>{submitToast}</span>
             </div>
           </motion.div>
         )}
