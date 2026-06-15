@@ -37,6 +37,10 @@ const FIXTURE_LISBON: Itinerary = {
           price: '€420/night',
           localTip: 'Ask for a room on floors 5–7 facing east — Tagus river and São Jorge Castle view at sunrise.',
           transportAfter: { mode: 'metro', duration: '12 min', notes: '~€1.50' },
+          alternatives: [
+            { name: 'Memmo Alfama Hotel', tagline: 'Design boutique · Tagus river views' },
+            { name: 'Palácio Belmonte', tagline: 'Historic 15th-c. palace · Castle hill' },
+          ],
         },
         {
           time: '09:30',
@@ -66,6 +70,10 @@ const FIXTURE_LISBON: Itinerary = {
           imageUrl: '/fixture-images/restaurant-dishes-seafood.webp',
           price: '€€€ · avg €60/person',
           localTip: 'Order the percebes (barnacles) and gambas al ajillo first — they go fast. Finish with the iconic prego no pão steak sandwich.',
+          alternatives: [
+            { name: 'Taberna da Rua das Flores', tagline: 'Local petiscos · Hidden gem, Chiado' },
+            { name: 'Solar dos Presuntos', tagline: 'Traditional Lisbon classics · Avenida' },
+          ],
         },
       ],
     },
@@ -161,6 +169,10 @@ const FIXTURE_NYC: Itinerary = {
           price: '$389/night',
           localTip: 'Ask for a room above floor 8 facing west — the Madison Square Park view at golden hour is worth specifying at check-in.',
           transportAfter: { mode: 'walk', duration: '12 min', notes: 'To Javits Center' },
+          alternatives: [
+            { name: 'The Greenwich Hotel', tagline: 'Boutique TriBeCa · Robert De Niro\'s hotel' },
+            { name: 'Aman New York', tagline: 'Crown Building · Finest suites in Midtown' },
+          ],
         },
         {
           time: '09:30',
@@ -189,6 +201,10 @@ const FIXTURE_NYC: Itinerary = {
           category: 'dining' as EventCategory,
           price: '$335/person',
           localTip: 'The black truffle custard and the celery root "shawarma" are the two most talked-about courses. Wines pairing adds $175 and is worth it.',
+          alternatives: [
+            { name: 'Per Se', tagline: 'French tasting menu · Columbus Circle views' },
+            { name: 'Le Bernardin', tagline: 'Premier seafood fine dining · Midtown' },
+          ],
         },
       ],
     },
@@ -282,6 +298,10 @@ const FIXTURE_TOKYO: Itinerary = {
           price: '¥98,000/night (~$650)',
           localTip: 'Ask for a west-facing room above floor 45 — on clear days Mount Fuji is visible at dawn. The New York Bar (Lost in Translation fame) is on floor 52.',
           transportAfter: { mode: 'walk', duration: '10 min', notes: 'To summit venue' },
+          alternatives: [
+            { name: 'Aman Tokyo', tagline: 'Minimalist luxury · Otemachi skyline views' },
+            { name: 'The Peninsula Tokyo', tagline: 'Marunouchi · Imperial Palace views' },
+          ],
         },
         {
           time: '17:00',
@@ -300,6 +320,10 @@ const FIXTURE_TOKYO: Itinerary = {
           category: 'dining' as EventCategory,
           price: '¥40,000/person (~$265)',
           localTip: 'No menu — 10 courses, 30 minutes. The uni (sea urchin) and toro (bluefin tuna belly) are the spiritual heart of the meal. Eat each piece immediately.',
+          alternatives: [
+            { name: 'Narisawa', tagline: 'Innovative Japanese cuisine · 2 Michelin stars' },
+            { name: "L'Effervescence", tagline: 'French-Japanese fusion · Nishiazabu' },
+          ],
         },
       ],
     },
@@ -395,6 +419,10 @@ const FIXTURE_DUBAI: Itinerary = {
           price: 'AED 2,800/night (~$765)',
           localTip: 'Request a high floor facing northeast — the Burj Khalifa fountain show at 18:00 and 20:00 is visible from the room. Breakfast on the 63rd floor pool terrace is the best meal in Dubai.',
           transportAfter: { mode: 'taxi', duration: '15 min', notes: 'To DIFC' },
+          alternatives: [
+            { name: 'Burj Al Arab Jumeirah', tagline: 'Iconic sail-shaped tower · Private beach' },
+            { name: 'Four Seasons DIFC', tagline: 'Contemporary luxury · Financial district' },
+          ],
         },
         {
           time: '20:30',
@@ -438,6 +466,10 @@ const FIXTURE_DUBAI: Itinerary = {
           imageUrl: '/fixture-images/restaurant-dishes-seafood.webp',
           price: 'AED 600–900/person (~$165–245)',
           localTip: 'Rock shrimp tempura and black cod in den miso are non-negotiable. The bar menu has the best Japanese whisky selection in the Gulf. Reserve 48 hrs ahead for a terrace table.',
+          alternatives: [
+            { name: 'Nobu Dubai', tagline: 'Japanese-Peruvian · Atlantis The Palm' },
+            { name: 'Coya Dubai', tagline: 'Peruvian cuisine · DIFC · vibrant rooftop' },
+          ],
         },
       ],
     },
@@ -500,6 +532,10 @@ const FIXTURE_LONDON: Itinerary = {
           price: '£550/night (~$695)',
           localTip: 'The Ned has 9 restaurants and a rooftop pool. Millie\'s Lounge bar in the 1920s banking hall has the best pre-dinner cocktail atmosphere in the City. Ned\'s Club rooftop access is included — sunset over St Paul\'s is the payoff.',
           transportAfter: { mode: 'tube', duration: '18 min', notes: 'Central Line to Custom House (ExCeL)' },
+          alternatives: [
+            { name: "Claridge's", tagline: 'Art deco landmark · Mayfair · quintessentially London' },
+            { name: 'The Dorchester', tagline: 'Park Lane icon · Hyde Park views' },
+          ],
         },
         {
           time: '11:00',
@@ -529,6 +565,10 @@ const FIXTURE_LONDON: Itinerary = {
           imageUrl: '/fixture-images/restaurant-dishes-cod.webp',
           price: '£70–90/person',
           localTip: 'Bone marrow and parsley salad is the iconic starter — on the menu every day and non-negotiable. The Eccles cake with Lancashire cheese at dessert divides opinion but is essential once. Book 2 weeks ahead for Clerkenwell.',
+          alternatives: [
+            { name: 'The Clove Club', tagline: 'Modern British · Shoreditch · tasting menu' },
+            { name: 'Brat', tagline: 'Wood-fire cooking · Shoreditch · Basque-inspired' },
+          ],
         },
       ],
     },
@@ -631,7 +671,7 @@ const DEMO_DESTINATIONS: Array<Itinerary & { flag: string; cityShort: string }> 
   },
 ]
 
-// ── Category styles (per YOU-750 spec) ────────────────────────────────────
+// ── Category styles ────────────────────────────────────────────────────────
 
 const CATEGORY_STYLE: Record<EventCategory, { bg: string; icon: string; label: string }> = {
   conference:    { bg: '#EEF2FF', icon: '📅', label: 'Conference' },
@@ -641,14 +681,45 @@ const CATEGORY_STYLE: Record<EventCategory, { bg: string; icon: string; label: s
   other:         { bg: '#F9FAFB', icon: '✨', label: 'Other' },
 }
 
-// ── Transport mode icons (per YOU-750 spec) ───────────────────────────────
+// ── Transport helpers ──────────────────────────────────────────────────────
 
 const TRANSPORT_ICON: Record<string, string> = {
   walk: '🚶', taxi: '🚕', metro: '🚇', tram: '🚊',
-  ferry: '⛴️', bus: '🚌', car: '🚗', train: '🚆', uber: '🚗',
+  ferry: '⛴️', bus: '🚌', car: '🚗', train: '🚆', uber: '🚗', tube: '🚇',
 }
 
-// ── DestinationAccordionCard — YOU-775 spec: inline accordion, not a modal ──
+const STANDARD_MODES = ['taxi', 'metro', 'walk'] as const
+type StandardMode = typeof STANDARD_MODES[number]
+
+const MODE_META: Record<StandardMode, { icon: string; label: string }> = {
+  taxi:  { icon: '🚕', label: 'Taxi' },
+  metro: { icon: '🚇', label: 'Metro' },
+  walk:  { icon: '🚶', label: 'Walk' },
+}
+
+function parseMinutes(duration: string): number {
+  const m = duration.match(/(\d+)/)
+  return m ? parseInt(m[1], 10) : 15
+}
+
+function getModeDuration(baseDuration: string, mode: StandardMode): string {
+  const base = parseMinutes(baseDuration)
+  if (mode === 'metro') return `~${base + 10} min`
+  if (mode === 'walk') return `~${base + 20} min`
+  return `~${base} min`
+}
+
+function getModePrice(mode: StandardMode, notes?: string): string {
+  if (mode === 'walk') return 'Free'
+  if (mode === 'metro') return '€1.50'
+  if (notes) {
+    const m = notes.match(/[€$£¥][\d,.]+|[\d,.]+\s*[€$£¥]/)
+    if (m) return m[0]
+  }
+  return '—'
+}
+
+// ── DestinationAccordionCard ──────────────────────────────────────────────
 
 interface DestinationAccordionCardProps {
   dest: typeof DEMO_DESTINATIONS[0]
@@ -676,12 +747,10 @@ function DestinationAccordionCard({ dest, isSelected, isExpanded, onExpand }: De
         outline: 'none',
       }}
     >
-      {/* Collapsed header row */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12,
         padding: '12px 16px', minHeight: 80,
       }}>
-        {/* Thumbnail 72×72 per YOU-775 */}
         <div style={{
           width: 72, height: 72, borderRadius: 8, overflow: 'hidden',
           flexShrink: 0, background: '#F3F4F6',
@@ -697,7 +766,6 @@ function DestinationAccordionCard({ dest, isSelected, isExpanded, onExpand }: De
             <span style={{ fontSize: 24, fontWeight: 500, color: '#9CA3AF' }}>{initial}</span>
           )}
         </div>
-        {/* Title + meta */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{
             fontSize: 16, fontWeight: 600, color: 'var(--text-primary)',
@@ -710,7 +778,6 @@ function DestinationAccordionCard({ dest, isSelected, isExpanded, onExpand }: De
             {dest.dates}
           </p>
         </div>
-        {/* Chevron — rotates 180° when expanded (YOU-775 §3) */}
         <span style={{
           fontSize: 18, color: '#9CA3AF', flexShrink: 0, lineHeight: 1,
           transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
@@ -719,7 +786,6 @@ function DestinationAccordionCard({ dest, isSelected, isExpanded, onExpand }: De
         }}>⌄</span>
       </div>
 
-      {/* Expanded inline content — YOU-775 §3 */}
       <AnimatePresence initial={false}>
         {isExpanded && (
           <motion.div
@@ -730,7 +796,6 @@ function DestinationAccordionCard({ dest, isSelected, isExpanded, onExpand }: De
             transition={{ duration: 0.2, ease: [0.25, 1, 0.5, 1] }}
             style={{ overflow: 'hidden' }}
           >
-            {/* Hero image 16:9, max 220px (YOU-775 §3) */}
             {dest.heroImageUrl && !imgErr ? (
               <div style={{ position: 'relative', width: '100%', maxHeight: 220, overflow: 'hidden' }}>
                 <img
@@ -739,7 +804,6 @@ function DestinationAccordionCard({ dest, isSelected, isExpanded, onExpand }: De
                 />
               </div>
             ) : null}
-            {/* Summary */}
             <p style={{
               fontSize: 13, color: '#374151', padding: '12px 16px 0',
               margin: 0, lineHeight: 1.55,
@@ -748,7 +812,6 @@ function DestinationAccordionCard({ dest, isSelected, isExpanded, onExpand }: De
             }}>
               {dest.summary}
             </p>
-            {/* Local tip — amber per YOU-775 §3 */}
             {dest.tripLocalTip && (
               <div style={{
                 margin: '10px 16px 0',
@@ -767,7 +830,6 @@ function DestinationAccordionCard({ dest, isSelected, isExpanded, onExpand }: De
                 </p>
               </div>
             )}
-            {/* Price row (YOU-775 §3) */}
             {dest.tripPrice && (
               <p style={{
                 fontSize: 13, fontWeight: 600, color: '#111827',
@@ -783,9 +845,13 @@ function DestinationAccordionCard({ dest, isSelected, isExpanded, onExpand }: De
   )
 }
 
-// ── EventCard — tappable, no × button (AC#1, AC#2) ───────────────────────
+// ── EventCard — tappable with optional applied badge ──────────────────────
 
-function EventCard({ item, onClick }: { item: ItineraryItem; onClick: () => void }) {
+function EventCard({ item, onClick, showAppliedBadge }: {
+  item: ItineraryItem
+  onClick: () => void
+  showAppliedBadge?: boolean
+}) {
   const [imgErr, setImgErr] = useState(false)
   const cat = item.category ?? 'other'
   const catStyle = CATEGORY_STYLE[cat] ?? CATEGORY_STYLE.other
@@ -798,7 +864,6 @@ function EventCard({ item, onClick }: { item: ItineraryItem; onClick: () => void
       exit={{ opacity: 0, scale: 0.96, transition: { duration: 0.18 } }}
       style={{ borderRadius: 12, background: '#FFFFFF', boxShadow: '0 1px 4px rgba(0,0,0,0.08)', overflow: 'hidden' }}
     >
-      {/* Full card is a single tap target — no × in read state (AC#1) */}
       <button
         onClick={onClick}
         aria-label={`View details for ${item.title}`}
@@ -807,7 +872,6 @@ function EventCard({ item, onClick }: { item: ItineraryItem; onClick: () => void
           border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left',
         }}
       >
-        {/* Image — full-width, 160px */}
         <div style={{ position: 'relative', height: 160, overflow: 'hidden' }}>
           {item.imageUrl && !imgErr ? (
             <img
@@ -825,7 +889,6 @@ function EventCard({ item, onClick }: { item: ItineraryItem; onClick: () => void
               <span style={{ fontSize: 36 }}>{catStyle.icon}</span>
             </div>
           )}
-          {/* Time chip (bottom-left) */}
           {item.time && (
             <div style={{
               position: 'absolute', bottom: 8, left: 10,
@@ -835,7 +898,6 @@ function EventCard({ item, onClick }: { item: ItineraryItem; onClick: () => void
               <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{item.time}</span>
             </div>
           )}
-          {/* Category badge (top-left) */}
           <div style={{
             position: 'absolute', top: 8, left: 10,
             background: catStyle.bg, borderRadius: 6, padding: '2px 8px',
@@ -844,19 +906,45 @@ function EventCard({ item, onClick }: { item: ItineraryItem; onClick: () => void
               {catStyle.icon} {catStyle.label}
             </span>
           </div>
-          {/* › chevron — tappability signifier (AC#2) */}
-          <div style={{
-            position: 'absolute', top: 8, right: 10,
-            background: 'rgba(0,0,0,0.30)', borderRadius: '50%',
-            width: 24, height: 24,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            pointerEvents: 'none',
-          }}>
-            <span style={{ color: 'white', fontSize: 14, lineHeight: 1 }}>›</span>
-          </div>
+          {/* Applied badge replaces chevron for 2500ms */}
+          <AnimatePresence>
+            {showAppliedBadge ? (
+              <motion.div
+                key="badge"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  position: 'absolute', top: 8, right: 10,
+                  background: 'var(--accent)', color: 'white',
+                  fontSize: 10, fontWeight: 600,
+                  borderRadius: 999, padding: '2px 8px',
+                  pointerEvents: 'none',
+                }}
+              >
+                ✓ Updated
+              </motion.div>
+            ) : (
+              <motion.div
+                key="chevron"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  position: 'absolute', top: 8, right: 10,
+                  background: 'rgba(0,0,0,0.30)', borderRadius: '50%',
+                  width: 24, height: 24,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  pointerEvents: 'none',
+                }}
+              >
+                <span style={{ color: 'white', fontSize: 14, lineHeight: 1 }}>›</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* Content */}
         <div style={{ padding: '8px 12px 12px' }}>
           <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 4px', lineHeight: 1.25 }}>
             {item.title}
@@ -874,28 +962,149 @@ function EventCard({ item, onClick }: { item: ItineraryItem; onClick: () => void
   )
 }
 
-// ── TransportLegPill (per YOU-750 spec) ───────────────────────────────────
+// ── TransportLegPill — interactive inline mode picker ─────────────────────
 
-function TransportLegPill({ leg }: { leg: TransportLeg }) {
-  const icon = TRANSPORT_ICON[leg.mode.toLowerCase()] ?? '→'
-  const label = `~${leg.duration}${leg.notes ? ` · ${leg.notes}` : ''}`
+function TransportLegPill({
+  leg, itemKey, selectedMode, onModeChange,
+}: {
+  leg: TransportLeg
+  itemKey: string
+  selectedMode: string
+  onModeChange: (key: string, mode: string) => void
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const isCustomMode = selectedMode !== leg.mode
+  const currentIcon = TRANSPORT_ICON[selectedMode.toLowerCase()] ?? '→'
+  const isSpecialMode = !(STANDARD_MODES as readonly string[]).includes(leg.mode)
+  const label = isOpen
+    ? '⇄'
+    : `~${leg.duration}${leg.notes ? ` · ${leg.notes}` : ''}`
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2px 0' }}>
       <div style={{ width: 1, height: 16, background: 'var(--border)' }} />
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: 5,
-        background: 'rgba(0,0,0,0.04)', borderRadius: 999,
-        padding: '4px 12px', fontSize: 12, color: 'var(--text-tertiary)',
-      }}>
-        <span style={{ fontSize: 13 }}>{icon}</span>
+
+      {/* Tappable pill */}
+      <button
+        onClick={() => setIsOpen(o => !o)}
+        aria-label={`Transport: ${selectedMode}. Tap to change`}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 5,
+          background: 'rgba(0,0,0,0.04)', borderRadius: 999,
+          padding: '4px 12px', fontSize: 12,
+          color: 'var(--text-tertiary)',
+          border: isCustomMode ? '1px solid rgba(28,110,242,0.3)' : '1px solid transparent',
+          cursor: 'pointer',
+          transition: 'border-color 0.15s',
+        }}
+      >
+        <span style={{ fontSize: 13 }}>{currentIcon}</span>
         <span>{label}</span>
-      </div>
+        <span style={{ fontSize: 11, opacity: 0.5 }}>⇄</span>
+      </button>
+
+      {/* Inline picker */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            style={{ overflow: 'hidden', width: '100%' }}
+          >
+            <div style={{
+              background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md, 10px)',
+              padding: '10px', margin: '4px 16px',
+              border: '1px solid var(--border)',
+            }}>
+              <p style={{
+                fontSize: 10, fontWeight: 600, textTransform: 'uppercase',
+                letterSpacing: '0.06em', color: 'var(--text-tertiary)', margin: '0 0 8px',
+              }}>
+                Transport
+              </p>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${isSpecialMode ? 4 : 3}, 1fr)`,
+                gap: 6,
+              }}>
+                {STANDARD_MODES.map(mode => {
+                  const isSelected = selectedMode === mode
+                  const duration = getModeDuration(leg.duration, mode)
+                  const price = getModePrice(mode, leg.notes)
+                  return (
+                    <button
+                      key={mode}
+                      onClick={() => { onModeChange(itemKey, mode); setIsOpen(false) }}
+                      style={{
+                        minHeight: 72, borderRadius: 'var(--radius-md, 10px)',
+                        border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
+                        background: isSelected ? 'var(--accent-light, rgba(28,110,242,0.08))' : 'var(--bg)',
+                        cursor: 'pointer', padding: '6px 4px',
+                        display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', justifyContent: 'center', gap: 2,
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <span style={{ fontSize: 18 }}>{MODE_META[mode].icon}</span>
+                      <span style={{
+                        fontSize: 10, fontWeight: 600, textTransform: 'uppercase',
+                        color: isSelected ? 'var(--accent)' : 'var(--text-primary)',
+                      }}>
+                        {MODE_META[mode].label}
+                      </span>
+                      <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{duration}</span>
+                      <span style={{
+                        fontSize: 10,
+                        color: price === 'Free' ? 'var(--accent)' : 'var(--text-secondary)',
+                      }}>
+                        {price}
+                      </span>
+                    </button>
+                  )
+                })}
+                {/* Special mode tile (train/tube/ferry) — read-only */}
+                {isSpecialMode && (
+                  <div style={{
+                    minHeight: 72, borderRadius: 'var(--radius-md, 10px)',
+                    border: `1px solid ${(!(STANDARD_MODES as readonly string[]).includes(selectedMode)) ? 'var(--accent)' : 'var(--border)'}`,
+                    background: (!(STANDARD_MODES as readonly string[]).includes(selectedMode)) ? 'var(--accent-light, rgba(28,110,242,0.08))' : 'var(--bg-secondary)',
+                    padding: '6px 4px',
+                    display: 'flex', flexDirection: 'column',
+                    alignItems: 'center', justifyContent: 'center', gap: 2,
+                    opacity: 0.7,
+                  }}>
+                    <span style={{ fontSize: 18 }}>{TRANSPORT_ICON[leg.mode] ?? '→'}</span>
+                    <span style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                      {leg.mode.charAt(0).toUpperCase() + leg.mode.slice(1)}
+                    </span>
+                    <span style={{ fontSize: 10, color: 'var(--text-secondary)' }}>{`~${leg.duration}`}</span>
+                    <span style={{ fontSize: 9, color: 'var(--text-tertiary)' }}>Fixed</span>
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setIsOpen(false)}
+                style={{
+                  width: '100%', marginTop: 8, padding: '8px',
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontSize: 12, color: 'var(--text-tertiary)', textAlign: 'center',
+                }}
+              >
+                Cancel ✕
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div style={{ width: 1, height: 16, background: 'var(--border)' }} />
     </div>
   )
 }
 
-// ── PersonalizationTag (per YOU-750 spec) ─────────────────────────────────
+// ── PersonalizationTag ─────────────────────────────────────────────────────
 
 function PersonalizationTag({ name = 'Jeevy' }: { name?: string }) {
   return (
@@ -906,16 +1115,127 @@ function PersonalizationTag({ name = 'Jeevy' }: { name?: string }) {
   )
 }
 
-// ── ItemDetailSheet — AC#3: bottom sheet, 60vh, slide-up, scrim, swipe-dismiss ──
+// ── PersonalizationBar — fixed above sticky CTA ───────────────────────────
+
+function PersonalizationBar({
+  chips, onOpen, onRemoveChip, isAltering, flashActive,
+}: {
+  chips: string[]
+  onOpen: () => void
+  onRemoveChip: (chip: string) => void
+  isAltering: boolean
+  flashActive: boolean
+}) {
+  const hasChips = chips.length > 0
+
+  return (
+    <div style={{
+      height: 44, display: 'flex', alignItems: 'center',
+      padding: '0 20px',
+      background: flashActive ? 'var(--accent-light, rgba(28,110,242,0.08))' : 'var(--bg-secondary)',
+      borderTop: '1px solid var(--border)',
+      gap: 8,
+      transition: 'background 0.2s',
+    }}>
+      {!hasChips ? (
+        <button
+          onClick={onOpen}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            color: 'var(--text-secondary)', fontSize: 13,
+            minHeight: 44, padding: '0',
+            display: 'flex', alignItems: 'center', gap: 4,
+            marginLeft: 'auto',
+          }}
+        >
+          <span>✨</span>
+          <span>Adjust this trip</span>
+        </button>
+      ) : (
+        <>
+          <span style={{ fontSize: 10, color: '#818CF8', flexShrink: 0 }}>✦</span>
+          <motion.div
+            animate={isAltering ? { opacity: [1, 0.5, 1] } : { opacity: 1 }}
+            transition={isAltering
+              ? { duration: 0.8, repeat: Infinity, repeatType: 'loop' }
+              : { duration: 0.2 }}
+            style={{
+              flex: 1, overflowX: 'auto', display: 'flex', gap: 6, alignItems: 'center',
+              scrollbarWidth: 'none',
+            }}
+          >
+            <AnimatePresence>
+              {chips.map(chip => (
+                <motion.div
+                  key={chip}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, width: 0, marginRight: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 2,
+                    background: 'rgba(28,110,242,0.08)',
+                    border: '1px solid rgba(28,110,242,0.2)',
+                    borderRadius: 999,
+                    padding: '2px 2px 2px 8px',
+                    flexShrink: 0,
+                  }}
+                >
+                  <span style={{ fontSize: 12, color: 'var(--accent)', fontWeight: 500 }}>
+                    {chip.length > 20 ? chip.slice(0, 20) + '…' : chip}
+                  </span>
+                  <button
+                    onClick={() => onRemoveChip(chip)}
+                    aria-label={`Remove ${chip} preference`}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: 'rgba(28,110,242,0.6)', fontSize: 12,
+                      padding: '0 6px', lineHeight: 1,
+                      minWidth: 24, minHeight: 24,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    ✕
+                  </button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+          {!isAltering ? (
+            <button
+              onClick={onOpen}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--text-secondary)', fontSize: 12,
+                flexShrink: 0, whiteSpace: 'nowrap',
+                minHeight: 44, padding: '0 4px',
+                display: 'flex', alignItems: 'center',
+              }}
+            >
+              + Adjust more
+            </button>
+          ) : (
+            <span style={{ fontSize: 11, color: 'var(--text-secondary)', flexShrink: 0, whiteSpace: 'nowrap' }}>
+              Jeevy is updating…
+            </span>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
+// ── ItemDetailSheet ───────────────────────────────────────────────────────
 
 interface ItemDetailSheetProps {
   item: ItineraryItem | null
   onClose: () => void
   onRemove: (item: ItineraryItem) => void
   onChangeItem: (item: ItineraryItem) => void
+  onSwapItem: (alt: { name: string; tagline?: string; imageUrl?: string }) => void
 }
 
-function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSheetProps) {
+function ItemDetailSheet({ item, onClose, onRemove, onChangeItem, onSwapItem }: ItemDetailSheetProps) {
   const controls = useDragControls()
   const [imgErr, setImgErr] = useState(false)
 
@@ -924,7 +1244,6 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
 
   useEffect(() => { setImgErr(false) }, [item?.title])
 
-  // Close on Escape
   useEffect(() => {
     if (!item) return
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -932,7 +1251,6 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
     return () => window.removeEventListener('keydown', handler)
   }, [item, onClose])
 
-  // Lock body scroll
   useEffect(() => {
     if (item) {
       document.body.style.overflow = 'hidden'
@@ -955,7 +1273,7 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
             onClick={onClose}
           />
 
-          {/* Sheet — 60vh max, slide-up 300ms ease-out (AC#3) */}
+          {/* Sheet */}
           <motion.div
             drag="y"
             dragControls={controls}
@@ -976,6 +1294,9 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Details for ${item.title}`}
           >
             {/* Drag handle */}
             <div
@@ -987,7 +1308,7 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
 
             {/* Scrollable body */}
             <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-              {/* Hero image — 160px per spec */}
+              {/* Hero image */}
               <div style={{ position: 'relative', height: 160, flexShrink: 0, overflow: 'hidden' }}>
                 {item.imageUrl && !imgErr ? (
                   <img
@@ -1005,7 +1326,6 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
                     <span style={{ fontSize: 48 }}>{catStyle.icon}</span>
                   </div>
                 )}
-                {/* Time chip */}
                 {item.time && (
                   <div style={{
                     position: 'absolute', bottom: 8, left: 12,
@@ -1015,7 +1335,6 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
                     <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{item.time}</span>
                   </div>
                 )}
-                {/* Category badge */}
                 <div style={{
                   position: 'absolute', top: 8, left: 12,
                   background: catStyle.bg, borderRadius: 6, padding: '3px 10px',
@@ -1039,7 +1358,6 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
                     {item.detail}
                   </p>
                 )}
-                {/* Price pill */}
                 {item.price && (
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, marginBottom: 10 }}>
                     <span style={{
@@ -1053,7 +1371,6 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
                     </span>
                   </div>
                 )}
-                {/* Local tip callout */}
                 {item.localTip && (
                   <div style={{
                     background: 'var(--accent-light, #EEF2FF)',
@@ -1068,17 +1385,77 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
                     </p>
                   </div>
                 )}
+
+                {/* Jeevy Alternatives strip */}
+                {item.alternatives && item.alternatives.length > 0 && (
+                  <div style={{
+                    marginTop: 12,
+                    background: 'var(--bg)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 10,
+                    overflow: 'hidden',
+                  }}>
+                    <p style={{
+                      fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)',
+                      textTransform: 'uppercase', letterSpacing: '0.08em',
+                      margin: 0, padding: '8px 12px 6px',
+                      fontFamily: 'monospace',
+                    }}>
+                      Jeevy's picks
+                    </p>
+                    {item.alternatives.map((alt, i) => (
+                      <button
+                        key={alt.name}
+                        onClick={() => onSwapItem(alt)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10,
+                          width: '100%', background: 'none', border: 'none',
+                          borderTop: i === 0 ? '1px solid var(--border)' : '1px solid var(--border)',
+                          cursor: 'pointer', padding: '10px 12px',
+                          textAlign: 'left',
+                          transition: 'background 0.12s',
+                        }}
+                        onMouseEnter={e => (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-secondary)'}
+                        onMouseLeave={e => (e.currentTarget as HTMLButtonElement).style.background = 'none'}
+                      >
+                        {/* Alt thumbnail */}
+                        <div style={{
+                          width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                          background: catStyle.bg,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          overflow: 'hidden',
+                        }}>
+                          {alt.imageUrl ? (
+                            <img src={alt.imageUrl} alt={alt.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <span style={{ fontSize: 18 }}>{catStyle.icon}</span>
+                          )}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', margin: 0, lineHeight: 1.3 }}>
+                            {alt.name}
+                          </p>
+                          {alt.tagline && (
+                            <p style={{ fontSize: 11, color: 'var(--text-secondary)', margin: '2px 0 0' }}>
+                              {alt.tagline}
+                            </p>
+                          )}
+                        </div>
+                        <span style={{ fontSize: 14, color: 'var(--text-tertiary)', flexShrink: 0 }}>›</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Action buttons — sticky, min-h-44 (WCAG 2.5.5) (AC#3, AC#6) */}
+            {/* Action buttons */}
             <div style={{
               padding: '12px 16px 20px',
               borderTop: '1px solid var(--border)',
               background: 'var(--bg-secondary)',
               flexShrink: 0,
             }}>
-              {/* Primary: Edit item inline — opens structured pre-fill form (YOU-759) */}
               <button
                 onClick={() => onChangeItem(item)}
                 style={{
@@ -1090,9 +1467,8 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
                 }}
               >
                 <span>✏️</span>
-                <span>Edit item</span>
+                <span>Change this item</span>
               </button>
-              {/* Secondary: Remove from plan — removal moved inside sheet (AC#5) */}
               <button
                 onClick={() => onRemove(item)}
                 style={{
@@ -1115,23 +1491,38 @@ function ItemDetailSheet({ item, onClose, onRemove, onChangeItem }: ItemDetailSh
   )
 }
 
-// ── AlterSheet — AC#4: accepts prefilledText for "Change this item" ───────
+// ── AlterSheet ────────────────────────────────────────────────────────────
 
-function AlterSheet({ onSubmit, onDismiss, isLoading, prefilledText = '' }: {
+function AlterSheet({ onSubmit, onDismiss, isLoading, prefilledText = '', mode = 'alter' }: {
   onSubmit: (instruction: string) => void
   onDismiss: () => void
   isLoading: boolean
   prefilledText?: string
+  mode?: 'alter' | 'personalize'
 }) {
   const [draft, setDraft] = useState(prefilledText)
-  const SUGGESTIONS = [
+
+  const SUGGESTIONS_ALTER = [
     'Make the pace more relaxed',
     'Add a seafood dinner on day 2',
     'Swap morning activity for a museum',
     'Add a rooftop bar in the evening',
   ]
 
-  // Sync when prefilledText changes (re-opened for different item)
+  const SUGGESTIONS_PERSONALIZE = [
+    'More food experiences',
+    'Slower pace, add breaks',
+    'More local & off-the-beaten-path',
+    'Skip the nightlife',
+    'Earlier starts',
+    'Add a cultural activity',
+  ]
+
+  const suggestions = mode === 'personalize' ? SUGGESTIONS_PERSONALIZE : SUGGESTIONS_ALTER
+  const title = mode === 'personalize' ? 'What do you want more (or less) of?' : 'What would you like to change?'
+  const placeholder = mode === 'personalize' ? 'e.g. "more food stops", "less packed schedule"' : 'e.g. "Move dinner somewhere in Alfama"'
+  const ctaLabel = mode === 'personalize' ? 'Apply preference →' : 'Update my plan →'
+
   useEffect(() => { setDraft(prefilledText) }, [prefilledText])
 
   return (
@@ -1148,13 +1539,13 @@ function AlterSheet({ onSubmit, onDismiss, isLoading, prefilledText = '' }: {
       >
         <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: 'var(--border)' }} />
         <p className="text-[11px] font-mono uppercase tracking-widest mb-1" style={{ color: 'var(--text-tertiary)' }}>
-          Jeevy · Alter plan
+          {mode === 'personalize' ? 'Jeevy · Personalise' : 'Jeevy · Alter plan'}
         </p>
         <h2 className="text-[22px] font-semibold mb-4" style={{ color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
-          What would you like to change?
+          {title}
         </h2>
         <div className="flex flex-wrap gap-2 mb-4">
-          {SUGGESTIONS.map(s => (
+          {suggestions.map(s => (
             <button key={s} onClick={() => setDraft(s)}
               className="text-[13px] px-3 py-1.5 rounded-full border transition-colors"
               style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)', background: 'var(--bg)' }}>
@@ -1165,7 +1556,7 @@ function AlterSheet({ onSubmit, onDismiss, isLoading, prefilledText = '' }: {
         <textarea
           value={draft}
           onChange={e => setDraft(e.target.value)}
-          placeholder={'e.g. "Move dinner somewhere in Alfama"'}
+          placeholder={placeholder}
           rows={3}
           className="w-full rounded-2xl px-4 py-3 text-[15px] outline-none resize-none mb-4"
           style={{ background: 'var(--bg)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}
@@ -1176,7 +1567,7 @@ function AlterSheet({ onSubmit, onDismiss, isLoading, prefilledText = '' }: {
           className="w-full py-4 rounded-2xl font-semibold text-[16px] text-white transition-opacity disabled:opacity-40"
           style={{ background: 'var(--text-primary)' }}
         >
-          {isLoading ? 'Updating your plan…' : 'Update my plan →'}
+          {isLoading ? 'Updating your plan…' : ctaLabel}
         </button>
       </motion.div>
     </motion.div>
@@ -1185,18 +1576,23 @@ function AlterSheet({ onSubmit, onDismiss, isLoading, prefilledText = '' }: {
 
 // ── DaySection ────────────────────────────────────────────────────────────
 
-function DaySection({ day, removedKeys, editedItems, onOpen }: {
+function DaySection({
+  day, removedKeys, editedItems, onOpen,
+  appliedBadgeKeys, transportModes, onTransportModeChange,
+}: {
   day: ItineraryDay
   removedKeys: Set<string>
   editedItems: Map<string, ItineraryItem>
   onOpen: (item: ItineraryItem, key: string) => void
+  appliedBadgeKeys: Set<string>
+  transportModes: Map<string, string>
+  onTransportModeChange: (key: string, mode: string) => void
 }) {
   const visibleItems = day.items.filter((_, i) => !removedKeys.has(`${day.day}:${i}`))
   if (visibleItems.length === 0) return null
 
   return (
     <div style={{ paddingBottom: 24 }}>
-      {/* Sticky day header — bleeds through scroll container's 16px padding (AC1, AC2) */}
       <div style={{
         position: 'sticky',
         top: 0,
@@ -1218,14 +1614,25 @@ function DaySection({ day, removedKeys, editedItems, onOpen }: {
           {visibleItems.map((item, vi) => {
             const originalIndex = day.items.indexOf(item)
             const itemKey = `${day.day}:${originalIndex}`
-            // Optimistic override: use locally-edited version if available
             const resolvedItem = editedItems.get(itemKey) ?? item
             const hasNextVisible = vi < visibleItems.length - 1
             const showLeg = !!resolvedItem.transportAfter && hasNextVisible
+            const selectedMode = transportModes.get(itemKey) ?? resolvedItem.transportAfter?.mode ?? 'taxi'
             return (
               <div key={itemKey}>
-                <EventCard item={resolvedItem} onClick={() => onOpen(resolvedItem, itemKey)} />
-                {showLeg && resolvedItem.transportAfter && <TransportLegPill leg={resolvedItem.transportAfter} />}
+                <EventCard
+                  item={resolvedItem}
+                  onClick={() => onOpen(resolvedItem, itemKey)}
+                  showAppliedBadge={appliedBadgeKeys.has(itemKey)}
+                />
+                {showLeg && resolvedItem.transportAfter && (
+                  <TransportLegPill
+                    leg={resolvedItem.transportAfter}
+                    itemKey={itemKey}
+                    selectedMode={selectedMode}
+                    onModeChange={onTransportModeChange}
+                  />
+                )}
               </div>
             )
           })}
@@ -1248,22 +1655,27 @@ interface Props {
 export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', loadStatus = 'idle', onStartOver }: Props) {
   const [alterOpen, setAlterOpen] = useState(false)
   const [alterPrefilledText, setAlterPrefilledText] = useState('')
+  const [alterMode, setAlterMode] = useState<'alter' | 'personalize'>('alter')
   const [removedKeys, setRemovedKeys] = useState<Set<string>>(new Set())
-  // AC#3: item detail sheet state
   const [activeItem, setActiveItem] = useState<ItineraryItem | null>(null)
   const [activeItemKey, setActiveItemKey] = useState<string | null>(null)
-  // YOU-759: inline edit sheet state
   const [editItem, setEditItem] = useState<ItineraryItem | null>(null)
   const [editItemKey, setEditItemKey] = useState<string | null>(null)
   const [editedItems, setEditedItems] = useState<Map<string, ItineraryItem>>(new Map())
-  // AC#5: undo toast state
-  const [undoState, setUndoState] = useState<{ key: string; title: string } | null>(null)
+  const [undoState, setUndoState] = useState<{ key: string; title: string; type?: 'item' | 'chip' } | null>(null)
   const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
-  // Phase 4: demo destination selector (only active when no API itinerary)
   const [demoDestIdx, setDemoDestIdx] = useState(0)
-  // Phase 4: which destination accordion is expanded (YOU-775 — 1 at a time)
   const [expandedDestIdx, setExpandedDestIdx] = useState<number | null>(0)
+  // Phase 5 state
+  const [appliedBadgeKeys, setAppliedBadgeKeys] = useState<Set<string>>(new Set())
+  const appliedBadgeTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
+  const [transportModes, setTransportModes] = useState<Map<string, string>>(new Map())
+  const [preferenceChips, setPreferenceChips] = useState<string[]>([])
+  const [barFlash, setBarFlash] = useState(false)
+  const [prevDetailItem, setPrevDetailItem] = useState<ItineraryItem | null>(null)
+  const [prevDetailItemKey, setPrevDetailItemKey] = useState<string | null>(null)
+  const prevAlterStatusRef = useRef(alterStatus)
 
   const display = itinerary ?? DEMO_DESTINATIONS[demoDestIdx]
   const isDemoMode = !itinerary
@@ -1274,20 +1686,56 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
     }
   }, [itinerary])
 
-  // Cleanup undo timer
   useEffect(() => {
-    return () => { if (undoTimerRef.current) clearTimeout(undoTimerRef.current) }
+    return () => {
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+      appliedBadgeTimersRef.current.forEach(t => clearTimeout(t))
+    }
+  }, [])
+
+  // Bar flash when altering finishes
+  useEffect(() => {
+    if (prevAlterStatusRef.current === 'altering' && alterStatus === 'idle' && preferenceChips.length > 0) {
+      setBarFlash(true)
+      const t = setTimeout(() => setBarFlash(false), 200)
+      return () => clearTimeout(t)
+    }
+    prevAlterStatusRef.current = alterStatus
+  }, [alterStatus, preferenceChips.length])
+
+  const showAppliedBadgeForKey = useCallback((key: string) => {
+    setAppliedBadgeKeys(prev => new Set([...prev, key]))
+    if (appliedBadgeTimersRef.current.has(key)) {
+      clearTimeout(appliedBadgeTimersRef.current.get(key)!)
+    }
+    const timer = setTimeout(() => {
+      setAppliedBadgeKeys(prev => {
+        const next = new Set(prev)
+        next.delete(key)
+        return next
+      })
+      appliedBadgeTimersRef.current.delete(key)
+    }, 2500)
+    appliedBadgeTimersRef.current.set(key, timer)
   }, [])
 
   async function handleAlterSubmit(instruction: string) {
-    if (!alterPlan) return
-    setAlterOpen(false)
-    setAlterPrefilledText('')
-    setRemovedKeys(new Set())
-    await alterPlan(instruction)
+    if (alterMode === 'personalize') {
+      setPreferenceChips(prev => [...prev, instruction])
+      setAlterOpen(false)
+      setAlterPrefilledText('')
+      if (alterPlan) {
+        await alterPlan(`Apply this preference to the itinerary: ${instruction}`)
+      }
+    } else {
+      if (!alterPlan) return
+      setAlterOpen(false)
+      setAlterPrefilledText('')
+      setRemovedKeys(new Set())
+      await alterPlan(instruction)
+    }
   }
 
-  // AC#3: open detail sheet
   const handleOpenItem = useCallback((item: ItineraryItem, key: string) => {
     setActiveItem(item)
     setActiveItemKey(key)
@@ -1298,7 +1746,6 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
     setActiveItemKey(null)
   }, [])
 
-  // AC#5: remove via sheet → undo toast (removal moved inside sheet)
   const handleRemoveItem = useCallback((item: ItineraryItem) => {
     if (!activeItemKey) return
     const key = activeItemKey
@@ -1306,40 +1753,88 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
     setActiveItem(null)
     setActiveItemKey(null)
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
-    setUndoState({ key, title: item.title })
+    setUndoState({ key, title: item.title, type: 'item' })
     undoTimerRef.current = setTimeout(() => setUndoState(null), 5000)
   }, [activeItemKey])
 
   const handleUndoRemove = useCallback(() => {
     if (!undoState) return
-    setRemovedKeys(prev => {
-      const next = new Set(prev)
-      next.delete(undoState.key)
-      return next
-    })
+    if (undoState.type === 'chip') {
+      setPreferenceChips(prev => [...prev, undoState.key])
+    } else {
+      setRemovedKeys(prev => {
+        const next = new Set(prev)
+        next.delete(undoState.key)
+        return next
+      })
+    }
     setUndoState(null)
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
   }, [undoState])
 
-  // YOU-759: "Edit item" → open structured inline edit form (pre-filled, no AI)
+  // "Change this item" — open edit sheet with back nav
   const handleChangeItem = useCallback((item: ItineraryItem) => {
+    setPrevDetailItem(item)
+    setPrevDetailItemKey(activeItemKey)
     setEditItem(item)
     setEditItemKey(activeItemKey)
     setActiveItem(null)
     setActiveItemKey(null)
   }, [activeItemKey])
 
+  // ← Back from edit sheet → reopen detail sheet
+  const handleBackFromEdit = useCallback(() => {
+    setEditItem(null)
+    setEditItemKey(null)
+    setActiveItem(prevDetailItem)
+    setActiveItemKey(prevDetailItemKey)
+  }, [prevDetailItem, prevDetailItemKey])
+
   const handleSaveEdit = useCallback((updated: ItineraryItem) => {
     if (editItemKey) {
       setEditedItems(prev => new Map(prev).set(editItemKey, updated))
+      showAppliedBadgeForKey(editItemKey)
     }
     setEditItem(null)
     setEditItemKey(null)
-  }, [editItemKey])
+  }, [editItemKey, showAppliedBadgeForKey])
 
   const handleCancelEdit = useCallback(() => {
     setEditItem(null)
     setEditItemKey(null)
+  }, [])
+
+  // Optimistic swap from alternatives strip
+  const handleSwapItem = useCallback((alt: { name: string; tagline?: string; imageUrl?: string }) => {
+    if (!activeItemKey || !activeItem) return
+    const key = activeItemKey
+    const updated: ItineraryItem = {
+      ...activeItem,
+      title: alt.name,
+      detail: alt.tagline ?? activeItem.detail,
+      ...(alt.imageUrl ? { imageUrl: alt.imageUrl } : {}),
+    }
+    setEditedItems(prev => new Map(prev).set(key, updated))
+    setActiveItem(null)
+    setActiveItemKey(null)
+    showAppliedBadgeForKey(key)
+  }, [activeItemKey, activeItem, showAppliedBadgeForKey])
+
+  const handleTransportModeChange = useCallback((key: string, mode: string) => {
+    setTransportModes(prev => new Map(prev).set(key, mode))
+  }, [])
+
+  const handleOpenPersonalize = useCallback(() => {
+    setAlterMode('personalize')
+    setAlterPrefilledText('')
+    setAlterOpen(true)
+  }, [])
+
+  const handleRemovePreference = useCallback((chip: string) => {
+    setPreferenceChips(prev => prev.filter(c => c !== chip))
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    setUndoState({ key: chip, title: `"${chip}" preference`, type: 'chip' })
+    undoTimerRef.current = setTimeout(() => setUndoState(null), 5000)
   }, [])
 
   const HERO_FALLBACKS: Record<string, string> = {
@@ -1368,7 +1863,6 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
           background: 'linear-gradient(to bottom, transparent 30%, var(--bg-secondary) 100%)',
         }} />
 
-        {/* ← Back — min 44px tap target (AC#6) */}
         {onStartOver && (
           <button onClick={onStartOver} style={{
             position: 'absolute', top: 52, left: 16,
@@ -1392,32 +1886,41 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
         </div>
       </div>
 
-      {/* Phase 4: destination accordion list — YOU-775 spec (inline expand, 1 at a time) */}
+      {/* Destination accordion */}
       {isDemoMode && (
         <div style={{
-          display: 'flex', flexDirection: 'column', gap: 8,
-          padding: '12px 16px 4px', flexShrink: 0,
+          flexShrink: 0,
+          maxHeight: 'min(280px, 33vh)',
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch' as const,
         }}>
-          <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Upcoming trips
-          </p>
-          {DEMO_DESTINATIONS.map((dest, i) => (
-            <DestinationAccordionCard
-              key={dest.cityShort}
-              dest={dest}
-              isSelected={i === demoDestIdx}
-              isExpanded={expandedDestIdx === i}
-              onExpand={() => {
-                const next = expandedDestIdx === i ? null : i
-                setExpandedDestIdx(next)
-                if (next !== null) {
-                  setDemoDestIdx(i)
-                  setRemovedKeys(new Set())
-                  setEditedItems(new Map())
-                }
-              }}
-            />
-          ))}
+          <div style={{
+            display: 'flex', flexDirection: 'column', gap: 8,
+            padding: '12px 16px 4px',
+          }}>
+            <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-tertiary)', margin: '0 0 4px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              Upcoming trips
+            </p>
+            {DEMO_DESTINATIONS.map((dest, i) => (
+              <DestinationAccordionCard
+                key={dest.cityShort}
+                dest={dest}
+                isSelected={i === demoDestIdx}
+                isExpanded={expandedDestIdx === i}
+                onExpand={() => {
+                  const next = expandedDestIdx === i ? null : i
+                  setExpandedDestIdx(next)
+                  if (next !== null) {
+                    setDemoDestIdx(i)
+                    setRemovedKeys(new Set())
+                    setEditedItems(new Map())
+                    setTransportModes(new Map())
+                    setAppliedBadgeKeys(new Set())
+                  }
+                }}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -1451,7 +1954,7 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
       </div>
 
       {/* Card stack */}
-      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 16px 200px' }}>
+      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 16px 230px' }}>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {display.days.map(day => (
             <DaySection
@@ -1460,82 +1963,95 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
               removedKeys={removedKeys}
               editedItems={editedItems}
               onOpen={handleOpenItem}
+              appliedBadgeKeys={appliedBadgeKeys}
+              transportModes={transportModes}
+              onTransportModeChange={handleTransportModeChange}
             />
           ))}
         </div>
       </div>
 
-      {/* Sticky CTA bar */}
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        padding: '16px 20px 34px',
-        background: 'linear-gradient(to top, var(--bg-secondary) 80%, transparent 100%)',
-      }}>
-        <div style={{ maxWidth: 430, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {/* Add to Calendar — already ≥44px */}
-          <button
-            style={{
-              width: '100%', padding: '16px 0', borderRadius: 16,
-              background: 'var(--text-primary)', color: 'white',
-              fontWeight: 600, fontSize: 16, border: 'none', cursor: 'pointer',
-            }}
-          >
-            Add to Calendar
-          </button>
+      {/* Fixed footer: PersonalizationBar + CTA */}
+      <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}>
+        {/* Personalization Bar — directly above CTA */}
+        <PersonalizationBar
+          chips={preferenceChips}
+          onOpen={handleOpenPersonalize}
+          onRemoveChip={handleRemovePreference}
+          isAltering={alterStatus === 'altering'}
+          flashActive={barFlash}
+        />
 
-          {/* ✏️ Change something? — min 44px tap target (AC#6) */}
-          {alterPlan && (
+        {/* Sticky CTA bar */}
+        <div style={{
+          padding: '16px 20px 34px',
+          background: 'linear-gradient(to top, var(--bg-secondary) 80%, transparent 100%)',
+        }}>
+          <div style={{ maxWidth: 430, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 10 }}>
             <button
-              onClick={() => !busy && (setAlterPrefilledText(''), setAlterOpen(true))}
-              disabled={busy}
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                background: 'none', border: 'none', cursor: busy ? 'not-allowed' : 'pointer',
-                color: 'var(--text-secondary)', fontSize: 14,
-                minHeight: 44, padding: '0 8px',
-                opacity: busy ? 0.4 : 1, transition: 'opacity 0.15s',
+                width: '100%', padding: '16px 0', borderRadius: 16,
+                background: 'var(--text-primary)', color: 'white',
+                fontWeight: 600, fontSize: 16, border: 'none', cursor: 'pointer',
               }}
             >
-              <span>✏️</span>
-              <span>Change something?</span>
+              Add to Calendar
             </button>
-          )}
 
-          {/* Share trip — min 44px tap target (AC#6) */}
-          <button
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--text-tertiary)', fontSize: 14,
-              minHeight: 44,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            Share trip
-          </button>
+            {alterPlan && (
+              <button
+                onClick={() => !busy && (setAlterPrefilledText(''), setAlterMode('alter'), setAlterOpen(true))}
+                disabled={busy}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  background: 'none', border: 'none', cursor: busy ? 'not-allowed' : 'pointer',
+                  color: 'var(--text-secondary)', fontSize: 14,
+                  minHeight: 44, padding: '0 8px',
+                  opacity: busy ? 0.4 : 1, transition: 'opacity 0.15s',
+                }}
+              >
+                <span>✏️</span>
+                <span>Change something?</span>
+              </button>
+            )}
+
+            <button
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--text-tertiary)', fontSize: 14,
+                minHeight: 44,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              Share trip
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* AC#3: Item Detail Bottom Sheet */}
+      {/* Item Detail Sheet */}
       <ItemDetailSheet
         item={activeItem}
         onClose={handleCloseSheet}
         onRemove={handleRemoveItem}
         onChangeItem={handleChangeItem}
+        onSwapItem={handleSwapItem}
       />
 
-      {/* YOU-759: Inline edit sheet — structured pre-fill form for transport/restaurant/flight */}
+      {/* Item Edit Sheet with back nav */}
       <ItemEditSheet
         item={editItem}
         onSave={handleSaveEdit}
         onClose={handleCancelEdit}
+        onBack={handleBackFromEdit}
       />
 
-      {/* AC#5: Undo toast — 5s, appears above sticky bar */}
+      {/* Undo toast */}
       <AnimatePresence>
         {undoState && (
           <motion.div
             className="fixed left-0 right-0 z-30 flex justify-center px-4 pointer-events-none"
-            style={{ bottom: 120 }}
+            style={{ bottom: 170 }}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
@@ -1576,6 +2092,7 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
             onDismiss={() => { setAlterOpen(false); setAlterPrefilledText('') }}
             isLoading={alterStatus === 'altering'}
             prefilledText={alterPrefilledText}
+            mode={alterMode}
           />
         )}
       </AnimatePresence>
