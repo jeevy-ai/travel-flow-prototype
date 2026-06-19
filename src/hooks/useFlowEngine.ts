@@ -1,6 +1,8 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { soloTravelFixture } from '../data/fixture'
 import { IMAGE_MANIFEST, GRADIENT_FALLBACKS } from '../data/imageManifest'
+import { sendToConcierge } from '../lib/conciergeApi'
+import type { Itinerary, ItineraryItem } from '../lib/conciergeApi'
 
 export type EntryState = 'ghost' | 'proposed' | 'confirmed' | 'calendar-synced' | 'day-of-active' | 'self-managed' | 'custom-pending'
 
@@ -44,6 +46,92 @@ export type TimelineEntry = {
   transportMode?: 'taxi' | 'transit' | 'walk'
   partySize?: number
   menuItems?: { name: string; price: string; popular?: boolean }[]
+}
+
+function inferTypeFromItem(item: ItineraryItem): EntryType {
+  const cat = item.category
+  const t = (item.title + ' ' + (item.detail ?? '')).toLowerCase()
+  if (cat === 'accommodation') return 'hotel'
+  if (cat === 'conference') return 'conference_session'
+  if (cat === 'dining') return 'restaurant'
+  if (/flight|airline/.test(t)) {
+    // Return flight if title contains arrow pointing to a common origin hub
+    if (/→\s*(sfo|jfk|lax|ord|bos|sea|dfw|mia|iad|atl)/i.test(item.title + ' ' + (item.detail ?? ''))) return 'flight_return'
+    return 'flight_outbound'
+  }
+  if (/taxi|transfer|uber|bolt|ride/.test(t)) return 'ride'
+  if (/reminder|packing|pack/.test(t)) return 'reminders'
+  return 'activity'
+}
+
+function parseDateFromDayLabel(dayLabel: string, year: number): string | null {
+  const match = dayLabel.match(/\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})\b/i)
+  if (!match) return null
+  try {
+    const d = new Date(`${match[1]} ${match[2]}, ${year}`)
+    if (isNaN(d.getTime())) return null
+    const mo = String(d.getMonth() + 1).padStart(2, '0')
+    const da = String(d.getDate()).padStart(2, '0')
+    return `${year}-${mo}-${da}`
+  } catch {
+    return null
+  }
+}
+
+function mapItineraryToEntries(itinerary: Itinerary): TimelineEntry[] {
+  const yearMatch = itinerary.dates.match(/\d{4}/)
+  const year = yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear()
+  const entries: TimelineEntry[] = []
+
+  itinerary.days.forEach((day, dayIdx) => {
+    const dateStr = parseDateFromDayLabel(day.day, year)
+    day.items.forEach((item, itemIdx) => {
+      const id = `live_${dayIdx}_${itemIdx}`
+      const type = inferTypeFromItem(item)
+
+      let scheduledAt: string | null = null
+      if (dateStr && item.time) {
+        const tp = item.time.match(/^(\d{1,2}):(\d{2})/)
+        if (tp) scheduledAt = `${dateStr}T${tp[1].padStart(2, '0')}:${tp[2]}:00+00:00`
+      } else if (dateStr) {
+        scheduledAt = `${dateStr}T12:00:00+00:00`
+      }
+
+      const gradientFallback = GRADIENT_FALLBACKS[type] ?? GRADIENT_FALLBACKS['default']
+
+      entries.push({
+        id,
+        type,
+        state: 'proposed',
+        scheduledAt,
+        imageThumb: item.imageUrl ?? IMAGE_MANIFEST[type]?.thumb ?? null,
+        imageHero: item.imageUrl ?? IMAGE_MANIFEST[type]?.hero ?? null,
+        gradientFallback,
+        tagline: item.detail ? `${item.title} · ${item.detail}` : item.title,
+        ghostHeadline: item.title,
+        ghostSubtext: item.detail ?? '',
+        data: {
+          title: item.title,
+          detail: item.detail,
+          price: item.price,
+          localTip: item.localTip,
+          category: item.category,
+        },
+        ...(item.alternatives && item.alternatives.length > 0 ? {
+          alternatives: item.alternatives.map(alt => ({
+            id: alt.name.toLowerCase().replace(/\W+/g, '-'),
+            name: alt.name,
+            tagline: alt.tagline ?? '',
+            imageThumb: alt.imageUrl ?? null,
+            imageHero: alt.imageUrl ?? null,
+            gradientFallback: GRADIENT_FALLBACKS['activity'],
+          })),
+        } : {}),
+      })
+    })
+  })
+
+  return entries
 }
 
 function makeEntries(): TimelineEntry[] {
@@ -517,8 +605,10 @@ function makeEntries(): TimelineEntry[] {
 
 export type FlowEngine = ReturnType<typeof useFlowEngine>
 
-export function useFlowEngine() {
-  const [entries, setEntries] = useState<TimelineEntry[]>(() => makeEntries())
+export function useFlowEngine(intent?: string) {
+  const [entries, setEntries] = useState<TimelineEntry[]>(() => intent ? [] : makeEntries())
+  const [entriesLoading, setEntriesLoading] = useState(() => Boolean(intent))
+  const [entriesError, setEntriesError] = useState<string | null>(null)
   const [expandedEntryId, setExpandedEntryId] = useState<string | null>(null)
   const [conflictResolved, setConflictResolved] = useState(false)
   const [editingScreen, setEditingScreen] = useState<number | null>(null)
@@ -526,6 +616,32 @@ export function useFlowEngine() {
   const [confirmStep, setConfirmStep] = useState(-1)
   const [allConfirmed, setAllConfirmed] = useState(false)
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set())
+
+  // On mount with intent: fetch live itinerary, fall back to fixture on error
+  useEffect(() => {
+    if (!intent) return
+    let cancelled = false
+    setEntriesLoading(true)
+    setEntriesError(null)
+    sendToConcierge([{ role: 'user', content: intent }])
+      .then(result => {
+        if (cancelled) return
+        if (result.itinerary) {
+          setEntries(mapItineraryToEntries(result.itinerary))
+        } else {
+          setEntries(makeEntries())
+        }
+        setEntriesLoading(false)
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return
+        setEntriesError(err instanceof Error ? err.message : 'Failed to generate itinerary')
+        setEntries(makeEntries())
+        setEntriesLoading(false)
+      })
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intent])
 
   // In pre-planned model, "advancing chat" just closes any open swap panel
   const advanceChat = useCallback((_nextScreen: number, _enrichBit?: number) => {
@@ -638,6 +754,8 @@ export function useFlowEngine() {
     advanceChat,
     hasEnrichment: (_bit: number) => false,
     entries,
+    entriesLoading,
+    entriesError,
     expandedEntryId,
     setExpandedEntryId,
     confirmEntry,

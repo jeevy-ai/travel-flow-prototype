@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useSearchParams } from 'react-router-dom'
 import { useFlowEngine } from '../../hooks/useFlowEngine'
 import type { TimelineEntry } from '../../hooks/useFlowEngine'
 import { AppHeader } from '../layout/AppHeader'
@@ -99,7 +100,9 @@ const CONFIRM_STEPS = [
 ]
 
 export function FlowPage() {
-  const flow = useFlowEngine()
+  const [searchParams] = useSearchParams()
+  const intent = searchParams.get('q') ?? undefined
+  const flow = useFlowEngine(intent)
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showMap, setShowMap] = useState(false)
   const [activeDateKey, setActiveDateKey] = useState<string>('2026-11-09')
@@ -200,6 +203,32 @@ export function FlowPage() {
   return (
     <div className="flex flex-col h-screen bg-surface-0 overflow-hidden">
       <AppHeader confirmedCount={flow.confirmedCount} totalCount={flow.totalCount} />
+
+      {/* Live generation loading / error banner */}
+      <AnimatePresence>
+        {(flow.entriesLoading || flow.entriesError) && (
+          <motion.div
+            className="px-4 py-2 flex items-center gap-2"
+            style={{ background: flow.entriesError ? 'rgba(239,68,68,0.08)' : 'rgba(28,110,242,0.08)' }}
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+          >
+            {flow.entriesLoading && (
+              <motion.div
+                className="w-2 h-2 rounded-full bg-accent shrink-0"
+                animate={{ opacity: [0.4, 1, 0.4] }}
+                transition={{ duration: 1, repeat: Infinity }}
+              />
+            )}
+            <p className="text-[12px]" style={{ color: flow.entriesError ? '#EF4444' : 'var(--accent)' }}>
+              {flow.entriesLoading
+                ? `Building your personalised itinerary from "${intent}"…`
+                : `Generation failed — showing sample plan. ${flow.entriesError ?? ''}`}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Mobile horizontal date strip */}
       <div className="md:hidden">
