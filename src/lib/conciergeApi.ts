@@ -53,22 +53,88 @@ export interface ConciergeResponse {
 const BASE = 'https://ai-action-service.noahlaux.workers.dev'
 const ITINERARY_ENDPOINT = `${BASE}/concierge/itinerary`
 const ALTER_ENDPOINT = `${BASE}/concierge/itinerary/alter`
+const FETCH_TIMEOUT_MS = 45_000
+
+function inferCategory(item: ItineraryItem): EventCategory {
+  const t = (item.title + ' ' + item.detail).toLowerCase()
+  if (/hotel|check.?in|accommodation|stay|resort|hostel/.test(t)) return 'accommodation'
+  if (/dinner|lunch|breakfast|restaurant|cafe|coffee|bistro|bar|food|eat|dining|tavern|seafood|sushi/.test(t)) return 'dining'
+  if (/flight|depart|arrival|airport|fly/.test(t)) return 'other'
+  if (/conference|summit|keynote|session|workshop|panel|seminar|talk|speaker/.test(t)) return 'conference'
+  return 'explore'
+}
+
+type RawItem = ItineraryItem & { transport?: { mode?: string; duration?: string; detail?: string; notes?: string } }
+
+function normalizeItem(raw: unknown): ItineraryItem {
+  const item = raw as RawItem
+  // Normalize transportAfter: use explicit field first, fall back to `transport` if present
+  let transportAfter = item.transportAfter
+  if (!transportAfter && item.transport) {
+    const t = item.transport
+    transportAfter = {
+      mode: (t.mode ?? 'taxi').toLowerCase(),
+      duration: t.duration ?? '10 min',
+      notes: t.detail ?? t.notes,
+    }
+  } else if (transportAfter) {
+    transportAfter = { ...transportAfter, mode: transportAfter.mode.toLowerCase() }
+  }
+  const category = item.category ?? inferCategory(item)
+  return { ...item, transportAfter, category }
+}
+
+function normalizeItinerary(itinerary: Itinerary): Itinerary {
+  return {
+    ...itinerary,
+    days: itinerary.days.map(day => ({
+      ...day,
+      items: day.items.map(item => normalizeItem(item)),
+    })),
+  }
+}
+
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  const controller = new AbortController()
+  const id = setTimeout(() => controller.abort(), ms)
+  try {
+    return await promise
+  } finally {
+    clearTimeout(id)
+  }
+}
 
 async function parseResponse(res: Response): Promise<ConciergeResponse> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({})) as { error?: string }
     throw new Error(body.error ?? `Request failed: ${res.status}`)
   }
-  return res.json() as Promise<ConciergeResponse>
+  const data = await res.json() as ConciergeResponse
+  return {
+    ...data,
+    itinerary: data.itinerary ? normalizeItinerary(data.itinerary) : null,
+  }
 }
 
 export async function sendToConcierge(messages: ChatMessage[]): Promise<ConciergeResponse> {
-  const res = await fetch(ITINERARY_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages }),
-  })
-  return parseResponse(res)
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  try {
+    const res = await fetch(ITINERARY_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messages }),
+      signal: controller.signal,
+    })
+    return parseResponse(res)
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.')
+    }
+    throw err
+  } finally {
+    clearTimeout(timeoutId)
+  }
 }
 
 export async function alterItinerary(
@@ -76,10 +142,25 @@ export async function alterItinerary(
   currentItinerary: Itinerary,
   messages?: ChatMessage[],
 ): Promise<ConciergeResponse> {
-  const res = await fetch(ALTER_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ instruction, currentItinerary, messages }),
-  })
-  return parseResponse(res)
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
+  try {
+    const res = await fetch(ALTER_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ instruction, currentItinerary, messages }),
+      signal: controller.signal,
+    })
+    return parseResponse(res)
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('Request timed out. Please try again.')
+    }
+    throw err
+  } finally {
+    clearTimeout(timeoutId)
+  }
 }
+
+// withTimeout exported for tests/future use
+export { withTimeout }

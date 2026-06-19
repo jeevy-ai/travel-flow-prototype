@@ -1983,6 +1983,38 @@ export function S8ItineraryPeak({ itinerary, alterPlan, alterStatus = 'idle', lo
             </motion.div>
           )}
         </AnimatePresence>
+
+        <AnimatePresence>
+          {loadStatus === 'error' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{
+                borderRadius: 10, background: '#FEF2F2',
+                padding: '10px 14px', marginBottom: 12,
+                display: 'flex', alignItems: 'center', gap: 8,
+              }}
+            >
+              <span style={{ fontSize: 14, flexShrink: 0 }}>⚠️</span>
+              <p style={{ fontSize: 13, fontWeight: 500, color: '#DC2626', margin: 0, flex: 1 }}>
+                Couldn't build your itinerary — showing examples instead
+              </p>
+              {onStartOver && (
+                <button
+                  onClick={onStartOver}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: '#DC2626', fontWeight: 600, fontSize: 12,
+                    flexShrink: 0, padding: '0 4px', minHeight: 32,
+                  }}
+                >
+                  Try again →
+                </button>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Card stack */}
