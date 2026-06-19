@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { sendToConcierge, alterItinerary, type ChatMessage, type Itinerary } from '../lib/conciergeApi'
 
 export type ChatStatus = 'idle' | 'loading' | 'altering' | 'error'
@@ -14,6 +15,7 @@ export interface ButlerChatState {
 }
 
 export function useButlerChat(): ButlerChatState {
+  const navigate = useNavigate()
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [status, setStatus] = useState<ChatStatus>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -31,11 +33,10 @@ export function useButlerChat(): ButlerChatState {
       setMessages(prev => [...prev, { role: 'assistant', content: result.reply }])
       if (result.itinerary) setItinerary(result.itinerary)
       setStatus('idle')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
-      setStatus('error')
+    } catch {
+      navigate('/legacy?q=' + encodeURIComponent(text))
     }
-  }, [messages])
+  }, [messages, navigate])
 
   const alterPlan = useCallback(async (instruction: string) => {
     if (!itinerary) return
