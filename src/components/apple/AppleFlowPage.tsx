@@ -1,10 +1,11 @@
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useButlerChat } from '../../hooks/useButlerChat'
 import { S1ButlerNudge } from './screens/S1ButlerNudge'
+import { SButlerChat } from './screens/SButlerChat'
 import { S8ItineraryPeak } from './screens/S8ItineraryPeak'
 
-type Screen = 's1' | 's8'
+type Screen = 's1' | 'chat' | 's8'
 
 const SCREEN_VARIANTS: Variants = {
   initial: { opacity: 0, y: 12 },
@@ -17,12 +18,15 @@ export function AppleFlowPage() {
   const [dismissed, setDismissed] = useState(false)
   const butler = useButlerChat()
 
-  // Navigate to itinerary canvas as soon as API itinerary arrives
-  useEffect(() => {
-    if (butler.itinerary && screen === 's1') {
-      setScreen('s8')
-    }
-  }, [butler.itinerary, screen])
+  const handleIntentSubmit = useCallback((intent: string) => {
+    void butler.sendMessage(intent)
+    setScreen('chat')
+  }, [butler])
+
+  const handleStartOver = useCallback(() => {
+    butler.reset()
+    setScreen('s1')
+  }, [butler])
 
   if (dismissed) {
     return (
@@ -40,13 +44,6 @@ export function AppleFlowPage() {
         </button>
       </div>
     )
-  }
-
-  function handleIntentSubmit(intent: string) {
-    // Fire the API call immediately — navigate to s8 at once so the
-    // user lands on the itinerary canvas without waiting
-    void butler.sendMessage(intent)
-    setScreen('s8')
   }
 
   return (
@@ -68,6 +65,25 @@ export function AppleFlowPage() {
             </motion.div>
           )}
 
+          {screen === 'chat' && (
+            <motion.div
+              key="chat"
+              variants={SCREEN_VARIANTS}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              <SButlerChat
+                messages={butler.messages}
+                status={butler.status}
+                error={butler.error}
+                itinerary={butler.itinerary}
+                sendMessage={butler.sendMessage}
+                onItineraryReady={() => setScreen('s8')}
+              />
+            </motion.div>
+          )}
+
           {screen === 's8' && (
             <motion.div
               key="s8"
@@ -81,10 +97,7 @@ export function AppleFlowPage() {
                 alterPlan={butler.alterPlan}
                 alterStatus={butler.status === 'altering' ? 'altering' : 'idle'}
                 loadStatus={butler.status === 'loading' ? 'loading' : butler.status === 'error' ? 'error' : 'idle'}
-                onStartOver={() => {
-                  butler.reset()
-                  setScreen('s1')
-                }}
+                onStartOver={handleStartOver}
               />
             </motion.div>
           )}
