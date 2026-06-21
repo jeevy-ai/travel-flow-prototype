@@ -19,6 +19,7 @@ export function AppleFlowPage() {
   const butler = useButlerChat()
 
   const handleIntentSubmit = useCallback((intent: string) => {
+    butler.reset()
     void butler.sendMessage(intent)
     setScreen('chat')
   }, [butler])
