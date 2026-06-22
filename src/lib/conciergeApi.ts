@@ -53,7 +53,9 @@ export interface ConciergeResponse {
 const BASE = 'https://ai-action-service.noahlaux.workers.dev'
 const ITINERARY_ENDPOINT = `${BASE}/concierge/itinerary`
 const ALTER_ENDPOINT = `${BASE}/concierge/itinerary/alter`
-const FETCH_TIMEOUT_MS = 45_000
+const FETCH_TIMEOUT_MS = 60_000
+
+const INTERNAL_SECRET = import.meta.env.VITE_INTERNAL_API_SECRET as string | undefined
 
 function inferCategory(item: ItineraryItem): EventCategory {
   const t = (item.title + ' ' + item.detail).toLowerCase()
@@ -94,16 +96,6 @@ function normalizeItinerary(itinerary: Itinerary): Itinerary {
   }
 }
 
-async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  const controller = new AbortController()
-  const id = setTimeout(() => controller.abort(), ms)
-  try {
-    return await promise
-  } finally {
-    clearTimeout(id)
-  }
-}
-
 async function parseResponse(res: Response): Promise<ConciergeResponse> {
   if (!res.ok) {
     const body = await res.json().catch(() => ({})) as { error?: string }
@@ -117,23 +109,21 @@ async function parseResponse(res: Response): Promise<ConciergeResponse> {
 }
 
 export async function sendToConcierge(messages: ChatMessage[]): Promise<ConciergeResponse> {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (INTERNAL_SECRET) headers['X-Internal-Api-Secret'] = INTERNAL_SECRET
     const res = await fetch(ITINERARY_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ messages }),
-      signal: controller.signal,
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     })
     return parseResponse(res)
   } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error('Request timed out. Please try again.')
+    if (err instanceof Error && (err.name === 'AbortError' || err.name === 'TimeoutError')) {
+      throw new Error('Request timed out — try again.')
     }
     throw err
-  } finally {
-    clearTimeout(timeoutId)
   }
 }
 
@@ -142,25 +132,20 @@ export async function alterItinerary(
   currentItinerary: Itinerary,
   messages?: ChatMessage[],
 ): Promise<ConciergeResponse> {
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (INTERNAL_SECRET) headers['X-Internal-Api-Secret'] = INTERNAL_SECRET
     const res = await fetch(ALTER_ENDPOINT, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ instruction, currentItinerary, messages }),
-      signal: controller.signal,
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     })
     return parseResponse(res)
   } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') {
-      throw new Error('Request timed out. Please try again.')
+    if (err instanceof Error && (err.name === 'AbortError' || err.name === 'TimeoutError')) {
+      throw new Error('Request timed out — try again.')
     }
     throw err
-  } finally {
-    clearTimeout(timeoutId)
   }
 }
-
-// withTimeout exported for tests/future use
-export { withTimeout }
