@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react'
 import { sendToConcierge, alterItinerary, type ChatMessage, type Itinerary } from '../lib/conciergeApi'
+import { sendToConciergeAuth, alterItineraryAuth } from '../lib/butlerApi'
 
 export type ChatStatus = 'idle' | 'loading' | 'altering' | 'error'
 
@@ -13,7 +14,12 @@ export interface ButlerChatState {
   reset: () => void
 }
 
-export function useButlerChat(): ButlerChatState {
+interface ButlerChatOptions {
+  // When provided, authenticated backend calls are made (trips saved to Neon)
+  getToken?: () => Promise<string | null>
+}
+
+export function useButlerChat(opts: ButlerChatOptions = {}): ButlerChatState {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [status, setStatus] = useState<ChatStatus>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -27,7 +33,13 @@ export function useButlerChat(): ButlerChatState {
     setError(null)
 
     try {
-      const result = await sendToConcierge(next)
+      let result: { reply: string; itinerary: Itinerary | null }
+      const token = opts.getToken ? await opts.getToken() : null
+      if (token) {
+        result = await sendToConciergeAuth(next, token) as typeof result
+      } else {
+        result = await sendToConcierge(next)
+      }
       setMessages(prev => [...prev, { role: 'assistant', content: result.reply }])
       if (result.itinerary) setItinerary(result.itinerary)
       setStatus('idle')
@@ -35,7 +47,7 @@ export function useButlerChat(): ButlerChatState {
       setError(err instanceof Error ? err.message : 'Failed to generate itinerary. Please try again.')
       setStatus('error')
     }
-  }, [messages])
+  }, [messages, opts])
 
   const alterPlan = useCallback(async (instruction: string) => {
     if (!itinerary) return
@@ -43,7 +55,13 @@ export function useButlerChat(): ButlerChatState {
     setError(null)
 
     try {
-      const result = await alterItinerary(instruction, itinerary, messages)
+      let result: { reply: string; itinerary: Itinerary | null }
+      const token = opts.getToken ? await opts.getToken() : null
+      if (token) {
+        result = await alterItineraryAuth(instruction, itinerary, messages, token) as typeof result
+      } else {
+        result = await alterItinerary(instruction, itinerary, messages)
+      }
       const assistantMsg = `Got it — I've updated the plan: ${result.reply}`
       setMessages(prev => [
         ...prev,
@@ -56,7 +74,7 @@ export function useButlerChat(): ButlerChatState {
       setError(err instanceof Error ? err.message : 'Failed to update the plan')
       setStatus('error')
     }
-  }, [itinerary, messages])
+  }, [itinerary, messages, opts])
 
   const reset = useCallback(() => {
     setMessages([])
