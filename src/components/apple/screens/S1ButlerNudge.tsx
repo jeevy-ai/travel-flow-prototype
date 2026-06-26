@@ -1,20 +1,55 @@
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useRef, useState } from 'react'
+import { AccountButton } from '../../auth/AccountButton'
+import { WelcomeBack } from '../../auth/WelcomeBack'
+import type { ButlerProfile } from '../../../lib/butlerApi'
 
 interface Props {
   onSetItUp: (intent: string) => void
   onNotNow: () => void
+  profile?: ButlerProfile | null
 }
 
-const SUGGESTIONS = [
+const SUGGESTIONS_DEFAULT = [
   'Lisbon for Web Summit, 4 nights in November',
   'Paris weekend trip, early October',
   'Tokyo in cherry blossom season, 7 nights',
 ]
 
-export function S1ButlerNudge({ onSetItUp, onNotNow }: Props) {
+function personalisedSuggestions(profile: ButlerProfile): string[] {
+  const home = profile.preferences.homeAirport || 'home'
+  const interests = profile.preferences.interests
+
+  const suggestions: string[] = []
+  if (profile.tripHistory.length > 0) {
+    const last = profile.tripHistory[profile.tripHistory.length - 1]
+    suggestions.push(`Another trip to ${last.destination.split(',')[0]}`)
+  }
+  if (interests.includes('architecture') || interests.includes('design')) {
+    suggestions.push(`Copenhagen design weekend from ${home}`)
+  }
+  if (interests.includes('coffee')) {
+    suggestions.push('Melbourne coffee culture, 5 nights')
+  }
+  // pad with defaults
+  while (suggestions.length < 3) {
+    const fallback = SUGGESTIONS_DEFAULT.find(s => !suggestions.includes(s))
+    if (fallback) suggestions.push(fallback)
+    else break
+  }
+  return suggestions.slice(0, 3)
+}
+
+export function S1ButlerNudge({ onSetItUp, onNotNow, profile }: Props) {
   const [draft, setDraft] = useState('')
+  const [welcomeDismissed, setWelcomeDismissed] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  const isReturning = profile?.isReturning === true
+  const showWelcome = isReturning && !welcomeDismissed
+  const suggestions = profile?.isReturning
+    ? personalisedSuggestions(profile)
+    : SUGGESTIONS_DEFAULT
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -42,6 +77,11 @@ export function S1ButlerNudge({ onSetItUp, onNotNow }: Props) {
         />
       </div>
 
+      {/* Account button — top-right overlay */}
+      <div className="relative flex justify-end px-5 pt-safe pt-5">
+        <AccountButton />
+      </div>
+
       {/* Content */}
       <div className="relative flex flex-col flex-1 justify-end">
         <motion.div
@@ -57,9 +97,21 @@ export function S1ButlerNudge({ onSetItUp, onNotNow }: Props) {
             className="text-white font-semibold leading-tight"
             style={{ fontSize: 30, letterSpacing: '-0.025em' }}
           >
-            Where would you<br />like to go?
+            {isReturning && profile?.firstName
+              ? <>Good to see you,<br />{profile.firstName}.</>
+              : <>Where would you<br />like to go?</>}
           </h1>
         </motion.div>
+
+        {/* Welcome back card */}
+        <AnimatePresence>
+          {showWelcome && profile && (
+            <WelcomeBack
+              profile={profile}
+              onDismiss={() => setWelcomeDismissed(true)}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Suggestions */}
         <motion.div
@@ -69,7 +121,7 @@ export function S1ButlerNudge({ onSetItUp, onNotNow }: Props) {
           transition={{ duration: 0.3, delay: 0.25 }}
         >
           <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollbarWidth: 'none' }}>
-            {SUGGESTIONS.map((s) => (
+            {suggestions.map((s) => (
               <button
                 key={s}
                 onClick={() => { setDraft(s); inputRef.current?.focus() }}

@@ -55,7 +55,8 @@ const ITINERARY_ENDPOINT = `${BASE}/concierge/itinerary`
 const ALTER_ENDPOINT = `${BASE}/concierge/itinerary/alter`
 const FETCH_TIMEOUT_MS = 60_000
 
-const INTERNAL_SECRET = import.meta.env.VITE_INTERNAL_API_SECRET as string | undefined
+const CONCIERGE_SECRET = (import.meta.env.VITE_CONCIERGE_DEMO_SECRET as string | undefined)
+  ?? (import.meta.env.VITE_INTERNAL_API_SECRET as string | undefined)
 
 function inferCategory(item: ItineraryItem): EventCategory {
   const t = (item.title + ' ' + item.detail).toLowerCase()
@@ -111,7 +112,7 @@ async function parseResponse(res: Response): Promise<ConciergeResponse> {
 export async function sendToConcierge(messages: ChatMessage[]): Promise<ConciergeResponse> {
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (INTERNAL_SECRET) headers['X-Internal-Api-Secret'] = INTERNAL_SECRET
+    if (CONCIERGE_SECRET) headers['x-concierge-secret'] = CONCIERGE_SECRET
     const res = await fetch(ITINERARY_ENDPOINT, {
       method: 'POST',
       headers,
@@ -134,7 +135,7 @@ export async function alterItinerary(
 ): Promise<ConciergeResponse> {
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-    if (INTERNAL_SECRET) headers['X-Internal-Api-Secret'] = INTERNAL_SECRET
+    if (CONCIERGE_SECRET) headers['x-concierge-secret'] = CONCIERGE_SECRET
     const res = await fetch(ALTER_ENDPOINT, {
       method: 'POST',
       headers,
