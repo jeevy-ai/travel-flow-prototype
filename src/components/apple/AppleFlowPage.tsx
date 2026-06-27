@@ -1,6 +1,8 @@
+import { useAuth } from '@clerk/react'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
 import { useCallback, useState } from 'react'
 import { useButlerChat } from '../../hooks/useButlerChat'
+import { useButlerProfile } from '../../hooks/useButlerProfile'
 import { S1ButlerNudge } from './screens/S1ButlerNudge'
 import { SButlerChat } from './screens/SButlerChat'
 import { S8ItineraryPeak } from './screens/S8ItineraryPeak'
@@ -16,7 +18,14 @@ const SCREEN_VARIANTS: Variants = {
 export function AppleFlowPage() {
   const [screen, setScreen] = useState<Screen>('s1')
   const [dismissed, setDismissed] = useState(false)
-  const butler = useButlerChat()
+  const { getToken, isSignedIn } = useAuth()
+  const { state: profileState } = useButlerProfile()
+
+  const profile = profileState.status === 'loaded' ? profileState.profile : undefined
+
+  // Stable token getter — only passed when signed in so chat uses auth path
+  const getAuthToken = useCallback(() => getToken(), [getToken])
+  const butler = useButlerChat({ getToken: isSignedIn ? getAuthToken : undefined })
 
   const handleIntentSubmit = useCallback((intent: string) => {
     butler.reset()
@@ -62,6 +71,7 @@ export function AppleFlowPage() {
               <S1ButlerNudge
                 onSetItUp={handleIntentSubmit}
                 onNotNow={() => setDismissed(true)}
+                profile={profile ?? null}
               />
             </motion.div>
           )}
